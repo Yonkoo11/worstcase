@@ -1,0 +1,46 @@
+services:
+  adapter:
+    image: ${WORSTCASE_ADAPTER_IMAGE:?pin the adapter image by digest}
+    user: "65532:65532"
+    read_only: true
+    networks:
+      - adapter_proxy
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 32
+    mem_limit: 256m
+    cpus: 0.50
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,mode=0700
+    environment:
+      HTTPS_PROXY: http://egress-proxy:3128
+      HTTP_PROXY: http://egress-proxy:3128
+      NO_PROXY: ""
+    stdin_open: true
+    init: true
+    restart: "no"
+    depends_on: [egress-proxy]
+
+  egress-proxy:
+    image: ${WORSTCASE_SQUID_IMAGE:?pin a reviewed Squid image by digest}
+    user: "65532:65532"
+    read_only: true
+    networks:
+      - adapter_proxy
+      - proxy_egress
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 32
+    mem_limit: 128m
+    cpus: 0.25
+    tmpfs:
+      - /var/run/squid:rw,noexec,nosuid,size=1m,mode=0700
+      - /var/spool/squid:rw,noexec,nosuid,size=8m,mode=0700
+    volumes:
+      - ./squid-storage-chain.conf:/etc/squid/squid.conf:ro
+    restart: "no"
+
+networks:
+  adapter_proxy:
+    internal: true
+  proxy_egress: {}

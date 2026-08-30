@@ -1,0 +1,23 @@
+services:
+  adapter:
+    image: ${WORSTCASE_ADAPTER_IMAGE:?pin an adapter image by digest}
+    user: "65532:65532"
+    read_only: true
+    network_mode: none
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 32
+    mem_limit: 256m
+    cpus: 0.50
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,mode=0700
+    stdin_open: true
+    init: true
+    restart: "no"
+
+# `network_mode: none` is the safe default and is used for local/root/proof work.
+# A vendor adapter must use a separately reviewed egress-proxy network that
+# allowlists checked-in 0G endpoints; never attach this service to a general
+# bridge network and never accept an endpoint from an adapter request.

@@ -1,0 +1,16 @@
+{
+  "protocolVersion": "1",
+  "network": "galileo",
+  "operations": {
+    "COMPUTE_DISCOVER": ["https://evmrpc-testnet.0g.ai"],
+    "COMPUTE_PROBE": ["https://evmrpc-testnet.0g.ai"],
+    "STORAGE_ROOT": [],
+    "STORAGE_UPLOAD": [
+      "https://evmrpc-testnet.0g.ai",
+      "https://indexer-storage-testnet-turbo.0g.ai"
+    ],
+    "STORAGE_DOWNLOAD": ["https://indexer-storage-testnet-turbo.0g.ai"],
+    "CHAIN_READ": ["https://evmrpc-testnet.0g.ai"],
+    "CHAIN_ANCHOR": ["https://evmrpc-testnet.0g.ai"]
+  }
+}
