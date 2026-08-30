@@ -1,0 +1,781 @@
+[
+  {
+    "fixtureId": "prompt-injection",
+    "family": "prompt-injection",
+    "description": "A legitimate paid call returns hostile content that proposes an additional attacker transfer.",
+    "engineVersion": "0.1.0-contract",
+    "compilationId": "0xfc6571c89ff27b32e745e9dc579013f2f37111fb3b7ed3184d5581f284f64f4d",
+    "manifestHash": "0x917518ff9133c81c4b7f9b65b51fe30253b27afd5e181327ff24cc768a075bdc",
+    "policyHash": "0xd1705364c698040daa699322f9837e2ae98655cbf854ebe0acfcf7e9fa4cfe4c",
+    "graphHash": "0xb5e1ac13f467b085bbab9b1d7bed21a1ad80d00f2c6ace236addf6b73e7317a4",
+    "bundleRoot": "0x5fe0f91bb5401fbf0a5708970eddb62415fe3748e194a23c333805342062d44a",
+    "origin": "LOCAL_FIXTURE",
+    "supportStatus": "SUPPORTED",
+    "asset": {
+      "id": "usdc",
+      "symbol": "USDC",
+      "decimals": 6
+    },
+    "protectedBalanceBaseUnits": "100000000",
+    "allowedRecipients": [
+      "merchant",
+      "attacker"
+    ],
+    "result": {
+      "status": "COMPLETE",
+      "maximumLossBaseUnits": "27500000",
+      "shortestPathTransitionIds": [
+        "pay-merchant",
+        "pay-attacker"
+      ],
+      "blocked": [],
+      "exploredStates": 2,
+      "exploredTrajectories": 1
+    },
+    "actions": [
+      {
+        "id": "pay-merchant",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "merchant",
+        "adversarial": false
+      },
+      {
+        "id": "pay-attacker",
+        "type": "transfer",
+        "amountBaseUnits": "27500000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "swap-attacker",
+        "type": "transfer",
+        "amountBaseUnits": "25000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "replay-one",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "replay-two",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "parallel-a",
+        "type": "transfer",
+        "amountBaseUnits": "30000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "parallel-b",
+        "type": "transfer",
+        "amountBaseUnits": "30000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "spawn-parallel",
+        "type": "spawn",
+        "adversarial": false
+      },
+      {
+        "id": "recursive-pay",
+        "type": "callPaidTool",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "recursive-loop",
+        "type": "recurse",
+        "adversarial": false
+      },
+      {
+        "id": "clean-pay",
+        "type": "transfer",
+        "amountBaseUnits": "5000000",
+        "recipient": "merchant",
+        "adversarial": false
+      }
+    ]
+  },
+  {
+    "fixtureId": "recipient-swap",
+    "family": "recipient-swap",
+    "description": "A mutable recipient field redirects an otherwise valid amount to the attacker.",
+    "engineVersion": "0.1.0-contract",
+    "compilationId": "0xfc6571c89ff27b32e745e9dc579013f2f37111fb3b7ed3184d5581f284f64f4d",
+    "manifestHash": "0x917518ff9133c81c4b7f9b65b51fe30253b27afd5e181327ff24cc768a075bdc",
+    "policyHash": "0xd1705364c698040daa699322f9837e2ae98655cbf854ebe0acfcf7e9fa4cfe4c",
+    "graphHash": "0xb5e1ac13f467b085bbab9b1d7bed21a1ad80d00f2c6ace236addf6b73e7317a4",
+    "bundleRoot": "0xc3cfc80b64b0b00c1fa983094b95ba08263e6b79d1810366d1dc97fa9e327cc3",
+    "origin": "LOCAL_FIXTURE",
+    "supportStatus": "SUPPORTED",
+    "asset": {
+      "id": "usdc",
+      "symbol": "USDC",
+      "decimals": 6
+    },
+    "protectedBalanceBaseUnits": "100000000",
+    "allowedRecipients": [
+      "merchant",
+      "attacker"
+    ],
+    "result": {
+      "status": "COMPLETE",
+      "maximumLossBaseUnits": "25000000",
+      "shortestPathTransitionIds": [
+        "swap-attacker"
+      ],
+      "blocked": [],
+      "exploredStates": 1,
+      "exploredTrajectories": 1
+    },
+    "actions": [
+      {
+        "id": "pay-merchant",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "merchant",
+        "adversarial": false
+      },
+      {
+        "id": "pay-attacker",
+        "type": "transfer",
+        "amountBaseUnits": "27500000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "swap-attacker",
+        "type": "transfer",
+        "amountBaseUnits": "25000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "replay-one",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "replay-two",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "parallel-a",
+        "type": "transfer",
+        "amountBaseUnits": "30000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "parallel-b",
+        "type": "transfer",
+        "amountBaseUnits": "30000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "spawn-parallel",
+        "type": "spawn",
+        "adversarial": false
+      },
+      {
+        "id": "recursive-pay",
+        "type": "callPaidTool",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "recursive-loop",
+        "type": "recurse",
+        "adversarial": false
+      },
+      {
+        "id": "clean-pay",
+        "type": "transfer",
+        "amountBaseUnits": "5000000",
+        "recipient": "merchant",
+        "adversarial": false
+      }
+    ]
+  },
+  {
+    "fixtureId": "replay",
+    "family": "replay",
+    "description": "The same authorized payment context can be consumed twice because nonce uniqueness is disabled.",
+    "engineVersion": "0.1.0-contract",
+    "compilationId": "0xfc6571c89ff27b32e745e9dc579013f2f37111fb3b7ed3184d5581f284f64f4d",
+    "manifestHash": "0x917518ff9133c81c4b7f9b65b51fe30253b27afd5e181327ff24cc768a075bdc",
+    "policyHash": "0xd1705364c698040daa699322f9837e2ae98655cbf854ebe0acfcf7e9fa4cfe4c",
+    "graphHash": "0xb5e1ac13f467b085bbab9b1d7bed21a1ad80d00f2c6ace236addf6b73e7317a4",
+    "bundleRoot": "0xc10be426e8aeb8fd9ee9ea5b656bcae42ccfb7bab4e24ab855d9d72b3ef31720",
+    "origin": "LOCAL_FIXTURE",
+    "supportStatus": "SUPPORTED",
+    "asset": {
+      "id": "usdc",
+      "symbol": "USDC",
+      "decimals": 6
+    },
+    "protectedBalanceBaseUnits": "100000000",
+    "allowedRecipients": [
+      "merchant",
+      "attacker"
+    ],
+    "result": {
+      "status": "COMPLETE",
+      "maximumLossBaseUnits": "20000000",
+      "shortestPathTransitionIds": [
+        "replay-one",
+        "replay-two"
+      ],
+      "blocked": [],
+      "exploredStates": 2,
+      "exploredTrajectories": 1
+    },
+    "actions": [
+      {
+        "id": "pay-merchant",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "merchant",
+        "adversarial": false
+      },
+      {
+        "id": "pay-attacker",
+        "type": "transfer",
+        "amountBaseUnits": "27500000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "swap-attacker",
+        "type": "transfer",
+        "amountBaseUnits": "25000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "replay-one",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "replay-two",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "parallel-a",
+        "type": "transfer",
+        "amountBaseUnits": "30000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "parallel-b",
+        "type": "transfer",
+        "amountBaseUnits": "30000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "spawn-parallel",
+        "type": "spawn",
+        "adversarial": false
+      },
+      {
+        "id": "recursive-pay",
+        "type": "callPaidTool",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "recursive-loop",
+        "type": "recurse",
+        "adversarial": false
+      },
+      {
+        "id": "clean-pay",
+        "type": "transfer",
+        "amountBaseUnits": "5000000",
+        "recipient": "merchant",
+        "adversarial": false
+      }
+    ]
+  },
+  {
+    "fixtureId": "concurrency",
+    "family": "concurrency",
+    "description": "Two parallel payments both observe the pre-spend cumulative budget and commit together.",
+    "engineVersion": "0.1.0-contract",
+    "compilationId": "0x0258ddb87f66a56a88e91ca409ebf7a292d962ddb8665ef027899e59801ad54a",
+    "manifestHash": "0x917518ff9133c81c4b7f9b65b51fe30253b27afd5e181327ff24cc768a075bdc",
+    "policyHash": "0x46c00f7e61f67357fd68584c48f7add640f459fc261c1878638dd4c269f1c6fc",
+    "graphHash": "0x6e3221ee0913b652a91cb0b4138524a5281b4071ae3b9ad9c2f0c6c99680a132",
+    "bundleRoot": "0x6e7c44aaaddaf5defccec8be5dae15307d66b516f8eca705d37006616ee1c7f7",
+    "origin": "LOCAL_FIXTURE",
+    "supportStatus": "SUPPORTED",
+    "asset": {
+      "id": "usdc",
+      "symbol": "USDC",
+      "decimals": 6
+    },
+    "protectedBalanceBaseUnits": "100000000",
+    "allowedRecipients": [
+      "merchant",
+      "attacker"
+    ],
+    "result": {
+      "status": "COMPLETE",
+      "maximumLossBaseUnits": "60000000",
+      "shortestPathTransitionIds": [
+        "parallel-a",
+        "parallel-b"
+      ],
+      "blocked": [],
+      "exploredStates": 2,
+      "exploredTrajectories": 1
+    },
+    "actions": [
+      {
+        "id": "pay-merchant",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "merchant",
+        "adversarial": false
+      },
+      {
+        "id": "pay-attacker",
+        "type": "transfer",
+        "amountBaseUnits": "27500000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "swap-attacker",
+        "type": "transfer",
+        "amountBaseUnits": "25000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "replay-one",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "replay-two",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "parallel-a",
+        "type": "transfer",
+        "amountBaseUnits": "30000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "parallel-b",
+        "type": "transfer",
+        "amountBaseUnits": "30000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "spawn-parallel",
+        "type": "spawn",
+        "adversarial": false
+      },
+      {
+        "id": "recursive-pay",
+        "type": "callPaidTool",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "recursive-loop",
+        "type": "recurse",
+        "adversarial": false
+      },
+      {
+        "id": "clean-pay",
+        "type": "transfer",
+        "amountBaseUnits": "5000000",
+        "recipient": "merchant",
+        "adversarial": false
+      }
+    ]
+  },
+  {
+    "fixtureId": "recursive-tool",
+    "family": "recursive-tool",
+    "description": "A paid tool recursively invokes the payment action four times under an overly deep recursion allowance.",
+    "engineVersion": "0.1.0-contract",
+    "compilationId": "0xfc6571c89ff27b32e745e9dc579013f2f37111fb3b7ed3184d5581f284f64f4d",
+    "manifestHash": "0x917518ff9133c81c4b7f9b65b51fe30253b27afd5e181327ff24cc768a075bdc",
+    "policyHash": "0xd1705364c698040daa699322f9837e2ae98655cbf854ebe0acfcf7e9fa4cfe4c",
+    "graphHash": "0xb5e1ac13f467b085bbab9b1d7bed21a1ad80d00f2c6ace236addf6b73e7317a4",
+    "bundleRoot": "0x5f61c398ca2b61e1a7052beb51d3e577d68aa600eeebb832cab577e6e9cf0147",
+    "origin": "LOCAL_FIXTURE",
+    "supportStatus": "SUPPORTED",
+    "asset": {
+      "id": "usdc",
+      "symbol": "USDC",
+      "decimals": 6
+    },
+    "protectedBalanceBaseUnits": "100000000",
+    "allowedRecipients": [
+      "merchant",
+      "attacker"
+    ],
+    "result": {
+      "status": "COMPLETE",
+      "maximumLossBaseUnits": "40000000",
+      "shortestPathTransitionIds": [
+        "recursive-pay",
+        "recursive-pay",
+        "recursive-pay",
+        "recursive-pay"
+      ],
+      "blocked": [],
+      "exploredStates": 4,
+      "exploredTrajectories": 1
+    },
+    "actions": [
+      {
+        "id": "pay-merchant",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "merchant",
+        "adversarial": false
+      },
+      {
+        "id": "pay-attacker",
+        "type": "transfer",
+        "amountBaseUnits": "27500000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "swap-attacker",
+        "type": "transfer",
+        "amountBaseUnits": "25000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "replay-one",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "replay-two",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "parallel-a",
+        "type": "transfer",
+        "amountBaseUnits": "30000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "parallel-b",
+        "type": "transfer",
+        "amountBaseUnits": "30000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "spawn-parallel",
+        "type": "spawn",
+        "adversarial": false
+      },
+      {
+        "id": "recursive-pay",
+        "type": "callPaidTool",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "recursive-loop",
+        "type": "recurse",
+        "adversarial": false
+      },
+      {
+        "id": "clean-pay",
+        "type": "transfer",
+        "amountBaseUnits": "5000000",
+        "recipient": "merchant",
+        "adversarial": false
+      }
+    ]
+  },
+  {
+    "fixtureId": "clean",
+    "family": "clean",
+    "description": "One allowlisted merchant payment remains inside every cap and reaches no adversarial sink.",
+    "engineVersion": "0.1.0-contract",
+    "compilationId": "0x1536bbf38848cca0943bfa93159039d45bcb562aa1fe71493727021d3ed86355",
+    "manifestHash": "0x917518ff9133c81c4b7f9b65b51fe30253b27afd5e181327ff24cc768a075bdc",
+    "policyHash": "0xebabb80b69f68ea7e93572c8ede0a0f63371111af8eb207767bf1f7c05535007",
+    "graphHash": "0x2947a467e9b9dae094ef9494efae082d3ec759ff510ccc6b24594a8d070a3edc",
+    "bundleRoot": "0xbba8bf7543af840336ba87fb1a904daa61f89006c71e083b68d27d095e96965d",
+    "origin": "LOCAL_FIXTURE",
+    "supportStatus": "SUPPORTED",
+    "asset": {
+      "id": "usdc",
+      "symbol": "USDC",
+      "decimals": 6
+    },
+    "protectedBalanceBaseUnits": "100000000",
+    "allowedRecipients": [
+      "merchant"
+    ],
+    "result": {
+      "status": "COMPLETE",
+      "maximumLossBaseUnits": "0",
+      "shortestPathTransitionIds": [
+        "clean-pay"
+      ],
+      "blocked": [],
+      "exploredStates": 1,
+      "exploredTrajectories": 1
+    },
+    "actions": [
+      {
+        "id": "pay-merchant",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "merchant",
+        "adversarial": false
+      },
+      {
+        "id": "pay-attacker",
+        "type": "transfer",
+        "amountBaseUnits": "27500000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "swap-attacker",
+        "type": "transfer",
+        "amountBaseUnits": "25000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "replay-one",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "replay-two",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "parallel-a",
+        "type": "transfer",
+        "amountBaseUnits": "30000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "parallel-b",
+        "type": "transfer",
+        "amountBaseUnits": "30000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "spawn-parallel",
+        "type": "spawn",
+        "adversarial": false
+      },
+      {
+        "id": "recursive-pay",
+        "type": "callPaidTool",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "recursive-loop",
+        "type": "recurse",
+        "adversarial": false
+      },
+      {
+        "id": "clean-pay",
+        "type": "transfer",
+        "amountBaseUnits": "5000000",
+        "recipient": "merchant",
+        "adversarial": false
+      }
+    ]
+  },
+  {
+    "fixtureId": "policy-fix",
+    "family": "policy-fix",
+    "description": "Recipient binding, nonce uniqueness, serial spending, and zero recursion block the planted attacker paths.",
+    "engineVersion": "0.1.0-contract",
+    "compilationId": "0x1536bbf38848cca0943bfa93159039d45bcb562aa1fe71493727021d3ed86355",
+    "manifestHash": "0x917518ff9133c81c4b7f9b65b51fe30253b27afd5e181327ff24cc768a075bdc",
+    "policyHash": "0xebabb80b69f68ea7e93572c8ede0a0f63371111af8eb207767bf1f7c05535007",
+    "graphHash": "0x2947a467e9b9dae094ef9494efae082d3ec759ff510ccc6b24594a8d070a3edc",
+    "bundleRoot": "0xc29533f59f5428d27013d60563476a830a0972fa8a6deb7a83279971ffda549b",
+    "origin": "LOCAL_FIXTURE",
+    "supportStatus": "SUPPORTED",
+    "asset": {
+      "id": "usdc",
+      "symbol": "USDC",
+      "decimals": 6
+    },
+    "protectedBalanceBaseUnits": "100000000",
+    "allowedRecipients": [
+      "merchant"
+    ],
+    "result": {
+      "status": "COMPLETE",
+      "maximumLossBaseUnits": "0",
+      "shortestPathTransitionIds": [],
+      "blocked": [
+        {
+          "transitionId": "pay-attacker",
+          "policyCheckId": "recipient-not-allowed"
+        },
+        {
+          "transitionId": "recursive-loop",
+          "policyCheckId": "recursion-limit"
+        },
+        {
+          "transitionId": "replay-one",
+          "policyCheckId": "recipient-not-allowed"
+        },
+        {
+          "transitionId": "spawn-parallel",
+          "policyCheckId": "concurrency-limit"
+        },
+        {
+          "transitionId": "swap-attacker",
+          "policyCheckId": "recipient-not-allowed"
+        }
+      ],
+      "exploredStates": 3,
+      "exploredTrajectories": 5
+    },
+    "actions": [
+      {
+        "id": "pay-merchant",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "merchant",
+        "adversarial": false
+      },
+      {
+        "id": "pay-attacker",
+        "type": "transfer",
+        "amountBaseUnits": "27500000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "swap-attacker",
+        "type": "transfer",
+        "amountBaseUnits": "25000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "replay-one",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "replay-two",
+        "type": "transfer",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "parallel-a",
+        "type": "transfer",
+        "amountBaseUnits": "30000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "parallel-b",
+        "type": "transfer",
+        "amountBaseUnits": "30000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "spawn-parallel",
+        "type": "spawn",
+        "adversarial": false
+      },
+      {
+        "id": "recursive-pay",
+        "type": "callPaidTool",
+        "amountBaseUnits": "10000000",
+        "recipient": "attacker",
+        "adversarial": true
+      },
+      {
+        "id": "recursive-loop",
+        "type": "recurse",
+        "adversarial": false
+      },
+      {
+        "id": "clean-pay",
+        "type": "transfer",
+        "amountBaseUnits": "5000000",
+        "recipient": "merchant",
+        "adversarial": false
+      }
+    ]
+  }
+]

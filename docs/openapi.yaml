@@ -1,0 +1,214 @@
+openapi: 3.1.0
+info:
+  title: Worstcase API
+  version: 1.0.0-contract
+  description: Bounded economic model checking for supported payment-capable agent tools.
+servers:
+  - url: http://localhost:3001
+    description: Local development
+paths:
+  /v1/compilations:
+    post:
+      operationId: createCompilation
+      summary: Validate and compile one immutable manifest and policy.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CompilationRequest' }
+      responses:
+        '201': { description: Compiled, content: { application/json: { schema: { $ref: '#/components/schemas/SuccessEnvelope' } } } }
+        '400': { $ref: '#/components/responses/Error' }
+        '413': { $ref: '#/components/responses/Error' }
+  /v1/fixtures:
+    get:
+      operationId: listFixtures
+      summary: Return the fixed versioned fixture catalog.
+      parameters:
+        - { in: query, name: catalogVersion, schema: { type: string, const: '1' } }
+      responses:
+        '200': { description: Catalog, content: { application/json: { schema: { $ref: '#/components/schemas/SuccessEnvelope' } } } }
+        '400': { $ref: '#/components/responses/Error' }
+  /v1/runs:
+    post:
+      operationId: createRun
+      summary: Idempotently start one immutable run.
+      parameters:
+        - { $ref: '#/components/parameters/IdempotencyKey' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RunRequest' }
+      responses:
+        '202': { description: Queued, content: { application/json: { schema: { $ref: '#/components/schemas/SuccessEnvelope' } } } }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+  /v1/runs/{runId}:
+    parameters:
+      - { $ref: '#/components/parameters/RunId' }
+    get:
+      operationId: getRun
+      summary: Return one immutable run projection.
+      responses:
+        '200': { description: Run, content: { application/json: { schema: { $ref: '#/components/schemas/SuccessEnvelope' } } } }
+        '404': { $ref: '#/components/responses/Error' }
+  /v1/runs/{runId}/evidence:
+    parameters:
+      - { $ref: '#/components/parameters/RunId' }
+    post:
+      operationId: storeRunEvidence
+      summary: Idempotently store one terminal canonical bundle on 0G Storage.
+      parameters:
+        - { $ref: '#/components/parameters/IdempotencyKey' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [storageNetwork, expectedRunRevision]
+              properties:
+                storageNetwork: { type: string, enum: [turbo-testnet, standard-testnet, turbo-mainnet, standard-mainnet] }
+                expectedRunRevision: { type: integer, minimum: 1 }
+      responses:
+        '200': { description: Existing stored operation, content: { application/json: { schema: { $ref: '#/components/schemas/SuccessEnvelope' } } } }
+        '202': { description: Storage operation accepted, content: { application/json: { schema: { $ref: '#/components/schemas/SuccessEnvelope' } } } }
+        '403': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /v1/evidence/{bundleRoot}:
+    parameters:
+      - { $ref: '#/components/parameters/BundleRoot' }
+    get:
+      operationId: verifyEvidence
+      summary: Retrieve, proof-check, and replay one bundle.
+      parameters:
+        - { in: query, name: storageNetwork, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Per-check verification result, content: { application/json: { schema: { $ref: '#/components/schemas/SuccessEnvelope' } } } }
+        '404': { $ref: '#/components/responses/Error' }
+        '502': { $ref: '#/components/responses/Error' }
+  /v1/evidence/{bundleRoot}/anchors:
+    parameters:
+      - { $ref: '#/components/parameters/BundleRoot' }
+    post:
+      operationId: createAnchor
+      summary: Idempotently write one approved registry anchor.
+      parameters:
+        - { $ref: '#/components/parameters/IdempotencyKey' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AnchorRequest' }
+      responses:
+        '200': { description: Existing anchor operation, content: { application/json: { schema: { $ref: '#/components/schemas/SuccessEnvelope' } } } }
+        '202': { description: Anchor operation accepted, content: { application/json: { schema: { $ref: '#/components/schemas/SuccessEnvelope' } } } }
+        '403': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /v1/evidence/{bundleRoot}/anchors/{chainId}:
+    parameters:
+      - { $ref: '#/components/parameters/BundleRoot' }
+      - { in: path, name: chainId, required: true, schema: { type: string, pattern: '^[1-9][0-9]*$' } }
+    get:
+      operationId: verifyAnchor
+      summary: Read and verify the expected registry event.
+      parameters:
+        - { in: query, name: registryAddress, required: true, schema: { $ref: '#/components/schemas/Address' } }
+      responses:
+        '200': { description: Per-field match result, content: { application/json: { schema: { $ref: '#/components/schemas/SuccessEnvelope' } } } }
+        '404': { $ref: '#/components/responses/Error' }
+        '502': { $ref: '#/components/responses/Error' }
+components:
+  parameters:
+    IdempotencyKey:
+      in: header
+      name: Idempotency-Key
+      required: true
+      schema: { type: string, minLength: 16, maxLength: 128, pattern: '^[!-~]+$' }
+    RunId:
+      in: path
+      name: runId
+      required: true
+      schema: { type: string, pattern: '^[a-z][a-z0-9._:-]{0,127}$' }
+    BundleRoot:
+      in: path
+      name: bundleRoot
+      required: true
+      schema: { $ref: '#/components/schemas/HashHex' }
+  responses:
+    Error:
+      description: Typed failure
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+  schemas:
+    MoneyBaseUnits:
+      type: string
+      pattern: '^(0|[1-9][0-9]*)$'
+      maxLength: 79
+    HashHex:
+      type: string
+      pattern: '^0x[0-9a-f]{64}$'
+    Address:
+      type: string
+      pattern: '^0x[0-9a-fA-F]{40}$'
+    CompilationRequest:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, manifest, policy]
+      properties:
+        schemaVersion: { type: string, const: '1' }
+        manifest: { type: object }
+        policy: { type: object }
+    RunRequest:
+      type: object
+      additionalProperties: false
+      required: [compilationId, fixtureIds, engineVersion, limits]
+      properties:
+        compilationId: { type: string }
+        fixtureIds: { type: array, minItems: 1, maxItems: 7, items: { type: string } }
+        engineVersion: { type: string }
+        limits: { type: object }
+    AnchorRequest:
+      type: object
+      additionalProperties: false
+      required: [chainId, registryAddress, expectedBundleHash]
+      properties:
+        chainId: { type: string, pattern: '^[1-9][0-9]*$' }
+        registryAddress: { $ref: '#/components/schemas/Address' }
+        expectedBundleHash: { $ref: '#/components/schemas/HashHex' }
+    SuccessEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data, meta]
+      properties:
+        data: {}
+        meta:
+          type: object
+          required: [requestId, apiVersion, schemaVersion]
+          properties:
+            requestId: { type: string }
+            apiVersion: { type: string, const: '1' }
+            schemaVersion: { type: string, const: '1' }
+            engineVersion: { type: string }
+    ErrorEnvelope:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message, retryable, requestId]
+          properties:
+            code:
+              type: string
+              enum: [INVALID_REQUEST, LIMIT_OUT_OF_RANGE, UNAUTHORIZED, EXTERNAL_WRITE_NOT_APPROVED, NOT_FOUND, IDEMPOTENCY_CONFLICT, INVALID_STATE_TRANSITION, PAYLOAD_TOO_LARGE, UNSUPPORTED_SEMANTICS, CONTEXT_MISMATCH, RATE_LIMITED, PROVIDER_RESPONSE_INVALID, PROOF_VERIFICATION_FAILED, DEPENDENCY_UNAVAILABLE, DEPENDENCY_TIMEOUT]
+            message: { type: string }
+            retryable: { type: boolean }
+            requestId: { type: string }
+            fields: { type: array, items: { type: object } }
+            details: { type: object }
