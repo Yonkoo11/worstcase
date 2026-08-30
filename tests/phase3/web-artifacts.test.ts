@@ -18,6 +18,27 @@ describe("production web artifact contract", () => {
     expect(artifacts.find((artifact) => artifact.fixtureId === "policy-fix")?.result.blocked).toHaveLength(5);
   });
 
+  it("only claims an on-chain anchor when a verified record backs the exact displayed loss", async () => {
+    const artifacts = buildDemoArtifacts();
+    for (const artifact of artifacts) {
+      const anchor = artifact.anchor;
+      if (anchor === undefined) continue;
+
+      // A displayed anchor must point at a real, well-formed transaction.
+      expect(anchor.anchorTx).toMatch(/^0x[0-9a-f]{64}$/i);
+      expect(anchor.runRegistry).toMatch(/^0x[0-9a-fA-F]{40}$/);
+      expect(anchor.explorerTx).toContain(anchor.anchorTx);
+      expect(anchor.explorerContract).toContain(anchor.runRegistry);
+
+      // The recorded loss must still equal what the engine computes today, so a
+      // changed model can never keep an anchor badge from an older result.
+      const raw = await readFile(new URL(`../../contracts/deployments/${anchor.chainId}-anchor-${artifact.fixtureId}.json`, import.meta.url), "utf8");
+      const record = JSON.parse(raw) as { maximumLossBaseUnits: string; bundleRoot: string };
+      expect(record.maximumLossBaseUnits).toBe(artifact.result.maximumLossBaseUnits ?? "0");
+      expect(record.bundleRoot).toBe(artifact.bundleRoot);
+    }
+  });
+
   it("formats base-unit money without floating point arithmetic", () => {
     expect(formatMoney("27500000", 6)).toBe("27.5");
     expect(formatMoney("100000000", 6)).toBe("100");

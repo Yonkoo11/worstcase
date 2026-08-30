@@ -162,13 +162,26 @@ function renderFixtures(): string {
 }
 
 function renderEvidence(): string {
+  const anchor = state.selected.anchor;
+  const chainRow = anchor === undefined
+    ? `<div><dt>0G Chain</dt><dd>Not anchored</dd><small>No registry event exists</small></div>`
+    : `<div><dt>0G Chain</dt><dd><a href="${escapeHtml(anchor.explorerTx)}" target="_blank" rel="noopener noreferrer">Anchored on ${escapeHtml(anchor.network)}</a></dd><small>Read back from chain state and matched</small></div>
+       <div><dt>Registry</dt><dd><a href="${escapeHtml(anchor.explorerContract)}" target="_blank" rel="noopener noreferrer"><code>${escapeHtml(shortHash(anchor.runRegistry))}</code></a></dd><small>Chain ${anchor.chainId}</small></div>`;
+
+  const heading = anchor === undefined
+    ? "Local, reproducible, not yet published."
+    : "Reproducible locally, verifiable on 0G Chain.";
+  const blurb = anchor === undefined
+    ? "This bundle is generated from the exact fixture, policy, graph, engine, and deterministic result. It does not claim 0G provenance."
+    : "This bundle is generated from the exact fixture, policy, graph, engine, and deterministic result. Its root and maximum loss are bound on 0G Chain to the model version that produced them.";
+
   return `<section class="section-view" aria-labelledby="evidence-title">
-    <div class="section-heading"><div class="eyebrow">Canonical evidence</div><h1 id="evidence-title">Local, reproducible, not yet published.</h1><p>This bundle is generated from the exact fixture, policy, graph, engine, and deterministic result. It does not claim 0G provenance.</p></div>
+    <div class="section-heading"><div class="eyebrow">Canonical evidence</div><h1 id="evidence-title">${heading}</h1><p>${blurb}</p></div>
     <dl class="evidence-sheet">
       <div><dt>Origin</dt><dd>Local fixture</dd><small>Not 0G Compute</small></div>
       <div><dt>Bundle root</dt><dd><code>${escapeHtml(state.selected.bundleRoot)}</code></dd><small>Canonical local bytes</small></div>
       <div><dt>0G Storage</dt><dd>Not uploaded</dd><small>No transaction exists</small></div>
-      <div><dt>0G Chain</dt><dd>Not anchored</dd><small>No registry event exists</small></div>
+      ${chainRow}
     </dl>
     <button class="button button-secondary" id="copy-root">Copy bundle root</button>
   </section>`;

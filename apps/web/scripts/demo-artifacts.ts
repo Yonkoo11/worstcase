@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import type { Fixture } from "../../../packages/contracts/src/index.js";
 import { FixtureSchema } from "../../../packages/contracts/src/index.js";
 import { compileModel } from "../../../packages/compiler/src/index.js";
@@ -38,7 +39,49 @@ export type DemoArtifact = {
     exploredTrajectories: number;
   };
   actions: DemoAction[];
+  anchor?: DemoAnchor | undefined;
 };
+
+export type DemoAnchor = {
+  network: string;
+  chainId: number;
+  runRegistry: string;
+  submitter: string;
+  anchorTx: string;
+  explorerTx: string;
+  explorerContract: string;
+};
+
+/**
+ * Read the on-chain anchor record for a fixture, when one exists.
+ *
+ * The records are written by contracts/anchor-0g.sh only after the anchor has
+ * been read back from chain state and matched against the local run, so an
+ * artifact carries an anchor exactly when a verified transaction exists.
+ */
+function loadAnchor(fixtureId: string): DemoAnchor | undefined {
+  for (const chainId of ANCHOR_CHAIN_IDS) {
+    try {
+      const raw = readFileSync(`contracts/deployments/${chainId}-anchor-${fixtureId}.json`, "utf8");
+      const record = JSON.parse(raw) as DemoAnchor;
+      return {
+        network: record.network,
+        chainId: record.chainId,
+        runRegistry: record.runRegistry,
+        submitter: record.submitter,
+        anchorTx: record.anchorTx,
+        explorerTx: record.explorerTx,
+        explorerContract: record.explorerContract,
+      };
+    } catch {
+      // No anchor on this network for this fixture; try the next.
+    }
+  }
+  return undefined;
+}
+
+// Mainnet first: if a run is anchored on both, the interface shows mainnet.
+const ANCHOR_CHAIN_IDS = [16661, 16602] as const;
 
 function actionProjection(fixture: Fixture): DemoAction[] {
   const adversarial = new Set(fixture.adversarialRecipients);
@@ -109,6 +152,7 @@ export function buildDemoArtifacts(): DemoArtifact[] {
             exploredTrajectories: result.exploredTrajectories,
           },
       actions: actionProjection(fixture),
+      anchor: loadAnchor(fixture.fixtureId),
     };
   });
 }
