@@ -1,0 +1,12 @@
+{
+  "network": "galileo",
+  "chainId": 16602,
+  "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
+  "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
+  "fixtureId": "prompt-injection",
+  "bundleRoot": "0x5fe0f91bb5401fbf0a5708970eddb62415fe3748e194a23c333805342062d44a",
+  "maximumLossBaseUnits": "27500000",
+  "anchorTx": "0x4c216c3b8cb6a64548cfe61572f8df8d19436c3489ed4ce624c3edfe035538c2",
+  "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x4c216c3b8cb6a64548cfe61572f8df8d19436c3489ed4ce624c3edfe035538c2",
+  "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
+}

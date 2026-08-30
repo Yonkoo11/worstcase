@@ -1,0 +1,9 @@
+{
+  "network": "galileo",
+  "chainId": 16602,
+  "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
+  "deployer": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
+  "deployTx": "0x9650db244cdea86899f2a4f2736aa5ddbe547994c711174679e4da92b25c4eea",
+  "rpcUrl": "https://evmrpc-testnet.0g.ai",
+  "explorer": "https://chainscan-galileo.0g.ai"
+}
