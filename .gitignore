@@ -60,3 +60,6 @@ plan.md
 # Internal agent instructions (contain operator-specific and personal detail)
 CLAUDE.md
 AGENTS.md
+
+# Demo rehearsal working state (local only)
+.demo-rehearsal-state.json

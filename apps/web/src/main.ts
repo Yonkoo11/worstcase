@@ -220,10 +220,10 @@ function render(): void {
       <nav aria-label="Primary navigation">
         ${navButton("run", "Run")}${navButton("fixtures", "Fixtures")}${navButton("evidence", "Evidence")}${navButton("model", "Model support")}
       </nav>
-      <div class="sidebar-meta"><code>engine ${escapeHtml(state.selected.engineVersion)}</code><span>Local evidence only</span></div>
+      <div class="sidebar-meta"><code>engine ${escapeHtml(state.selected.engineVersion)}</code><span>${state.selected.anchor === undefined ? "Local evidence only" : `Anchored · chain ${state.selected.anchor.chainId}`}</span></div>
     </aside>
     <main id="main-content" tabindex="-1">
-      <header class="topbar"><div class="breadcrumb"><b>Worstcase</b><span class="desktop-context">/ ${state.view === "run" ? "Runs" : fixtureLabel(state.view)} / <code>${escapeHtml(state.selected.fixtureId)}</code></span><span class="mobile-context">/ ${escapeHtml(state.selected.fixtureId)}</span></div><div class="provenance"><span aria-hidden="true"></span>Local fixture · not anchored</div></header>
+      <header class="topbar"><div class="breadcrumb"><b>Worstcase</b><span class="desktop-context">/ ${state.view === "run" ? "Runs" : fixtureLabel(state.view)} / <code>${escapeHtml(state.selected.fixtureId)}</code></span><span class="mobile-context">/ ${escapeHtml(state.selected.fixtureId)}</span></div><div class="provenance"><span aria-hidden="true"></span>${state.selected.anchor === undefined ? "Local fixture · not anchored" : `Local fixture · anchored on ${escapeHtml(state.selected.anchor.network)}`}</div></header>
       <div class="content">${renderMain()}</div>
     </main>
     <nav class="mobile-nav" aria-label="Mobile actions and navigation">${renderMobileNav()}</nav>
