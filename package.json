@@ -1,0 +1,47 @@
+{
+  "name": "losspath",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:web": "vite --config apps/web/vite.config.ts",
+    "build:web": "npm run generate:web-demo && vite build --config apps/web/vite.config.ts",
+    "generate:web-demo": "vite-node apps/web/scripts/generate-demo-artifacts.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "verify:contracts": "vitest run tests/phase0/contracts.test.ts",
+    "verify:model-semantics": "vitest run tests/phase0/model-semantics.test.ts",
+    "verify:threat-model": "vitest run tests/phase0/threat-model.test.ts",
+    "verify:fixtures": "vitest run tests/phase0/fixtures.test.ts",
+    "verify:secrets": "node scripts/verify-secrets.mjs",
+    "test:phase1": "vitest run tests/phase1/oracle.test.ts",
+    "test:determinism": "vitest run tests/phase1/determinism.test.ts",
+    "test:counterexample": "vitest run tests/phase1/counterexample.test.ts",
+    "test:unknown": "vitest run tests/phase1/unknown.test.ts",
+    "test:sandbox": "vitest run tests/phase1/sandbox.test.ts",
+    "test:registry": "forge test --offline -vv",
+    "test:replay": "vitest run tests/phase2/replay.test.ts",
+    "test:zerog:failures": "vitest run tests/phase2/zerog-failures.test.ts",
+    "verify:adapter:container": "bash scripts/verify-adapter-container.sh",
+    "verify:zerog:compute:live": "node scripts/require-live-evidence.mjs compute",
+    "verify:zerog:storage:live": "node scripts/require-live-evidence.mjs storage",
+    "verify:zerog:chain:live": "node scripts/require-live-evidence.mjs chain"
+  },
+  "dependencies": {
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0",
+    "vite": "7.3.6",
+    "yaml": "^2.8.0"
+  }
+}

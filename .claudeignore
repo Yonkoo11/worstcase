@@ -1,0 +1,34 @@
+# Dependencies and generated artifacts
+node_modules/
+vendor/
+.venv/
+__pycache__/
+dist/
+build/
+out/
+.svelte-kit/
+coverage/
+cache/
+lib/
+broadcast/
+
+# Large or low-signal files
+package-lock.json
+*.log
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.woff
+*.woff2
+*.mp4
+*.webm
+*.mp3
+
+# Private and local state
+.env*
+.private/
+.DS_Store
+.idea/
+.vscode/
