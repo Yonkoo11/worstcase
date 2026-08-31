@@ -37,7 +37,6 @@
   "dependencies": {
     "@0gfoundation/0g-storage-ts-sdk": "1.2.11",
     "ethers": "^6.17.0",
-    "puppeteer-core": "^23.11.1",
     "zod": "^4.0.0"
   },
   "devDependencies": {
