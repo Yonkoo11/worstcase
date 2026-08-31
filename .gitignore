@@ -63,3 +63,6 @@ AGENTS.md
 
 # Demo rehearsal working state (local only)
 .demo-rehearsal-state.json
+
+# Demo video working files (large, local only)
+.video/

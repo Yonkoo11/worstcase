@@ -1,13 +1,16 @@
 {
-  "fixtureId": "policy-fix",
+  "fixtureId": "prompt-injection",
   "engineVersion": "0.1.0-contract",
-  "runId": "run-f0e64a08dbb14b3155129ccc",
-  "bundleRoot": "0xc29533f59f5428d27013d60563476a830a0972fa8a6deb7a83279971ffda549b",
-  "policyHash": "0xebabb80b69f68ea7e93572c8ede0a0f63371111af8eb207767bf1f7c05535007",
-  "graphHash": "0x2947a467e9b9dae094ef9494efae082d3ec759ff510ccc6b24594a8d070a3edc",
-  "maximumLossBaseUnits": "0",
+  "runId": "run-365b34de796314ac15b1576a",
+  "bundleRoot": "0x5fe0f91bb5401fbf0a5708970eddb62415fe3748e194a23c333805342062d44a",
+  "policyHash": "0xd1705364c698040daa699322f9837e2ae98655cbf854ebe0acfcf7e9fa4cfe4c",
+  "graphHash": "0xb5e1ac13f467b085bbab9b1d7bed21a1ad80d00f2c6ace236addf6b73e7317a4",
+  "maximumLossBaseUnits": "27500000",
   "engineVersionHash": "0x49caf1febef59eec1d8476f675cfb79dbfbb231ea816561a84bf16633b5c7a31",
   "status": 1,
   "statusLabel": "COMPLETE",
-  "shortestPathTransitionIds": []
+  "shortestPathTransitionIds": [
+    "pay-merchant",
+    "pay-attacker"
+  ]
 }
