@@ -46,6 +46,16 @@ echo "  registry:    $REGISTRY"
 echo "  bundleRoot:  $BUNDLE_ROOT"
 echo "  maximumLoss: $MAX_LOSS base units"
 
+# Re-running against an unchanged bundle is normal: the root is content derived,
+# so an identical model produces an identical root and the registry rejects the
+# duplicate. Report that as already anchored rather than dying opaquely.
+EXISTING=$(cast call "$REGISTRY" "getAnchor(address,bytes32)((bytes32,bytes32,uint256,bytes32,uint8,address,uint64))" "$SIGNER_ADDRESS" "$BUNDLE_ROOT" --rpc-url "$RPC" 2>/dev/null || true)
+if [[ -n "$EXISTING" && "$EXISTING" != *", 0, 0x0000000000000000000000000000000000000000,"* ]]; then
+  echo "Already anchored on $NETWORK for this exact bundle root; leaving the existing record untouched."
+  echo "  $EXPLORER/address/$REGISTRY"
+  exit 0
+fi
+
 OUTPUT=$(cast send "$REGISTRY" \
   "anchor(bytes32,bytes32,bytes32,uint256,bytes32,uint8)" \
   "$BUNDLE_ROOT" "$POLICY_HASH" "$GRAPH_HASH" "$MAX_LOSS" "$ENGINE_HASH" "$STATUS" \

@@ -3,10 +3,10 @@
   "chainId": 16602,
   "fixtureId": "recipient-swap",
   "storageRoot": "0xbd2352f15cfdb172d8af7ab330d960ef395ecf477ed9ee7e0d0c906dbb099e72",
-  "storageTx": "0x966d7d3b0504c69ceb9ae616f2b157a39c0ec4711bf39fe15e2ab7f8f674908c",
+  "storageTx": "0xca6891009f2924ec1c3615e9c204ac1e4dd706311ac5971933aa725f51e81500",
   "alreadyStored": false,
   "indexerUrl": "https://indexer-storage-testnet-turbo.0g.ai",
-  "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x966d7d3b0504c69ceb9ae616f2b157a39c0ec4711bf39fe15e2ab7f8f674908c",
+  "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xca6891009f2924ec1c3615e9c204ac1e4dd706311ac5971933aa725f51e81500",
   "verified": {
     "proofValid": true,
     "bytesMatch": true

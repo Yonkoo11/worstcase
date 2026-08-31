@@ -8,7 +8,7 @@
     "manifestHash": "0xa70c16dcfbcf8ae033206d1879ae437bcb9b0014a07fe4d69eaee3c821fb969d",
     "policyHash": "0xcf0638ea2d1e93dc197d8485c178264f3c82e35a6faf448fd8cd8671e7683bc7",
     "graphHash": "0x3cba62e5ea67d620e134fcf53d20d8603059d23cbf8ee4ff5c26c84bc9231fd6",
-    "bundleRoot": "0xafe7d23b996b20e1c169ccf034b12c88e01d03baaa02f40ab072323da61a0d28",
+    "bundleRoot": "0x304ff5d34bef92e9ddd4e5cbfe8bb83c8629f5aa1da20c4ea1b8ad3816cd27b0",
     "origin": "LOCAL_FIXTURE",
     "supportStatus": "SUPPORTED",
     "asset": {
@@ -52,16 +52,16 @@
       "chainId": 16602,
       "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
       "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
-      "anchorTx": "0x452eeef9df2bb19ef6bf7197fc844c79f7088b7c4a4f3c0ef81265debb64c04a",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x452eeef9df2bb19ef6bf7197fc844c79f7088b7c4a4f3c0ef81265debb64c04a",
+      "anchorTx": "0x0486f8f9b431b17bda6361bf144c6c88fd51ef94ab482dd294f8a53f81fa96c8",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x0486f8f9b431b17bda6361bf144c6c88fd51ef94ab482dd294f8a53f81fa96c8",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
     },
     "storage": {
       "network": "galileo",
       "chainId": 16602,
-      "storageRoot": "0x90fc5c21376f6b859ef853c2f19b9243131b2496e017ffb75e38b30640eab199",
-      "storageTx": "0x7ebe7fac0f4c8937fc2d53df95e71b7140cb05965672e4af4bb6917a7283ed38",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x7ebe7fac0f4c8937fc2d53df95e71b7140cb05965672e4af4bb6917a7283ed38",
+      "storageRoot": "0xf279c2807bf9d8bc2f40ccfe123704f5602f975c1f5cb96b9ee6b051e728d63f",
+      "storageTx": "0x68efe97a73dd75af6a13cd0d6deadbd96c24c07260771708361b5b9e4dbc3dc1",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x68efe97a73dd75af6a13cd0d6deadbd96c24c07260771708361b5b9e4dbc3dc1",
       "alreadyStored": false,
       "proofValid": true,
       "bytesMatch": true
@@ -128,8 +128,8 @@
       "network": "galileo",
       "chainId": 16602,
       "storageRoot": "0xbd2352f15cfdb172d8af7ab330d960ef395ecf477ed9ee7e0d0c906dbb099e72",
-      "storageTx": "0x966d7d3b0504c69ceb9ae616f2b157a39c0ec4711bf39fe15e2ab7f8f674908c",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x966d7d3b0504c69ceb9ae616f2b157a39c0ec4711bf39fe15e2ab7f8f674908c",
+      "storageTx": "0xca6891009f2924ec1c3615e9c204ac1e4dd706311ac5971933aa725f51e81500",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xca6891009f2924ec1c3615e9c204ac1e4dd706311ac5971933aa725f51e81500",
       "alreadyStored": false,
       "proofValid": true,
       "bytesMatch": true
@@ -197,9 +197,9 @@
       "network": "galileo",
       "chainId": 16602,
       "storageRoot": "0x450207848621bd5f2e9caedee3f61537435442aa4cb96c3521ff967c91cd3000",
-      "storageTx": "0x71c8e7be7a277b58e1d2830a3edde4b2575eacb64463bd006237886dd0d4b445",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x71c8e7be7a277b58e1d2830a3edde4b2575eacb64463bd006237886dd0d4b445",
-      "alreadyStored": false,
+      "storageTx": null,
+      "explorerTx": null,
+      "alreadyStored": true,
       "proofValid": true,
       "bytesMatch": true
     }
@@ -213,7 +213,7 @@
     "manifestHash": "0xf3e32923bbbc40b3293075405887110db6dbc9e441e3b81db8cb20975c6224a6",
     "policyHash": "0x8a58232bc9e70fdadb54f573d8ddd3656e6935b989e46f09ef6545fdbd01280b",
     "graphHash": "0x802db9f990c3e11326cc6925dc8ef122f0b25851c624eea6fd31e69c5ad01046",
-    "bundleRoot": "0xc55d92cb0bdf8f5480ebd7974f05d71dc3b742a47da709e1eb87f7544185b84c",
+    "bundleRoot": "0xb8704f1302d198c8d89cdec263b6c3c815c5bfbda2375f3dcc9ad0cf2140dc93",
     "origin": "LOCAL_FIXTURE",
     "supportStatus": "SUPPORTED",
     "asset": {
@@ -272,16 +272,16 @@
       "chainId": 16602,
       "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
       "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
-      "anchorTx": "0x1b8cf2b9246ec42db33d9894f5a1976a4cc50748f6f9442ede14f5cb0bbd0ae8",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x1b8cf2b9246ec42db33d9894f5a1976a4cc50748f6f9442ede14f5cb0bbd0ae8",
+      "anchorTx": "0xdb34f5316891f92b5f28d285dba0f6cd5cfaa8b2cc36d8bd0d520ed5c8b5dcb4",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xdb34f5316891f92b5f28d285dba0f6cd5cfaa8b2cc36d8bd0d520ed5c8b5dcb4",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
     },
     "storage": {
       "network": "galileo",
       "chainId": 16602,
-      "storageRoot": "0xcb3702a51a86b56eb98c53ed8b62b342d3249f00f6f40836a340bcc743172c43",
-      "storageTx": "0x6561771ec83d955610e2412c390e513846361841978dc7cb63120c126db60ba2",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x6561771ec83d955610e2412c390e513846361841978dc7cb63120c126db60ba2",
+      "storageRoot": "0x8e8f90c9759c3ea207bdf076d58a43fa5456b948db0f507639d0357399d3f8ef",
+      "storageTx": "0xfcd1f01fcf3ae1d017b344107c9428e83e5cba28469b25eabf023cf10f9d2ead",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xfcd1f01fcf3ae1d017b344107c9428e83e5cba28469b25eabf023cf10f9d2ead",
       "alreadyStored": false,
       "proofValid": true,
       "bytesMatch": true
@@ -296,7 +296,7 @@
     "manifestHash": "0x4af9419b840428be7a72ec8bcb46424b57ae404083fe992757bf8b34f831b112",
     "policyHash": "0x2b403ca305f3a6bb1110862c110eb3764717bc207df8a3805750272080d9a7fd",
     "graphHash": "0x9fc8bbbaa9e27fbc72bde420aee3f4ce2d8eae503cce5823001b782d72c5aabd",
-    "bundleRoot": "0x9d1b26e35898899c5490c9a10a5190552fc60f0467ad38814e1dc8a5c8b809f2",
+    "bundleRoot": "0x1b8a609f338a7f30ec9e4b864471efade0151bfc729d069c7717ac6ad69c384f",
     "origin": "LOCAL_FIXTURE",
     "supportStatus": "SUPPORTED",
     "asset": {
@@ -346,16 +346,16 @@
       "chainId": 16602,
       "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
       "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
-      "anchorTx": "0xc9b2d7276ef089e0963a44c039aa45f878ce7bb95b5bbce693d0b2ae5dfe5315",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xc9b2d7276ef089e0963a44c039aa45f878ce7bb95b5bbce693d0b2ae5dfe5315",
+      "anchorTx": "0x173c8b5074f14d5f30aad53840df74ee0fc7e71c8864a04d05fcd2a06e52da4d",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x173c8b5074f14d5f30aad53840df74ee0fc7e71c8864a04d05fcd2a06e52da4d",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
     },
     "storage": {
       "network": "galileo",
       "chainId": 16602,
-      "storageRoot": "0x4834d1a8d642eaec3d9c805058e41662ff8f72e0497dd34cfdfbab040054b156",
-      "storageTx": "0xf508dea89ebe0b17e0b7474947219e34410a38bbf30fd3b8d852cc7d0aa39756",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xf508dea89ebe0b17e0b7474947219e34410a38bbf30fd3b8d852cc7d0aa39756",
+      "storageRoot": "0x4f75b38c64f2560e21b4cd402a9b649efc59614be1bfc6ea10cae6eb70f2689b",
+      "storageTx": "0xe88c18f272da7d3299f76c13d8b85f21e0e249f391d41fcc85fcc55b75f7f890",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xe88c18f272da7d3299f76c13d8b85f21e0e249f391d41fcc85fcc55b75f7f890",
       "alreadyStored": false,
       "proofValid": true,
       "bytesMatch": true
@@ -370,7 +370,7 @@
     "manifestHash": "0x437ec0069d6a79a20a9dc5c1709591cfcda2f442199e036b16e1d7febf771ae6",
     "policyHash": "0xebabb80b69f68ea7e93572c8ede0a0f63371111af8eb207767bf1f7c05535007",
     "graphHash": "0x77b2f2dab45d9bb77bf77613348cf71c54281136a0bf41721d18b68e0c070d6b",
-    "bundleRoot": "0x497f4bf5adb83653a0b6242f943f81366edcec22e3dbd862ae9705cdfb1bd269",
+    "bundleRoot": "0x42c8fee00d7910f68dc7cf36ce5d094d76a1e59a06a6643fade8e1373f005139",
     "origin": "LOCAL_FIXTURE",
     "supportStatus": "SUPPORTED",
     "asset": {
@@ -411,16 +411,16 @@
       "chainId": 16602,
       "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
       "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
-      "anchorTx": "0x8e42dc1cd7f255fca273426485cf8f5425352a42505cd4f85715d6940b5cba05",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x8e42dc1cd7f255fca273426485cf8f5425352a42505cd4f85715d6940b5cba05",
+      "anchorTx": "0xe7c0d280dc9882679fb4819b0e5eebee9a02f83f8d7dc4a9691b406b0e073260",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xe7c0d280dc9882679fb4819b0e5eebee9a02f83f8d7dc4a9691b406b0e073260",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
     },
     "storage": {
       "network": "galileo",
       "chainId": 16602,
-      "storageRoot": "0xde12b6ef4abf8f15d8051878622f69e548dc51bdace42081ca25da6a800f3213",
-      "storageTx": "0xa22f83157c9adc35e00ef119167b792810255b36c977e575aad54882096de68a",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xa22f83157c9adc35e00ef119167b792810255b36c977e575aad54882096de68a",
+      "storageRoot": "0x9d5fc59020bf8d1355584a00b01b86fed9cd17a87147c8a3d9610ace0083ca70",
+      "storageTx": "0x999a707a5f13a499b28e3c2af796a4da9d584b7ceb73252c915441da47edd441",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x999a707a5f13a499b28e3c2af796a4da9d584b7ceb73252c915441da47edd441",
       "alreadyStored": false,
       "proofValid": true,
       "bytesMatch": true
@@ -435,7 +435,7 @@
     "manifestHash": "0xa70c16dcfbcf8ae033206d1879ae437bcb9b0014a07fe4d69eaee3c821fb969d",
     "policyHash": "0xebabb80b69f68ea7e93572c8ede0a0f63371111af8eb207767bf1f7c05535007",
     "graphHash": "0x77feae51dead5b272d801b0209c675dc517cda0c6b1934f1d3de9ff60049e712",
-    "bundleRoot": "0x8c37c734d17c954c68a9dcbedcd0d7f41a7b2fec1185ee9d93ffd356b4c8d010",
+    "bundleRoot": "0xf724852ada728ff5d912708c778f989451d0a0305f80bf42fec9060090a65689",
     "origin": "LOCAL_FIXTURE",
     "supportStatus": "SUPPORTED",
     "asset": {
@@ -481,16 +481,16 @@
       "chainId": 16602,
       "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
       "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
-      "anchorTx": "0xaa8bffcddaa32997ae613eb773e6789745998182e899443c64db0abe9b404098",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xaa8bffcddaa32997ae613eb773e6789745998182e899443c64db0abe9b404098",
+      "anchorTx": "0x40dd36085d9656dfcf6e3ce4c2ac28b69fa7e92b552639d92c9483dedd2e6c80",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x40dd36085d9656dfcf6e3ce4c2ac28b69fa7e92b552639d92c9483dedd2e6c80",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
     },
     "storage": {
       "network": "galileo",
       "chainId": 16602,
-      "storageRoot": "0x78c1a371dcfcbd7c3341f0db53b8515ae953c0135b287e76b567ee778560676d",
-      "storageTx": "0xb765fd28681459af410a19d1db2d8308a7cd5fa38b3826c9a51f6019be1acd98",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xb765fd28681459af410a19d1db2d8308a7cd5fa38b3826c9a51f6019be1acd98",
+      "storageRoot": "0x19cc4ac396a701a79469ebb3993d5d45e33d56ba7b227fbb1f4e152ca79e7714",
+      "storageTx": "0xfb100ab2bf91de5b1350c3c22473a65f0583a41f9fd28fb2468065967ef29ad7",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xfb100ab2bf91de5b1350c3c22473a65f0583a41f9fd28fb2468065967ef29ad7",
       "alreadyStored": false,
       "proofValid": true,
       "bytesMatch": true

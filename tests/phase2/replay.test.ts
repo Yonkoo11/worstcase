@@ -13,6 +13,22 @@ function makeEvidence(index = 0) {
 }
 
 describe("canonical evidence replay", () => {
+  it("records the trajectory the search accepted, and rejects a substituted one", () => {
+    const evidence = makeEvidence();
+
+    // The bundle records exactly one accepted trajectory: the counterexample.
+    expect(evidence.bundle.acceptedCandidateHashes).toEqual([canonicalHash(["pay-attacker"])]);
+
+    // Swapping in a different trajectory must fail replay. Before the search
+    // rewrite this field held the fixture's declared paths, which nothing
+    // re-derived, so a bundle could assert a provenance the run never had.
+    const tampered = { ...structuredClone(evidence.bundle) as EvidenceBundle, acceptedCandidateHashes: [canonicalHash(["pay-merchant", "pay-attacker"])] };
+    const bytes = new TextEncoder().encode(canonicalJson(tampered));
+    const replay = replayEvidenceBundle(bytes, canonicalHash(tampered));
+    expect(replay).toMatchObject({ verified: false, code: "REPLAY_MISMATCH" });
+  });
+
+
   it("reconstructs a complete result from canonical bytes", () => {
     const evidence = makeEvidence();
     const replay = replayEvidenceBundle(evidence.bytes, evidence.bundleRoot);

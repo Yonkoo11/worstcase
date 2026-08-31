@@ -27,13 +27,13 @@ Five planted attacks, one clean baseline, and the same drain re-checked after a 
 
 | Fixture | What it plants | Max loss found | On-chain anchor |
 |---|---|---|---|
-| `prompt-injection` | Hostile tool output proposes an extra transfer | 27,500,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x452eeef9df2bb19ef6bf7197fc844c79f7088b7c4a4f3c0ef81265debb64c04a) |
+| `prompt-injection` | Hostile tool output proposes an extra transfer | 27,500,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x0486f8f9b431b17bda6361bf144c6c88fd51ef94ab482dd294f8a53f81fa96c8) |
 | `recipient-swap` | Mutable recipient field redirects a valid amount | 25,000,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x3f71b07726d3b73990798dc2d3433fc2b59bf262a14304a4a79c313f184e99d1) |
 | `replay` | A signed intent is submitted more than once | 20,000,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x7af36d1ff96f458ca1c47baa17232866adf9229c78b844f020c90cc6fe8cbc7c) |
-| `concurrency` | Parallel calls each pass a per-call cap | 60,000,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x1b8cf2b9246ec42db33d9894f5a1976a4cc50748f6f9442ede14f5cb0bbd0ae8) |
-| `recursive-tool` | A paid tool calls itself through a budget gap | 40,000,000 | [tx](https://chainscan-galileo.0g.ai/tx/0xc9b2d7276ef089e0963a44c039aa45f878ce7bb95b5bbce693d0b2ae5dfe5315) |
-| `clean` | Nothing. This is the false-positive check | **0** | [tx](https://chainscan-galileo.0g.ai/tx/0x8e42dc1cd7f255fca273426485cf8f5425352a42505cd4f85715d6940b5cba05) |
-| `policy-fix` | The drain, after tightening one policy edge | **0** | [tx](https://chainscan-galileo.0g.ai/tx/0xaa8bffcddaa32997ae613eb773e6789745998182e899443c64db0abe9b404098) |
+| `concurrency` | Parallel calls each pass a per-call cap | 60,000,000 | [tx](https://chainscan-galileo.0g.ai/tx/0xdb34f5316891f92b5f28d285dba0f6cd5cfaa8b2cc36d8bd0d520ed5c8b5dcb4) |
+| `recursive-tool` | A paid tool calls itself through a budget gap | 40,000,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x173c8b5074f14d5f30aad53840df74ee0fc7e71c8864a04d05fcd2a06e52da4d) |
+| `clean` | Nothing. This is the false-positive check | **0** | [tx](https://chainscan-galileo.0g.ai/tx/0xe7c0d280dc9882679fb4819b0e5eebee9a02f83f8d7dc4a9691b406b0e073260) |
+| `policy-fix` | The drain, after tightening one policy edge | **0** | [tx](https://chainscan-galileo.0g.ai/tx/0x40dd36085d9656dfcf6e3ce4c2ac28b69fa7e92b552639d92c9483dedd2e6c80) |
 
 The last two rows are the point. A checker that flags everything is useless, and a checker you cannot act on is also useless. `clean` returns zero, and `policy-fix` shows a real drain going to zero after a specific, named change.
 
@@ -141,7 +141,7 @@ Requires Node.js 22+ and [Foundry](https://getfoundry.sh).
 
 ```bash
 npm install
-npm test                 # 99 TypeScript tests across 14 files
+npm test                 # 100 TypeScript tests across 14 files
 forge test --offline     # 5 Solidity tests, no external libs
 npm run typecheck        # strict, no errors
 ```
@@ -159,7 +159,7 @@ Verify an anchor straight from 0G Chain, without trusting this repository:
 cast call 0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3 \
   "getAnchor(address,bytes32)((bytes32,bytes32,uint256,bytes32,uint8,address,uint64))" \
   0xf9946775891a24462cD4ec885d0D4E2675C84355 \
-  0xafe7d23b996b20e1c169ccf034b12c88e01d03baaa02f40ab072323da61a0d28 \
+  0x304ff5d34bef92e9ddd4e5cbfe8bb83c8629f5aa1da20c4ea1b8ad3816cd27b0 \
   --rpc-url https://evmrpc-testnet.0g.ai
 ```
 

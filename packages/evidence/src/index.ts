@@ -56,7 +56,13 @@ export function createLocalEvidenceBundle(compiled: CompiledModel, fixture: Fixt
     policy: compiled.policy,
     graph: compiled.graph,
     fixtures: [fixture],
-    acceptedCandidateHashes: fixture.candidateTrajectories.map((trajectory) => canonicalHash(trajectory)).sort(),
+    // The trajectory the search actually accepted as the counterexample.
+    //
+    // This used to be the hashes of the fixture's declared `candidateTrajectories`.
+    // Once the checker searches the state space those declarations no longer drive
+    // the result, so recording them here asserted a provenance the run did not
+    // have. An UNKNOWN run accepted nothing and records nothing.
+    acceptedCandidateHashes: result.status === "COMPLETE" ? [canonicalHash(result.shortestPathTransitionIds)] : [],
     rejectedCandidates: [],
   });
   const json = canonicalJson(bundle);
@@ -100,6 +106,15 @@ export function replayEvidenceBundle(bytes: Uint8Array, expectedRoot: `0x${strin
   const actualProjection = replayRun.stage === "COMPLETE" ? replayRun.counterexample : replayRun.stage === "UNKNOWN" ? replayRun.unknownReason : undefined;
   if (bundle.run.stage !== replayRun.stage || canonicalJson(expectedProjection) !== canonicalJson(actualProjection)) {
     return { verified: false, code: "REPLAY_MISMATCH", message: "Deterministic replay does not match the recorded analytical result." };
+  }
+
+  // The accepted trajectory is re-derived rather than trusted, so the bundle
+  // cannot claim a counterexample the replayed search did not actually accept.
+  const expectedAccepted = replayRun.stage === "COMPLETE" && replayRun.counterexample !== undefined
+    ? [canonicalHash(replayRun.counterexample.transitionIds)]
+    : [];
+  if (canonicalJson(bundle.acceptedCandidateHashes) !== canonicalJson(expectedAccepted)) {
+    return { verified: false, code: "REPLAY_MISMATCH", message: "Recorded accepted trajectory does not match the replayed counterexample." };
   }
   return { verified: true, bundleRoot: actualRoot, run: bundle.run };
 }
