@@ -115,6 +115,16 @@
       "anchorTx": "0x4c216c3b8cb6a64548cfe61572f8df8d19436c3489ed4ce624c3edfe035538c2",
       "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x4c216c3b8cb6a64548cfe61572f8df8d19436c3489ed4ce624c3edfe035538c2",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
+    },
+    "storage": {
+      "network": "galileo",
+      "chainId": 16602,
+      "storageRoot": "0x3b61330543c528ccf88bf4cad9a2f9433785f0abafd55d592e68132c852d64ef",
+      "storageTx": "0xe1e5bf060d67b40fdcc5f116c3ad02b6fb22ff5a4ee88e34060b11451c26d4cd",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xe1e5bf060d67b40fdcc5f116c3ad02b6fb22ff5a4ee88e34060b11451c26d4cd",
+      "alreadyStored": false,
+      "proofValid": true,
+      "bytesMatch": true
     }
   },
   {
@@ -232,6 +242,16 @@
       "anchorTx": "0x738fbe6448cc292a891e6d9b5722bf544b1896642893cf8714a5791f03055b58",
       "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x738fbe6448cc292a891e6d9b5722bf544b1896642893cf8714a5791f03055b58",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
+    },
+    "storage": {
+      "network": "galileo",
+      "chainId": 16602,
+      "storageRoot": "0x226b8f76ae2fce2a22b586438ae3742c3c3145800958205bd4add836597c4858",
+      "storageTx": "0xa7d5c43b879cff577da642f847bfae36c5f07276d9c34c3beaaf861668bf0226",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xa7d5c43b879cff577da642f847bfae36c5f07276d9c34c3beaaf861668bf0226",
+      "alreadyStored": false,
+      "proofValid": true,
+      "bytesMatch": true
     }
   },
   {
@@ -350,6 +370,16 @@
       "anchorTx": "0x5f82745444ca156e0b08abe75e74b7baf12775b7c7f0ea78d96712f5c0679df9",
       "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x5f82745444ca156e0b08abe75e74b7baf12775b7c7f0ea78d96712f5c0679df9",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
+    },
+    "storage": {
+      "network": "galileo",
+      "chainId": 16602,
+      "storageRoot": "0x55e0f3f48125a7db55d08097fc4dec72c26f6b2d5eb8556c8749151c50560133",
+      "storageTx": "0xfb35f1d9212c5c624175ec43ec95a407f3dc3ca1c74c26883ea2fc7b2bd4fc73",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xfb35f1d9212c5c624175ec43ec95a407f3dc3ca1c74c26883ea2fc7b2bd4fc73",
+      "alreadyStored": false,
+      "proofValid": true,
+      "bytesMatch": true
     }
   },
   {
@@ -468,6 +498,16 @@
       "anchorTx": "0x38edc5112e2fd569aacc011a0631664cae1fa3dd7b046c53018c65793e5e9d11",
       "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x38edc5112e2fd569aacc011a0631664cae1fa3dd7b046c53018c65793e5e9d11",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
+    },
+    "storage": {
+      "network": "galileo",
+      "chainId": 16602,
+      "storageRoot": "0x59fa67542bff01feac3fa84f14166b2c3de43c4741f1a7a865c15ca93c35cb30",
+      "storageTx": "0xe622578e51eb9f09daba897634dc6c78785a56bf1ae9aa3c4baf14d1fe19c5e8",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xe622578e51eb9f09daba897634dc6c78785a56bf1ae9aa3c4baf14d1fe19c5e8",
+      "alreadyStored": false,
+      "proofValid": true,
+      "bytesMatch": true
     }
   },
   {
@@ -588,6 +628,16 @@
       "anchorTx": "0x84e840ea348eaf953b9eb3b497c93f2dade1c3f820547f4d28c7b3425d56aad3",
       "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x84e840ea348eaf953b9eb3b497c93f2dade1c3f820547f4d28c7b3425d56aad3",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
+    },
+    "storage": {
+      "network": "galileo",
+      "chainId": 16602,
+      "storageRoot": "0x2d5a203753883c2387d769cc1acc6db004e8a46ba8c19981158c756e593d2d00",
+      "storageTx": "0x12a7c9bc636373775012905a175cb9557f5132f7d5d5557ed598a9e75378c288",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x12a7c9bc636373775012905a175cb9557f5132f7d5d5557ed598a9e75378c288",
+      "alreadyStored": false,
+      "proofValid": true,
+      "bytesMatch": true
     }
   },
   {
@@ -704,6 +754,16 @@
       "anchorTx": "0xf0152ebcae6ca4e6e85b7bbefaf555c5f4ca36acce61b2d7ce211442684d5914",
       "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xf0152ebcae6ca4e6e85b7bbefaf555c5f4ca36acce61b2d7ce211442684d5914",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
+    },
+    "storage": {
+      "network": "galileo",
+      "chainId": 16602,
+      "storageRoot": "0x599159c6eea418f1b59149a87522eb5f90293754a2f12becfa9c90c5a0042236",
+      "storageTx": null,
+      "explorerTx": null,
+      "alreadyStored": true,
+      "proofValid": true,
+      "bytesMatch": true
     }
   },
   {
@@ -839,6 +899,16 @@
       "anchorTx": "0xb8cfb0cdb5cf5043f879a01e3681506f3e1b07a2b84cd04c36a3881caabd3d1b",
       "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xb8cfb0cdb5cf5043f879a01e3681506f3e1b07a2b84cd04c36a3881caabd3d1b",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
+    },
+    "storage": {
+      "network": "galileo",
+      "chainId": 16602,
+      "storageRoot": "0xa92d6d924972d5c811d7eddc9b291bf4edd5f3e5cce4f6e083120243873c98ed",
+      "storageTx": "0xb73e61189ea8faaacb8176f790d1fe8740f7bf746939447a6a9d5bda4e78e90f",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xb73e61189ea8faaacb8176f790d1fe8740f7bf746939447a6a9d5bda4e78e90f",
+      "alreadyStored": false,
+      "proofValid": true,
+      "bytesMatch": true
     }
   }
 ]

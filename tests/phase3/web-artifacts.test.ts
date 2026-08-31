@@ -39,6 +39,36 @@ describe("production web artifact contract", () => {
     }
   });
 
+  it("only claims a 0G Storage upload when the record proves a verified round trip", async () => {
+    for (const artifact of buildDemoArtifacts()) {
+      const store = artifact.storage;
+      if (store === undefined) continue;
+
+      expect(store.storageRoot).toMatch(/^0x[0-9a-f]{64}$/);
+
+      // Either a real transaction exists, or the upload was deduplicated and the
+      // interface must not offer a transaction link at all. Never an empty link.
+      if (store.alreadyStored) {
+        expect(store.storageTx).toBeNull();
+        expect(store.explorerTx).toBeNull();
+      } else {
+        expect(store.storageTx).toMatch(/^0x[0-9a-f]{64}$/i);
+        expect(store.explorerTx).toContain(store.storageTx as string);
+      }
+
+      // The interface says "uploaded and re-verified". It may only say that if
+      // the recorded upload actually downloaded back to identical bytes.
+      expect(store.proofValid).toBe(true);
+      expect(store.bytesMatch).toBe(true);
+
+      const raw = await readFile(new URL(`../../contracts/deployments/${store.chainId}-storage-${artifact.fixtureId}.json`, import.meta.url), "utf8");
+      const record = JSON.parse(raw) as { storageRoot: string; verified: { proofValid: boolean; bytesMatch: boolean } };
+      expect(record.storageRoot).toBe(store.storageRoot);
+      expect(record.verified.proofValid).toBe(true);
+      expect(record.verified.bytesMatch).toBe(true);
+    }
+  });
+
   it("formats base-unit money without floating point arithmetic", () => {
     expect(formatMoney("27500000", 6)).toBe("27.5");
     expect(formatMoney("100000000", 6)).toBe("100");

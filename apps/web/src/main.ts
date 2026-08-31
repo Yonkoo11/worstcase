@@ -168,6 +168,19 @@ function renderEvidence(): string {
     : `<div><dt>0G Chain</dt><dd><a href="${escapeHtml(anchor.explorerTx)}" target="_blank" rel="noopener noreferrer">Anchored on ${escapeHtml(anchor.network)}</a></dd><small>Read back from chain state and matched</small></div>
        <div><dt>Registry</dt><dd><a href="${escapeHtml(anchor.explorerContract)}" target="_blank" rel="noopener noreferrer"><code>${escapeHtml(shortHash(anchor.runRegistry))}</code></a></dd><small>Chain ${anchor.chainId}</small></div>`;
 
+  const store = state.selected.storage;
+  // Content-addressed storage creates no transaction when identical bytes are
+  // already stored, so only offer a transaction link when one actually exists.
+  const storageValue = store === undefined
+    ? `<dd>Not uploaded</dd><small>No transaction exists</small>`
+    : store.explorerTx === null
+      ? `<dd>Stored and re-verified</dd><small>Identical bytes already stored, so no new transaction</small>`
+      : `<dd><a href="${escapeHtml(store.explorerTx)}" target="_blank" rel="noopener noreferrer">Uploaded and re-verified</a></dd><small>Downloaded back, root re-derived, bytes identical</small>`;
+  const storageRow = store === undefined
+    ? `<div><dt>0G Storage</dt>${storageValue}</div>`
+    : `<div><dt>0G Storage</dt>${storageValue}</div>
+       <div><dt>Storage root</dt><dd><code>${escapeHtml(shortHash(store.storageRoot))}</code></dd><small>Merkle root on ${escapeHtml(store.network)}</small></div>`;
+
   const heading = anchor === undefined
     ? "Local, reproducible, not yet published."
     : "Reproducible locally, verifiable on 0G Chain.";
@@ -180,7 +193,7 @@ function renderEvidence(): string {
     <dl class="evidence-sheet">
       <div><dt>Origin</dt><dd>Local fixture</dd><small>Not 0G Compute</small></div>
       <div><dt>Bundle root</dt><dd><code>${escapeHtml(state.selected.bundleRoot)}</code></dd><small>Canonical local bytes</small></div>
-      <div><dt>0G Storage</dt><dd>Not uploaded</dd><small>No transaction exists</small></div>
+      ${storageRow}
       ${chainRow}
     </dl>
     <button class="button button-secondary" id="copy-root">Copy bundle root</button>

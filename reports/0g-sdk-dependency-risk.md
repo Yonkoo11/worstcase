@@ -48,3 +48,35 @@ Worstcase cannot place this graph in the main API/checker process or allow it to
 ## Disclosure note
 
 This draft contains dependency/audit observations only. It has not been sent to 0G, opened as an issue, or published. Exact advisory identifiers and a fresh clean-room reproduction should be attached immediately before any approved upstream submission.
+
+---
+
+## Resolution, 2026-08-31
+
+The quarantine on **0G Storage is lifted**. The quarantine on **0G Compute remains**.
+
+### What changed
+
+The original finding measured the *combined* Compute + Storage install: 384 packages, 23 advisories, 6 high. Measuring the Storage SDK on its own gives a much smaller surface: 59 packages, 5 advisories, 4 high. The advisories are not in 0G's own code. They come from three transitive dependencies:
+
+| Package | Installed | Advisory | Vulnerable range |
+|---|---|---|---|
+| `axios` | 0.27.2 | Cross-Site Request Forgery | `<=0.32.0` |
+| `ws` | 8.17.1 | Uninitialized memory disclosure | `8.0.0 - 8.20.1` |
+| `ethers` | 6.13.1 | moderate, transitive | `6.0.0-beta.1 - 6.16.0` |
+
+All three have patched releases. Pinning them through workspace `overrides` (`axios ^1.12.0`, `ws ^8.21.0`, `ethers ^6.17.0`) brings the whole workspace to **zero advisories at every severity across 131 packages**.
+
+### Why the audit number alone was not accepted as evidence
+
+`axios` 0.27 to 1.x is a major version change, and the SDK pins `ethers` to exactly 6.13.1, so forcing 6.17.0 overrides the vendor's own constraint. Either could break the SDK at runtime while `npm audit` still reads clean. A green audit over a broken integration would be a worse outcome than the quarantine.
+
+So the overrides were validated by function, not by audit output: a real evidence bundle was uploaded to 0G Storage on Galileo, downloaded back with proof, and compared byte for byte. It matched. All seven bundles were then uploaded the same way, each verified by re-deriving the Merkle root from the returned bytes before the upload was recorded.
+
+### Standing condition
+
+This admission is conditional on the overrides holding. If `npm audit` stops reporting zero, or if a future SDK release moves off the pinned versions, the Storage integration is a regression and should be treated as one rather than grandfathered.
+
+### 0G Compute is still out
+
+Nothing about the dependency finding was the blocking reason for Compute. The blocking reason is behavioural and unchanged: generating inference request headers can trigger an on-chain balance check and provider funding path, so it cannot be treated as read-only or executed ahead of a funding approval boundary. It stays a typed port until it runs behind the isolated adapter with a provider-enforced spend ceiling.

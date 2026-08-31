@@ -1,0 +1,14 @@
+{
+  "network": "galileo",
+  "chainId": 16602,
+  "fixtureId": "clean",
+  "storageRoot": "0x599159c6eea418f1b59149a87522eb5f90293754a2f12becfa9c90c5a0042236",
+  "storageTx": null,
+  "alreadyStored": true,
+  "indexerUrl": "https://indexer-storage-testnet-turbo.0g.ai",
+  "explorerTx": null,
+  "verified": {
+    "proofValid": true,
+    "bytesMatch": true
+  }
+}

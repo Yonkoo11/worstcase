@@ -1,0 +1,14 @@
+{
+  "network": "galileo",
+  "chainId": 16602,
+  "fixtureId": "policy-fix",
+  "storageRoot": "0xa92d6d924972d5c811d7eddc9b291bf4edd5f3e5cce4f6e083120243873c98ed",
+  "storageTx": "0xb73e61189ea8faaacb8176f790d1fe8740f7bf746939447a6a9d5bda4e78e90f",
+  "alreadyStored": false,
+  "indexerUrl": "https://indexer-storage-testnet-turbo.0g.ai",
+  "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xb73e61189ea8faaacb8176f790d1fe8740f7bf746939447a6a9d5bda4e78e90f",
+  "verified": {
+    "proofValid": true,
+    "bytesMatch": true
+  }
+}

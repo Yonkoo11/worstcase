@@ -40,6 +40,19 @@ export type DemoArtifact = {
   };
   actions: DemoAction[];
   anchor?: DemoAnchor | undefined;
+  storage?: DemoStorage | undefined;
+};
+
+export type DemoStorage = {
+  network: string;
+  chainId: number;
+  storageRoot: string;
+  /** Null when identical bytes were already stored, so no transaction was created. */
+  storageTx: string | null;
+  explorerTx: string | null;
+  alreadyStored: boolean;
+  proofValid: boolean;
+  bytesMatch: boolean;
 };
 
 export type DemoAnchor = {
@@ -82,6 +95,35 @@ function loadAnchor(fixtureId: string): DemoAnchor | undefined {
 
 // Mainnet first: if a run is anchored on both, the interface shows mainnet.
 const ANCHOR_CHAIN_IDS = [16661, 16602] as const;
+
+/**
+ * Read the 0G Storage record for a fixture, when one exists.
+ *
+ * scripts/storage-upload.ts writes a record only after the bundle has been
+ * downloaded back and re-derived to the same root, so a record here means a
+ * verified round trip actually happened.
+ */
+function loadStorage(fixtureId: string): DemoStorage | undefined {
+  for (const chainId of ANCHOR_CHAIN_IDS) {
+    try {
+      const raw = readFileSync(`contracts/deployments/${chainId}-storage-${fixtureId}.json`, "utf8");
+      const record = JSON.parse(raw) as DemoStorage & { verified: { proofValid: boolean; bytesMatch: boolean } };
+      return {
+        network: record.network,
+        chainId: record.chainId,
+        storageRoot: record.storageRoot,
+        storageTx: record.storageTx ?? null,
+        explorerTx: record.explorerTx ?? null,
+        alreadyStored: record.alreadyStored === true,
+        proofValid: record.verified.proofValid,
+        bytesMatch: record.verified.bytesMatch,
+      };
+    } catch {
+      // No verified upload on this network for this fixture; try the next.
+    }
+  }
+  return undefined;
+}
 
 function actionProjection(fixture: Fixture): DemoAction[] {
   const adversarial = new Set(fixture.adversarialRecipients);
@@ -153,6 +195,7 @@ export function buildDemoArtifacts(): DemoArtifact[] {
           },
       actions: actionProjection(fixture),
       anchor: loadAnchor(fixture.fixtureId),
+      storage: loadStorage(fixture.fixtureId),
     };
   });
 }

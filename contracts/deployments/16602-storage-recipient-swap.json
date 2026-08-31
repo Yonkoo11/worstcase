@@ -1,0 +1,14 @@
+{
+  "network": "galileo",
+  "chainId": 16602,
+  "fixtureId": "recipient-swap",
+  "storageRoot": "0x226b8f76ae2fce2a22b586438ae3742c3c3145800958205bd4add836597c4858",
+  "storageTx": "0xa7d5c43b879cff577da642f847bfae36c5f07276d9c34c3beaaf861668bf0226",
+  "alreadyStored": false,
+  "indexerUrl": "https://indexer-storage-testnet-turbo.0g.ai",
+  "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xa7d5c43b879cff577da642f847bfae36c5f07276d9c34c3beaaf861668bf0226",
+  "verified": {
+    "proofValid": true,
+    "bytesMatch": true
+  }
+}

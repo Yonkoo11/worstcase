@@ -10,9 +10,9 @@ Submitted to **0G Bridge by AKINDO, Wave 3**.
 
 ---
 
-## Live on 0G Chain
+## Live on 0G
 
-Every result below was produced by the engine in this repository, then anchored on 0G Chain and read back from chain state to confirm it matches.
+Every result below was produced by the engine in this repository, then anchored on 0G Chain and stored on 0G Storage. Each one was read back from the network and re-verified before it was recorded here.
 
 | | |
 |---|---|
@@ -36,6 +36,22 @@ Five planted attacks, one clean baseline, and the same drain re-checked after a 
 | `policy-fix` | The drain, after tightening one policy edge | **0** | [tx](https://chainscan-galileo.0g.ai/tx/0xb8cfb0cdb5cf5043f879a01e3681506f3e1b07a2b84cd04c36a3881caabd3d1b) |
 
 The last two rows are the point. A checker that flags everything is useless, and a checker you cannot act on is also useless. `clean` returns zero, and `policy-fix` shows a real drain going to zero after a specific, named change.
+
+### The same seven bundles on 0G Storage
+
+Each evidence bundle was uploaded, then downloaded back and re-derived to the same Merkle root before the upload was recorded. Records live in `contracts/deployments/16602-storage-*.json`.
+
+| Fixture | Storage root | Upload |
+|---|---|---|
+| `prompt-injection` | `0x3b613305…c852d64ef` | [tx](https://chainscan-galileo.0g.ai/tx/0xe1e5bf060d67b40fdcc5f116c3ad02b6fb22ff5a4ee88e34060b11451c26d4cd) |
+| `recipient-swap` | `0x226b8f76…597c4858` | [tx](https://chainscan-galileo.0g.ai/tx/0xa7d5c43b879cff577da642f847bfae36c5f07276d9c34c3beaaf861668bf0226) |
+| `replay` | `0x55e0f3f4…50560133` | [tx](https://chainscan-galileo.0g.ai/tx/0xfb35f1d9212c5c624175ec43ec95a407f3dc3ca1c74c26883ea2fc7b2bd4fc73) |
+| `concurrency` | `0x59fa6754…3c35cb30` | [tx](https://chainscan-galileo.0g.ai/tx/0xe622578e51eb9f09daba897634dc6c78785a56bf1ae9aa3c4baf14d1fe19c5e8) |
+| `recursive-tool` | `0x2d5a2037…593d2d00` | [tx](https://chainscan-galileo.0g.ai/tx/0x12a7c9bc636373775012905a175cb9557f5132f7d5d5557ed598a9e75378c288) |
+| `clean` | `0x599159c6…a0042236` | already stored, no new transaction |
+| `policy-fix` | `0xa92d6d92…873c98ed` | [tx](https://chainscan-galileo.0g.ai/tx/0xb73e61189ea8faaacb8176f790d1fe8740f7bf746939447a6a9d5bda4e78e90f) |
+
+The `clean` row is worth reading rather than skipping. 0G Storage is content addressed, so re-uploading identical bytes creates no transaction. The interface reports that as "stored and re-verified" with no transaction link, instead of linking a transaction that does not exist. A test enforces that distinction.
 
 ---
 
@@ -69,7 +85,13 @@ Remove the chain anchor and the product promise disappears: a maximum-loss numbe
 
 `contracts/src/RunRegistry.sol` is 68 lines of Solidity with no external dependencies, covered by 5 Foundry tests.
 
-**0G Compute and 0G Storage: typed ports, not yet live.** `packages/zerog` defines `ComputePort` and `StoragePort` alongside the `ChainPort` that is live today. They are not wired to the vendor SDKs. That is a deliberate call, documented honestly below rather than papered over.
+**0G Storage, load-bearing.** Every evidence bundle is uploaded to 0G Storage, then downloaded back and re-verified before the upload is recorded at all. Verification is deliberately stricter than trusting the SDK's proof flag: the adapter re-derives the Merkle root from the bytes that came back and compares it to the root it asked for, so corrupted content cannot pass as verified.
+
+Remove Storage and a third party cannot reconstruct the run from a content-addressed object, which is the other half of the evidence promise.
+
+The upload path is a mutation, so it refuses to run without a scoped, unexpired approval bound to the exact bytes. Wrong scope, wrong network, expired approval or a missing signer all fail before the vendor SDK is reached, and `tests/phase2/storage-0g.test.ts` asserts no outward call happens in each of those cases.
+
+**0G Compute: typed port, not live.** `packages/zerog` defines `ComputePort` alongside the live Storage and Chain adapters. It is not wired to the vendor SDK. Reasoning is below rather than papered over.
 
 ---
 
@@ -79,7 +101,7 @@ Requires Node.js 22+ and [Foundry](https://getfoundry.sh).
 
 ```bash
 npm install
-npm test                 # 82 TypeScript tests across 12 files
+npm test                 # 94 TypeScript tests across 13 files
 forge test --offline     # 5 Solidity tests, no external libs
 npm run typecheck        # strict, no errors
 ```
@@ -109,8 +131,9 @@ Deploy and anchor yourself. The preferred signer is an encrypted Foundry keystor
 cast wallet import worstcase --interactive   # once
 export ETH_KEYSTORE_ACCOUNT=worstcase
 
-./contracts/deploy-0g.sh galileo
-./scripts/anchor-all.sh galileo
+./contracts/deploy-0g.sh galileo      # deploy the registry
+./scripts/anchor-all.sh galileo       # anchor every fixture run on 0G Chain
+./contracts/storage-0g.sh galileo     # upload every evidence bundle to 0G Storage
 ```
 
 A plaintext `contracts/.env` holding `PRIVATE_KEY=0x…` also works as a fallback, and the scripts say so out loud when you use it, because that path hands the key to `forge` as a command-line argument where `ps` can see it. Fine for a throwaway testnet key, not for one holding real value.
@@ -152,7 +175,8 @@ Deeper documents: [`docs/model-semantics.md`](docs/model-semantics.md), [`docs/t
 
 Stated plainly, because a security tool that overstates itself is the thing it claims to prevent.
 
-- **0G Compute and 0G Storage are not live.** Installing the exact current SDK pair (`0g-compute-ts-sdk@0.9.0`, `0g-storage-ts-sdk@1.2.11`) expanded the dependency graph to 384 packages carrying 23 advisories, 6 of them high severity. Reading the Compute SDK source also showed that generating request headers can trigger an on-chain balance check and funding path, so it is not safe to treat as read-only. Those packages were removed. The workspace's current 118-package dependency graph reports zero known advisories at every severity. The typed ports and an isolated adapter runtime (container policy, egress allowlist, mutation journal, process supervisor) are built and tested against that boundary, waiting on a patched release or a reviewed vendor handler. Findings are in [`reports/0g-sdk-dependency-risk.md`](reports/0g-sdk-dependency-risk.md).
+- **0G Compute is not live.** The Compute SDK's own source shows that generating request headers can trigger an on-chain balance check and provider funding path, so it cannot be treated as read-only or run ahead of a funding approval boundary. It stays a typed port until that runs behind the isolated adapter (container policy, egress allowlist, mutation journal, process supervisor) that is already built and tested. Findings are in [`reports/0g-sdk-dependency-risk.md`](reports/0g-sdk-dependency-risk.md).
+- **The Storage SDK was admitted under pinned overrides, not as-is.** Installed alone it pulls 5 advisories, 4 of them high, from `axios`, `ws` and `ethers`. The workspace pins all three past their advisories through `overrides`, which brings `npm audit` to zero across 131 packages, and a live upload-download round trip proves the SDK still works with the patched versions rather than assuming it. If that audit stops reading zero, this integration is a regression and should be treated as one.
 - **Testnet, not mainnet.** Everything above is 0G Galileo, chain 16602. Mainnet deployment is the next step.
 - **The bound is conservative within a declared model.** It is not formal verification of an arbitrary agent, and it does not prove an agent is safe. It answers a narrower question honestly.
 - **Fixtures are synthetic.** All adversarial balances and effects are planted. No real funds move anywhere in this repository.
