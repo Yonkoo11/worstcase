@@ -69,7 +69,7 @@ function renderPath(): string {
   if (ids.length === 0) {
     return `<div class="empty-path">
       <span class="blocked-mark" aria-hidden="true">×</span>
-      <div><strong>No adversarial edge is reachable.</strong><p>The tightened policy blocks all ${result.blocked.length} planted paths. Select one to inspect the policy decision.</p></div>
+      <div><strong>No adversarial edge is reachable.</strong><p>The tightened policy blocks ${result.blocked.length === 1 ? `the planted path` : `all ${result.blocked.length} planted paths`}. Select ${result.blocked.length === 1 ? `it` : `one`} to inspect the policy decision.</p></div>
     </div>
     <ol class="blocked-list" aria-label="Blocked transitions">
       ${result.blocked.map((item) => `<li><button data-step="${escapeHtml(item.transitionId)}" ${state.selectedStep === item.transitionId ? 'aria-current="step"' : ""}><span>${escapeHtml(fixtureLabel(item.transitionId))}</span><code>${escapeHtml(item.policyCheckId)}</code></button></li>`).join("")}
