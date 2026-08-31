@@ -80,3 +80,18 @@ This admission is conditional on the overrides holding. If `npm audit` stops rep
 ### 0G Compute is still out
 
 Nothing about the dependency finding was the blocking reason for Compute. The blocking reason is behavioural and unchanged: generating inference request headers can trigger an on-chain balance check and provider funding path, so it cannot be treated as read-only or executed ahead of a funding approval boundary. It stays a typed port until it runs behind the isolated adapter with a provider-enforced spend ceiling.
+
+### Compute measured on its own, 2026-08-31
+
+For symmetry with the Storage re-examination, the Compute SDK was measured alone under the same overrides rather than being judged on the old combined figure.
+
+| Override set | Packages | Advisories |
+|---|---|---|
+| `ws`, `ethers`, `axios` pinned | 273 | 6 (2 high, 4 low) |
+| plus `adm-zip ^0.6.0`, `elliptic ^6.6.1` | 273 | 5 (0 high, 5 low) |
+
+The two high findings clear with an `adm-zip` pin. The remaining five do not clear at any version: `elliptic` carries an advisory with range `*` and `fixAvailable: false`, and `browserify-sign`, `create-ecdh` and `crypto-browserify` inherit it. They arrive through a browser crypto polyfill chain that a server-side adapter has no use for.
+
+Admitting Compute would therefore take the workspace from zero advisories to five with no fix path, and roughly triple the dependency count, to gain a search-widening feature rather than a core one. The standing condition written above says a Storage integration that stops auditing clean is a regression. Applying that rule consistently, Compute does not come in.
+
+This is a dependency-surface judgement on top of the behavioural blocker, not a replacement for it. Both would need to clear.

@@ -183,10 +183,14 @@ function renderEvidence(): string {
 
   const heading = anchor === undefined
     ? "Local, reproducible, not yet published."
-    : "Reproducible locally, verifiable on 0G Chain.";
+    : store === undefined
+      ? "Reproducible locally, verifiable on 0G Chain."
+      : "Reproducible locally, retrievable and verifiable on 0G.";
   const blurb = anchor === undefined
     ? "This bundle is generated from the exact fixture, policy, graph, engine, and deterministic result. It does not claim 0G provenance."
-    : "This bundle is generated from the exact fixture, policy, graph, engine, and deterministic result. Its root and maximum loss are bound on 0G Chain to the model version that produced them.";
+    : store === undefined
+      ? "This bundle is generated from the exact fixture, policy, graph, engine, and deterministic result. Its root and maximum loss are bound on 0G Chain to the model version that produced them."
+      : "This bundle is generated from the exact fixture, policy, graph, engine, and deterministic result. It is stored on 0G Storage and was downloaded back and re-derived to the same root, and its maximum loss is bound on 0G Chain to the model version that produced it.";
 
   return `<section class="section-view" aria-labelledby="evidence-title">
     <div class="section-heading"><div class="eyebrow">Canonical evidence</div><h1 id="evidence-title">${heading}</h1><p>${blurb}</p></div>
