@@ -15,7 +15,10 @@ describe("production web artifact contract", () => {
     expect(artifacts.every((artifact) => artifact.origin === "LOCAL_FIXTURE")).toBe(true);
     expect(artifacts.filter((artifact) => BigInt(artifact.result.maximumLossBaseUnits ?? "0") > 0n)).toHaveLength(5);
     expect(artifacts.find((artifact) => artifact.fixtureId === "clean")?.result.maximumLossBaseUnits).toBe("0");
-    expect(artifacts.find((artifact) => artifact.fixtureId === "policy-fix")?.result.blocked).toHaveLength(5);
+    // The tightened agent has one attacker-reaching action, and it is blocked.
+    const fixed = artifacts.find((artifact) => artifact.fixtureId === "policy-fix");
+    expect(fixed?.result.maximumLossBaseUnits).toBe("0");
+    expect(fixed?.result.blocked.map((b) => b.policyCheckId)).toEqual(["recipient-not-allowed"]);
   });
 
   it("only claims an on-chain anchor when a verified record backs the exact displayed loss", async () => {

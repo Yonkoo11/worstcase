@@ -4,9 +4,9 @@
   "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
   "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
   "fixtureId": "recursive-tool",
-  "bundleRoot": "0x5f61c398ca2b61e1a7052beb51d3e577d68aa600eeebb832cab577e6e9cf0147",
+  "bundleRoot": "0x9d1b26e35898899c5490c9a10a5190552fc60f0467ad38814e1dc8a5c8b809f2",
   "maximumLossBaseUnits": "40000000",
-  "anchorTx": "0x84e840ea348eaf953b9eb3b497c93f2dade1c3f820547f4d28c7b3425d56aad3",
-  "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x84e840ea348eaf953b9eb3b497c93f2dade1c3f820547f4d28c7b3425d56aad3",
+  "anchorTx": "0xc9b2d7276ef089e0963a44c039aa45f878ce7bb95b5bbce693d0b2ae5dfe5315",
+  "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xc9b2d7276ef089e0963a44c039aa45f878ce7bb95b5bbce693d0b2ae5dfe5315",
   "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
 }

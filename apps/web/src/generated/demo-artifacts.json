@@ -4,11 +4,11 @@
     "family": "prompt-injection",
     "description": "A legitimate paid call returns hostile content that proposes an additional attacker transfer.",
     "engineVersion": "0.1.0-contract",
-    "compilationId": "0xfc6571c89ff27b32e745e9dc579013f2f37111fb3b7ed3184d5581f284f64f4d",
-    "manifestHash": "0x917518ff9133c81c4b7f9b65b51fe30253b27afd5e181327ff24cc768a075bdc",
-    "policyHash": "0xd1705364c698040daa699322f9837e2ae98655cbf854ebe0acfcf7e9fa4cfe4c",
-    "graphHash": "0xb5e1ac13f467b085bbab9b1d7bed21a1ad80d00f2c6ace236addf6b73e7317a4",
-    "bundleRoot": "0x5fe0f91bb5401fbf0a5708970eddb62415fe3748e194a23c333805342062d44a",
+    "compilationId": "0xb859dbf341e87f250a851b2d0a102a229f88162a8a9aead8b2b53fc55d4a75f1",
+    "manifestHash": "0xa70c16dcfbcf8ae033206d1879ae437bcb9b0014a07fe4d69eaee3c821fb969d",
+    "policyHash": "0xcf0638ea2d1e93dc197d8485c178264f3c82e35a6faf448fd8cd8671e7683bc7",
+    "graphHash": "0x3cba62e5ea67d620e134fcf53d20d8603059d23cbf8ee4ff5c26c84bc9231fd6",
+    "bundleRoot": "0xafe7d23b996b20e1c169ccf034b12c88e01d03baaa02f40ab072323da61a0d28",
     "origin": "LOCAL_FIXTURE",
     "supportStatus": "SUPPORTED",
     "asset": {
@@ -25,12 +25,11 @@
       "status": "COMPLETE",
       "maximumLossBaseUnits": "27500000",
       "shortestPathTransitionIds": [
-        "pay-merchant",
         "pay-attacker"
       ],
       "blocked": [],
-      "exploredStates": 2,
-      "exploredTrajectories": 1
+      "exploredStates": 4,
+      "exploredTrajectories": 4
     },
     "actions": [
       {
@@ -46,65 +45,6 @@
         "amountBaseUnits": "27500000",
         "recipient": "attacker",
         "adversarial": true
-      },
-      {
-        "id": "swap-attacker",
-        "type": "transfer",
-        "amountBaseUnits": "25000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "replay-one",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "replay-two",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "parallel-a",
-        "type": "transfer",
-        "amountBaseUnits": "30000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "parallel-b",
-        "type": "transfer",
-        "amountBaseUnits": "30000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "spawn-parallel",
-        "type": "spawn",
-        "adversarial": false
-      },
-      {
-        "id": "recursive-pay",
-        "type": "callPaidTool",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "recursive-loop",
-        "type": "recurse",
-        "adversarial": false
-      },
-      {
-        "id": "clean-pay",
-        "type": "transfer",
-        "amountBaseUnits": "5000000",
-        "recipient": "merchant",
-        "adversarial": false
       }
     ],
     "anchor": {
@@ -112,16 +52,16 @@
       "chainId": 16602,
       "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
       "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
-      "anchorTx": "0x4c216c3b8cb6a64548cfe61572f8df8d19436c3489ed4ce624c3edfe035538c2",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x4c216c3b8cb6a64548cfe61572f8df8d19436c3489ed4ce624c3edfe035538c2",
+      "anchorTx": "0x452eeef9df2bb19ef6bf7197fc844c79f7088b7c4a4f3c0ef81265debb64c04a",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x452eeef9df2bb19ef6bf7197fc844c79f7088b7c4a4f3c0ef81265debb64c04a",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
     },
     "storage": {
       "network": "galileo",
       "chainId": 16602,
-      "storageRoot": "0x3b61330543c528ccf88bf4cad9a2f9433785f0abafd55d592e68132c852d64ef",
-      "storageTx": "0xe1e5bf060d67b40fdcc5f116c3ad02b6fb22ff5a4ee88e34060b11451c26d4cd",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xe1e5bf060d67b40fdcc5f116c3ad02b6fb22ff5a4ee88e34060b11451c26d4cd",
+      "storageRoot": "0x90fc5c21376f6b859ef853c2f19b9243131b2496e017ffb75e38b30640eab199",
+      "storageTx": "0x7ebe7fac0f4c8937fc2d53df95e71b7140cb05965672e4af4bb6917a7283ed38",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x7ebe7fac0f4c8937fc2d53df95e71b7140cb05965672e4af4bb6917a7283ed38",
       "alreadyStored": false,
       "proofValid": true,
       "bytesMatch": true
@@ -132,11 +72,11 @@
     "family": "recipient-swap",
     "description": "A mutable recipient field redirects an otherwise valid amount to the attacker.",
     "engineVersion": "0.1.0-contract",
-    "compilationId": "0xfc6571c89ff27b32e745e9dc579013f2f37111fb3b7ed3184d5581f284f64f4d",
-    "manifestHash": "0x917518ff9133c81c4b7f9b65b51fe30253b27afd5e181327ff24cc768a075bdc",
-    "policyHash": "0xd1705364c698040daa699322f9837e2ae98655cbf854ebe0acfcf7e9fa4cfe4c",
-    "graphHash": "0xb5e1ac13f467b085bbab9b1d7bed21a1ad80d00f2c6ace236addf6b73e7317a4",
-    "bundleRoot": "0xc3cfc80b64b0b00c1fa983094b95ba08263e6b79d1810366d1dc97fa9e327cc3",
+    "compilationId": "0x8e0f81ece10191c11e95ccf2fcc9baf716f211284c792500828b905108a2660b",
+    "manifestHash": "0x917e8af8528e74f56e6dc204cde9ef3c179b872672a2807b31dd7da1824e2e9f",
+    "policyHash": "0xcf0638ea2d1e93dc197d8485c178264f3c82e35a6faf448fd8cd8671e7683bc7",
+    "graphHash": "0x6b9873222ccb484b0a65ab2066915ae30882526aabdf4be1083abac5403dad67",
+    "bundleRoot": "0x3c1641206ade8c5313f6650e821fcff9670f775137d33ac692973408f0a76346",
     "origin": "LOCAL_FIXTURE",
     "supportStatus": "SUPPORTED",
     "asset": {
@@ -156,8 +96,8 @@
         "swap-attacker"
       ],
       "blocked": [],
-      "exploredStates": 1,
-      "exploredTrajectories": 1
+      "exploredStates": 4,
+      "exploredTrajectories": 4
     },
     "actions": [
       {
@@ -168,70 +108,11 @@
         "adversarial": false
       },
       {
-        "id": "pay-attacker",
-        "type": "transfer",
-        "amountBaseUnits": "27500000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
         "id": "swap-attacker",
         "type": "transfer",
         "amountBaseUnits": "25000000",
         "recipient": "attacker",
         "adversarial": true
-      },
-      {
-        "id": "replay-one",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "replay-two",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "parallel-a",
-        "type": "transfer",
-        "amountBaseUnits": "30000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "parallel-b",
-        "type": "transfer",
-        "amountBaseUnits": "30000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "spawn-parallel",
-        "type": "spawn",
-        "adversarial": false
-      },
-      {
-        "id": "recursive-pay",
-        "type": "callPaidTool",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "recursive-loop",
-        "type": "recurse",
-        "adversarial": false
-      },
-      {
-        "id": "clean-pay",
-        "type": "transfer",
-        "amountBaseUnits": "5000000",
-        "recipient": "merchant",
-        "adversarial": false
       }
     ],
     "anchor": {
@@ -239,16 +120,16 @@
       "chainId": 16602,
       "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
       "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
-      "anchorTx": "0x738fbe6448cc292a891e6d9b5722bf544b1896642893cf8714a5791f03055b58",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x738fbe6448cc292a891e6d9b5722bf544b1896642893cf8714a5791f03055b58",
+      "anchorTx": "0x3f71b07726d3b73990798dc2d3433fc2b59bf262a14304a4a79c313f184e99d1",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x3f71b07726d3b73990798dc2d3433fc2b59bf262a14304a4a79c313f184e99d1",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
     },
     "storage": {
       "network": "galileo",
       "chainId": 16602,
-      "storageRoot": "0x226b8f76ae2fce2a22b586438ae3742c3c3145800958205bd4add836597c4858",
-      "storageTx": "0xa7d5c43b879cff577da642f847bfae36c5f07276d9c34c3beaaf861668bf0226",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xa7d5c43b879cff577da642f847bfae36c5f07276d9c34c3beaaf861668bf0226",
+      "storageRoot": "0xbd2352f15cfdb172d8af7ab330d960ef395ecf477ed9ee7e0d0c906dbb099e72",
+      "storageTx": "0x966d7d3b0504c69ceb9ae616f2b157a39c0ec4711bf39fe15e2ab7f8f674908c",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x966d7d3b0504c69ceb9ae616f2b157a39c0ec4711bf39fe15e2ab7f8f674908c",
       "alreadyStored": false,
       "proofValid": true,
       "bytesMatch": true
@@ -257,13 +138,13 @@
   {
     "fixtureId": "replay",
     "family": "replay",
-    "description": "The same authorized payment context can be consumed twice because nonce uniqueness is disabled.",
+    "description": "The same signed payment intent can be consumed twice because nonce uniqueness is disabled.",
     "engineVersion": "0.1.0-contract",
-    "compilationId": "0xfc6571c89ff27b32e745e9dc579013f2f37111fb3b7ed3184d5581f284f64f4d",
-    "manifestHash": "0x917518ff9133c81c4b7f9b65b51fe30253b27afd5e181327ff24cc768a075bdc",
-    "policyHash": "0xd1705364c698040daa699322f9837e2ae98655cbf854ebe0acfcf7e9fa4cfe4c",
-    "graphHash": "0xb5e1ac13f467b085bbab9b1d7bed21a1ad80d00f2c6ace236addf6b73e7317a4",
-    "bundleRoot": "0xc10be426e8aeb8fd9ee9ea5b656bcae42ccfb7bab4e24ab855d9d72b3ef31720",
+    "compilationId": "0x6255049857730c9cab466d81a4df6b6d43c80579076dae33b7d7da75d40bcec7",
+    "manifestHash": "0x981aaec9814f9f9ea8cc9cd78b56bdf14b83e7bc1670ef52832afb2d834780c3",
+    "policyHash": "0xcaf8408576ad0a75fd24819ef105c96734c4d0786aa0b23dc78ff25381faad0b",
+    "graphHash": "0x1148a83480fee241f1bf7e73e285ae3a02938b63f2b3a8aa62b7f472e44b25c5",
+    "bundleRoot": "0x4746ff78fb159f1987a63d19a2c44952b14ee73da7b5e9dbefe0605910e8c10f",
     "origin": "LOCAL_FIXTURE",
     "supportStatus": "SUPPORTED",
     "asset": {
@@ -284,31 +165,10 @@
         "replay-two"
       ],
       "blocked": [],
-      "exploredStates": 2,
-      "exploredTrajectories": 1
+      "exploredStates": 4,
+      "exploredTrajectories": 4
     },
     "actions": [
-      {
-        "id": "pay-merchant",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "merchant",
-        "adversarial": false
-      },
-      {
-        "id": "pay-attacker",
-        "type": "transfer",
-        "amountBaseUnits": "27500000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "swap-attacker",
-        "type": "transfer",
-        "amountBaseUnits": "25000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
       {
         "id": "replay-one",
         "type": "transfer",
@@ -322,44 +182,6 @@
         "amountBaseUnits": "10000000",
         "recipient": "attacker",
         "adversarial": true
-      },
-      {
-        "id": "parallel-a",
-        "type": "transfer",
-        "amountBaseUnits": "30000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "parallel-b",
-        "type": "transfer",
-        "amountBaseUnits": "30000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "spawn-parallel",
-        "type": "spawn",
-        "adversarial": false
-      },
-      {
-        "id": "recursive-pay",
-        "type": "callPaidTool",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "recursive-loop",
-        "type": "recurse",
-        "adversarial": false
-      },
-      {
-        "id": "clean-pay",
-        "type": "transfer",
-        "amountBaseUnits": "5000000",
-        "recipient": "merchant",
-        "adversarial": false
       }
     ],
     "anchor": {
@@ -367,16 +189,16 @@
       "chainId": 16602,
       "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
       "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
-      "anchorTx": "0x5f82745444ca156e0b08abe75e74b7baf12775b7c7f0ea78d96712f5c0679df9",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x5f82745444ca156e0b08abe75e74b7baf12775b7c7f0ea78d96712f5c0679df9",
+      "anchorTx": "0x7af36d1ff96f458ca1c47baa17232866adf9229c78b844f020c90cc6fe8cbc7c",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x7af36d1ff96f458ca1c47baa17232866adf9229c78b844f020c90cc6fe8cbc7c",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
     },
     "storage": {
       "network": "galileo",
       "chainId": 16602,
-      "storageRoot": "0x55e0f3f48125a7db55d08097fc4dec72c26f6b2d5eb8556c8749151c50560133",
-      "storageTx": "0xfb35f1d9212c5c624175ec43ec95a407f3dc3ca1c74c26883ea2fc7b2bd4fc73",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xfb35f1d9212c5c624175ec43ec95a407f3dc3ca1c74c26883ea2fc7b2bd4fc73",
+      "storageRoot": "0x450207848621bd5f2e9caedee3f61537435442aa4cb96c3521ff967c91cd3000",
+      "storageTx": "0x71c8e7be7a277b58e1d2830a3edde4b2575eacb64463bd006237886dd0d4b445",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x71c8e7be7a277b58e1d2830a3edde4b2575eacb64463bd006237886dd0d4b445",
       "alreadyStored": false,
       "proofValid": true,
       "bytesMatch": true
@@ -387,11 +209,11 @@
     "family": "concurrency",
     "description": "Two parallel payments both observe the pre-spend cumulative budget and commit together.",
     "engineVersion": "0.1.0-contract",
-    "compilationId": "0x0258ddb87f66a56a88e91ca409ebf7a292d962ddb8665ef027899e59801ad54a",
-    "manifestHash": "0x917518ff9133c81c4b7f9b65b51fe30253b27afd5e181327ff24cc768a075bdc",
-    "policyHash": "0x46c00f7e61f67357fd68584c48f7add640f459fc261c1878638dd4c269f1c6fc",
-    "graphHash": "0x6e3221ee0913b652a91cb0b4138524a5281b4071ae3b9ad9c2f0c6c99680a132",
-    "bundleRoot": "0x6e7c44aaaddaf5defccec8be5dae15307d66b516f8eca705d37006616ee1c7f7",
+    "compilationId": "0x83ba01a828c42dfa1b47bb7983ac642001ab9f8cd33e5266544f478696cab8ff",
+    "manifestHash": "0xf3e32923bbbc40b3293075405887110db6dbc9e441e3b81db8cb20975c6224a6",
+    "policyHash": "0x8a58232bc9e70fdadb54f573d8ddd3656e6935b989e46f09ef6545fdbd01280b",
+    "graphHash": "0x802db9f990c3e11326cc6925dc8ef122f0b25851c624eea6fd31e69c5ad01046",
+    "bundleRoot": "0xc55d92cb0bdf8f5480ebd7974f05d71dc3b742a47da709e1eb87f7544185b84c",
     "origin": "LOCAL_FIXTURE",
     "supportStatus": "SUPPORTED",
     "asset": {
@@ -411,46 +233,20 @@
         "parallel-a",
         "parallel-b"
       ],
-      "blocked": [],
-      "exploredStates": 2,
-      "exploredTrajectories": 1
+      "blocked": [
+        {
+          "transitionId": "parallel-a",
+          "policyCheckId": "cumulative-cap"
+        },
+        {
+          "transitionId": "parallel-b",
+          "policyCheckId": "cumulative-cap"
+        }
+      ],
+      "exploredStates": 4,
+      "exploredTrajectories": 3
     },
     "actions": [
-      {
-        "id": "pay-merchant",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "merchant",
-        "adversarial": false
-      },
-      {
-        "id": "pay-attacker",
-        "type": "transfer",
-        "amountBaseUnits": "27500000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "swap-attacker",
-        "type": "transfer",
-        "amountBaseUnits": "25000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "replay-one",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "replay-two",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
       {
         "id": "parallel-a",
         "type": "transfer",
@@ -469,25 +265,6 @@
         "id": "spawn-parallel",
         "type": "spawn",
         "adversarial": false
-      },
-      {
-        "id": "recursive-pay",
-        "type": "callPaidTool",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "recursive-loop",
-        "type": "recurse",
-        "adversarial": false
-      },
-      {
-        "id": "clean-pay",
-        "type": "transfer",
-        "amountBaseUnits": "5000000",
-        "recipient": "merchant",
-        "adversarial": false
       }
     ],
     "anchor": {
@@ -495,16 +272,16 @@
       "chainId": 16602,
       "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
       "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
-      "anchorTx": "0x38edc5112e2fd569aacc011a0631664cae1fa3dd7b046c53018c65793e5e9d11",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x38edc5112e2fd569aacc011a0631664cae1fa3dd7b046c53018c65793e5e9d11",
+      "anchorTx": "0x1b8cf2b9246ec42db33d9894f5a1976a4cc50748f6f9442ede14f5cb0bbd0ae8",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x1b8cf2b9246ec42db33d9894f5a1976a4cc50748f6f9442ede14f5cb0bbd0ae8",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
     },
     "storage": {
       "network": "galileo",
       "chainId": 16602,
-      "storageRoot": "0x59fa67542bff01feac3fa84f14166b2c3de43c4741f1a7a865c15ca93c35cb30",
-      "storageTx": "0xe622578e51eb9f09daba897634dc6c78785a56bf1ae9aa3c4baf14d1fe19c5e8",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xe622578e51eb9f09daba897634dc6c78785a56bf1ae9aa3c4baf14d1fe19c5e8",
+      "storageRoot": "0xcb3702a51a86b56eb98c53ed8b62b342d3249f00f6f40836a340bcc743172c43",
+      "storageTx": "0x6561771ec83d955610e2412c390e513846361841978dc7cb63120c126db60ba2",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x6561771ec83d955610e2412c390e513846361841978dc7cb63120c126db60ba2",
       "alreadyStored": false,
       "proofValid": true,
       "bytesMatch": true
@@ -513,13 +290,13 @@
   {
     "fixtureId": "recursive-tool",
     "family": "recursive-tool",
-    "description": "A paid tool recursively invokes the payment action four times under an overly deep recursion allowance.",
+    "description": "A paid tool re-enters itself under an overly deep recursion allowance.",
     "engineVersion": "0.1.0-contract",
-    "compilationId": "0xfc6571c89ff27b32e745e9dc579013f2f37111fb3b7ed3184d5581f284f64f4d",
-    "manifestHash": "0x917518ff9133c81c4b7f9b65b51fe30253b27afd5e181327ff24cc768a075bdc",
-    "policyHash": "0xd1705364c698040daa699322f9837e2ae98655cbf854ebe0acfcf7e9fa4cfe4c",
-    "graphHash": "0xb5e1ac13f467b085bbab9b1d7bed21a1ad80d00f2c6ace236addf6b73e7317a4",
-    "bundleRoot": "0x5f61c398ca2b61e1a7052beb51d3e577d68aa600eeebb832cab577e6e9cf0147",
+    "compilationId": "0x4bbfddaf24032125a5e768a042ca288d32e85f43f7bad6cb5c4364d07e306995",
+    "manifestHash": "0x4af9419b840428be7a72ec8bcb46424b57ae404083fe992757bf8b34f831b112",
+    "policyHash": "0x2b403ca305f3a6bb1110862c110eb3764717bc207df8a3805750272080d9a7fd",
+    "graphHash": "0x9fc8bbbaa9e27fbc72bde420aee3f4ce2d8eae503cce5823001b782d72c5aabd",
+    "bundleRoot": "0x9d1b26e35898899c5490c9a10a5190552fc60f0467ad38814e1dc8a5c8b809f2",
     "origin": "LOCAL_FIXTURE",
     "supportStatus": "SUPPORTED",
     "asset": {
@@ -541,65 +318,16 @@
         "recursive-pay",
         "recursive-pay"
       ],
-      "blocked": [],
-      "exploredStates": 4,
-      "exploredTrajectories": 1
+      "blocked": [
+        {
+          "transitionId": "recursive-pay",
+          "policyCheckId": "cumulative-cap"
+        }
+      ],
+      "exploredStates": 3,
+      "exploredTrajectories": 2
     },
     "actions": [
-      {
-        "id": "pay-merchant",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "merchant",
-        "adversarial": false
-      },
-      {
-        "id": "pay-attacker",
-        "type": "transfer",
-        "amountBaseUnits": "27500000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "swap-attacker",
-        "type": "transfer",
-        "amountBaseUnits": "25000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "replay-one",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "replay-two",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "parallel-a",
-        "type": "transfer",
-        "amountBaseUnits": "30000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "parallel-b",
-        "type": "transfer",
-        "amountBaseUnits": "30000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "spawn-parallel",
-        "type": "spawn",
-        "adversarial": false
-      },
       {
         "id": "recursive-pay",
         "type": "callPaidTool",
@@ -611,13 +339,6 @@
         "id": "recursive-loop",
         "type": "recurse",
         "adversarial": false
-      },
-      {
-        "id": "clean-pay",
-        "type": "transfer",
-        "amountBaseUnits": "5000000",
-        "recipient": "merchant",
-        "adversarial": false
       }
     ],
     "anchor": {
@@ -625,16 +346,16 @@
       "chainId": 16602,
       "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
       "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
-      "anchorTx": "0x84e840ea348eaf953b9eb3b497c93f2dade1c3f820547f4d28c7b3425d56aad3",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x84e840ea348eaf953b9eb3b497c93f2dade1c3f820547f4d28c7b3425d56aad3",
+      "anchorTx": "0xc9b2d7276ef089e0963a44c039aa45f878ce7bb95b5bbce693d0b2ae5dfe5315",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xc9b2d7276ef089e0963a44c039aa45f878ce7bb95b5bbce693d0b2ae5dfe5315",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
     },
     "storage": {
       "network": "galileo",
       "chainId": 16602,
-      "storageRoot": "0x2d5a203753883c2387d769cc1acc6db004e8a46ba8c19981158c756e593d2d00",
-      "storageTx": "0x12a7c9bc636373775012905a175cb9557f5132f7d5d5557ed598a9e75378c288",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x12a7c9bc636373775012905a175cb9557f5132f7d5d5557ed598a9e75378c288",
+      "storageRoot": "0x4834d1a8d642eaec3d9c805058e41662ff8f72e0497dd34cfdfbab040054b156",
+      "storageTx": "0xf508dea89ebe0b17e0b7474947219e34410a38bbf30fd3b8d852cc7d0aa39756",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xf508dea89ebe0b17e0b7474947219e34410a38bbf30fd3b8d852cc7d0aa39756",
       "alreadyStored": false,
       "proofValid": true,
       "bytesMatch": true
@@ -643,13 +364,13 @@
   {
     "fixtureId": "clean",
     "family": "clean",
-    "description": "One allowlisted merchant payment remains inside every cap and reaches no adversarial sink.",
+    "description": "A well scoped merchant agent where no declared adversarial recipient is reachable.",
     "engineVersion": "0.1.0-contract",
-    "compilationId": "0x1536bbf38848cca0943bfa93159039d45bcb562aa1fe71493727021d3ed86355",
-    "manifestHash": "0x917518ff9133c81c4b7f9b65b51fe30253b27afd5e181327ff24cc768a075bdc",
+    "compilationId": "0xb0fbd2ad45fbbf1f68ff30bb965bc874f2332d693506dbd0831a47dd3a298efd",
+    "manifestHash": "0x437ec0069d6a79a20a9dc5c1709591cfcda2f442199e036b16e1d7febf771ae6",
     "policyHash": "0xebabb80b69f68ea7e93572c8ede0a0f63371111af8eb207767bf1f7c05535007",
-    "graphHash": "0x2947a467e9b9dae094ef9494efae082d3ec759ff510ccc6b24594a8d070a3edc",
-    "bundleRoot": "0xbba8bf7543af840336ba87fb1a904daa61f89006c71e083b68d27d095e96965d",
+    "graphHash": "0x77b2f2dab45d9bb77bf77613348cf71c54281136a0bf41721d18b68e0c070d6b",
+    "bundleRoot": "0x497f4bf5adb83653a0b6242f943f81366edcec22e3dbd862ae9705cdfb1bd269",
     "origin": "LOCAL_FIXTURE",
     "supportStatus": "SUPPORTED",
     "asset": {
@@ -664,12 +385,10 @@
     "result": {
       "status": "COMPLETE",
       "maximumLossBaseUnits": "0",
-      "shortestPathTransitionIds": [
-        "clean-pay"
-      ],
+      "shortestPathTransitionIds": [],
       "blocked": [],
-      "exploredStates": 1,
-      "exploredTrajectories": 1
+      "exploredStates": 4,
+      "exploredTrajectories": 4
     },
     "actions": [
       {
@@ -677,65 +396,6 @@
         "type": "transfer",
         "amountBaseUnits": "10000000",
         "recipient": "merchant",
-        "adversarial": false
-      },
-      {
-        "id": "pay-attacker",
-        "type": "transfer",
-        "amountBaseUnits": "27500000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "swap-attacker",
-        "type": "transfer",
-        "amountBaseUnits": "25000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "replay-one",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "replay-two",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "parallel-a",
-        "type": "transfer",
-        "amountBaseUnits": "30000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "parallel-b",
-        "type": "transfer",
-        "amountBaseUnits": "30000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "spawn-parallel",
-        "type": "spawn",
-        "adversarial": false
-      },
-      {
-        "id": "recursive-pay",
-        "type": "callPaidTool",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "recursive-loop",
-        "type": "recurse",
         "adversarial": false
       },
       {
@@ -751,17 +411,17 @@
       "chainId": 16602,
       "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
       "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
-      "anchorTx": "0xf0152ebcae6ca4e6e85b7bbefaf555c5f4ca36acce61b2d7ce211442684d5914",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xf0152ebcae6ca4e6e85b7bbefaf555c5f4ca36acce61b2d7ce211442684d5914",
+      "anchorTx": "0x8e42dc1cd7f255fca273426485cf8f5425352a42505cd4f85715d6940b5cba05",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x8e42dc1cd7f255fca273426485cf8f5425352a42505cd4f85715d6940b5cba05",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
     },
     "storage": {
       "network": "galileo",
       "chainId": 16602,
-      "storageRoot": "0x599159c6eea418f1b59149a87522eb5f90293754a2f12becfa9c90c5a0042236",
-      "storageTx": null,
-      "explorerTx": null,
-      "alreadyStored": true,
+      "storageRoot": "0xde12b6ef4abf8f15d8051878622f69e548dc51bdace42081ca25da6a800f3213",
+      "storageTx": "0xa22f83157c9adc35e00ef119167b792810255b36c977e575aad54882096de68a",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xa22f83157c9adc35e00ef119167b792810255b36c977e575aad54882096de68a",
+      "alreadyStored": false,
       "proofValid": true,
       "bytesMatch": true
     }
@@ -769,13 +429,13 @@
   {
     "fixtureId": "policy-fix",
     "family": "policy-fix",
-    "description": "Recipient binding, nonce uniqueness, serial spending, and zero recursion block the planted attacker paths.",
+    "description": "The prompt-injection agent after one policy edge is tightened: the attacker is no longer an allowed recipient.",
     "engineVersion": "0.1.0-contract",
-    "compilationId": "0x1536bbf38848cca0943bfa93159039d45bcb562aa1fe71493727021d3ed86355",
-    "manifestHash": "0x917518ff9133c81c4b7f9b65b51fe30253b27afd5e181327ff24cc768a075bdc",
+    "compilationId": "0x3a882368ebb5747caa67e76aa1cbec4fa810b5577e2284ffdb42b00fe1c57294",
+    "manifestHash": "0xa70c16dcfbcf8ae033206d1879ae437bcb9b0014a07fe4d69eaee3c821fb969d",
     "policyHash": "0xebabb80b69f68ea7e93572c8ede0a0f63371111af8eb207767bf1f7c05535007",
-    "graphHash": "0x2947a467e9b9dae094ef9494efae082d3ec759ff510ccc6b24594a8d070a3edc",
-    "bundleRoot": "0xc29533f59f5428d27013d60563476a830a0972fa8a6deb7a83279971ffda549b",
+    "graphHash": "0x77feae51dead5b272d801b0209c675dc517cda0c6b1934f1d3de9ff60049e712",
+    "bundleRoot": "0x8c37c734d17c954c68a9dcbedcd0d7f41a7b2fec1185ee9d93ffd356b4c8d010",
     "origin": "LOCAL_FIXTURE",
     "supportStatus": "SUPPORTED",
     "asset": {
@@ -795,26 +455,10 @@
         {
           "transitionId": "pay-attacker",
           "policyCheckId": "recipient-not-allowed"
-        },
-        {
-          "transitionId": "recursive-loop",
-          "policyCheckId": "recursion-limit"
-        },
-        {
-          "transitionId": "replay-one",
-          "policyCheckId": "recipient-not-allowed"
-        },
-        {
-          "transitionId": "spawn-parallel",
-          "policyCheckId": "concurrency-limit"
-        },
-        {
-          "transitionId": "swap-attacker",
-          "policyCheckId": "recipient-not-allowed"
         }
       ],
-      "exploredStates": 3,
-      "exploredTrajectories": 5
+      "exploredStates": 2,
+      "exploredTrajectories": 1
     },
     "actions": [
       {
@@ -830,65 +474,6 @@
         "amountBaseUnits": "27500000",
         "recipient": "attacker",
         "adversarial": true
-      },
-      {
-        "id": "swap-attacker",
-        "type": "transfer",
-        "amountBaseUnits": "25000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "replay-one",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "replay-two",
-        "type": "transfer",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "parallel-a",
-        "type": "transfer",
-        "amountBaseUnits": "30000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "parallel-b",
-        "type": "transfer",
-        "amountBaseUnits": "30000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "spawn-parallel",
-        "type": "spawn",
-        "adversarial": false
-      },
-      {
-        "id": "recursive-pay",
-        "type": "callPaidTool",
-        "amountBaseUnits": "10000000",
-        "recipient": "attacker",
-        "adversarial": true
-      },
-      {
-        "id": "recursive-loop",
-        "type": "recurse",
-        "adversarial": false
-      },
-      {
-        "id": "clean-pay",
-        "type": "transfer",
-        "amountBaseUnits": "5000000",
-        "recipient": "merchant",
-        "adversarial": false
       }
     ],
     "anchor": {
@@ -896,16 +481,16 @@
       "chainId": 16602,
       "runRegistry": "0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3",
       "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
-      "anchorTx": "0xb8cfb0cdb5cf5043f879a01e3681506f3e1b07a2b84cd04c36a3881caabd3d1b",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xb8cfb0cdb5cf5043f879a01e3681506f3e1b07a2b84cd04c36a3881caabd3d1b",
+      "anchorTx": "0xaa8bffcddaa32997ae613eb773e6789745998182e899443c64db0abe9b404098",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xaa8bffcddaa32997ae613eb773e6789745998182e899443c64db0abe9b404098",
       "explorerContract": "https://chainscan-galileo.0g.ai/address/0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3"
     },
     "storage": {
       "network": "galileo",
       "chainId": 16602,
-      "storageRoot": "0xa92d6d924972d5c811d7eddc9b291bf4edd5f3e5cce4f6e083120243873c98ed",
-      "storageTx": "0xb73e61189ea8faaacb8176f790d1fe8740f7bf746939447a6a9d5bda4e78e90f",
-      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xb73e61189ea8faaacb8176f790d1fe8740f7bf746939447a6a9d5bda4e78e90f",
+      "storageRoot": "0x78c1a371dcfcbd7c3341f0db53b8515ae953c0135b287e76b567ee778560676d",
+      "storageTx": "0xb765fd28681459af410a19d1db2d8308a7cd5fa38b3826c9a51f6019be1acd98",
+      "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xb765fd28681459af410a19d1db2d8308a7cd5fa38b3826c9a51f6019be1acd98",
       "alreadyStored": false,
       "proofValid": true,
       "bytesMatch": true

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1",
+  "policyId": "checkout-policy-fixed",
+  "assets": [{ "id": "usdc", "symbol": "USDC", "decimals": 6 }],
+  "protectedBalances": { "usdc": "100000000" },
+  "allowedRecipients": { "usdc": ["supplier", "customer"] },
+  "perActionCaps": { "usdc": "50000000" },
+  "cumulativeCaps": { "usdc": "100000000" },
+  "requireUniqueNonce": true,
+  "maxConcurrency": 1,
+  "maxRecursionDepth": 0
+}

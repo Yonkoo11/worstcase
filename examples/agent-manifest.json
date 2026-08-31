@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1",
+  "manifestId": "checkout-assistant",
+  "tools": [{ "id": "pay", "actionIds": ["pay-supplier", "pay-refund", "pay-unknown-vendor"] }],
+  "actions": [
+    { "id": "pay-supplier", "type": "transfer", "assetId": "usdc", "amountBaseUnits": "40000000", "recipient": "supplier" },
+    { "id": "pay-refund", "type": "transfer", "assetId": "usdc", "amountBaseUnits": "15000000", "recipient": "customer" },
+    { "id": "pay-unknown-vendor", "type": "transfer", "assetId": "usdc", "amountBaseUnits": "45000000", "recipient": "unknown-vendor" }
+  ],
+  "unsupported": []
+}

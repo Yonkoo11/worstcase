@@ -23,17 +23,17 @@ Every result below was produced by the engine in this repository, then anchored 
 
 ### The seven anchored runs
 
-Five planted attacks, one clean baseline, and the same drain re-checked after a one-line policy fix. Amounts are in base units of a 6-decimal stablecoin, so `27500000` is $27.50.
+Five planted attacks, one clean baseline, and the same drain re-checked after a one-line policy fix. Each fixture is its own small agent, so the family it plants is the binding constraint rather than an artifact of which path someone wrote down. Amounts are in base units of a 6-decimal stablecoin, so `27500000` is $27.50.
 
 | Fixture | What it plants | Max loss found | On-chain anchor |
 |---|---|---|---|
-| `prompt-injection` | Hostile tool output proposes an extra transfer | 27,500,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x4c216c3b8cb6a64548cfe61572f8df8d19436c3489ed4ce624c3edfe035538c2) |
-| `recipient-swap` | Mutable recipient field redirects a valid amount | 25,000,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x738fbe6448cc292a891e6d9b5722bf544b1896642893cf8714a5791f03055b58) |
-| `replay` | A signed intent is submitted more than once | 20,000,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x5f82745444ca156e0b08abe75e74b7baf12775b7c7f0ea78d96712f5c0679df9) |
-| `concurrency` | Parallel calls each pass a per-call cap | 60,000,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x38edc5112e2fd569aacc011a0631664cae1fa3dd7b046c53018c65793e5e9d11) |
-| `recursive-tool` | A paid tool calls itself through a budget gap | 40,000,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x84e840ea348eaf953b9eb3b497c93f2dade1c3f820547f4d28c7b3425d56aad3) |
-| `clean` | Nothing. This is the false-positive check | **0** | [tx](https://chainscan-galileo.0g.ai/tx/0xf0152ebcae6ca4e6e85b7bbefaf555c5f4ca36acce61b2d7ce211442684d5914) |
-| `policy-fix` | The drain, after tightening one policy edge | **0** | [tx](https://chainscan-galileo.0g.ai/tx/0xb8cfb0cdb5cf5043f879a01e3681506f3e1b07a2b84cd04c36a3881caabd3d1b) |
+| `prompt-injection` | Hostile tool output proposes an extra transfer | 27,500,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x452eeef9df2bb19ef6bf7197fc844c79f7088b7c4a4f3c0ef81265debb64c04a) |
+| `recipient-swap` | Mutable recipient field redirects a valid amount | 25,000,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x3f71b07726d3b73990798dc2d3433fc2b59bf262a14304a4a79c313f184e99d1) |
+| `replay` | A signed intent is submitted more than once | 20,000,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x7af36d1ff96f458ca1c47baa17232866adf9229c78b844f020c90cc6fe8cbc7c) |
+| `concurrency` | Parallel calls each pass a per-call cap | 60,000,000 | [tx](https://chainscan-galileo.0g.ai/tx/0x1b8cf2b9246ec42db33d9894f5a1976a4cc50748f6f9442ede14f5cb0bbd0ae8) |
+| `recursive-tool` | A paid tool calls itself through a budget gap | 40,000,000 | [tx](https://chainscan-galileo.0g.ai/tx/0xc9b2d7276ef089e0963a44c039aa45f878ce7bb95b5bbce693d0b2ae5dfe5315) |
+| `clean` | Nothing. This is the false-positive check | **0** | [tx](https://chainscan-galileo.0g.ai/tx/0x8e42dc1cd7f255fca273426485cf8f5425352a42505cd4f85715d6940b5cba05) |
+| `policy-fix` | The drain, after tightening one policy edge | **0** | [tx](https://chainscan-galileo.0g.ai/tx/0xaa8bffcddaa32997ae613eb773e6789745998182e899443c64db0abe9b404098) |
 
 The last two rows are the point. A checker that flags everything is useless, and a checker you cannot act on is also useless. `clean` returns zero, and `policy-fix` shows a real drain going to zero after a specific, named change.
 
@@ -43,13 +43,13 @@ Each evidence bundle was uploaded, then downloaded back and re-derived to the sa
 
 | Fixture | Storage root | Upload |
 |---|---|---|
-| `prompt-injection` | `0x3b613305…c852d64ef` | [tx](https://chainscan-galileo.0g.ai/tx/0xe1e5bf060d67b40fdcc5f116c3ad02b6fb22ff5a4ee88e34060b11451c26d4cd) |
-| `recipient-swap` | `0x226b8f76…597c4858` | [tx](https://chainscan-galileo.0g.ai/tx/0xa7d5c43b879cff577da642f847bfae36c5f07276d9c34c3beaaf861668bf0226) |
-| `replay` | `0x55e0f3f4…50560133` | [tx](https://chainscan-galileo.0g.ai/tx/0xfb35f1d9212c5c624175ec43ec95a407f3dc3ca1c74c26883ea2fc7b2bd4fc73) |
-| `concurrency` | `0x59fa6754…3c35cb30` | [tx](https://chainscan-galileo.0g.ai/tx/0xe622578e51eb9f09daba897634dc6c78785a56bf1ae9aa3c4baf14d1fe19c5e8) |
-| `recursive-tool` | `0x2d5a2037…593d2d00` | [tx](https://chainscan-galileo.0g.ai/tx/0x12a7c9bc636373775012905a175cb9557f5132f7d5d5557ed598a9e75378c288) |
-| `clean` | `0x599159c6…a0042236` | already stored, no new transaction |
-| `policy-fix` | `0xa92d6d92…873c98ed` | [tx](https://chainscan-galileo.0g.ai/tx/0xb73e61189ea8faaacb8176f790d1fe8740f7bf746939447a6a9d5bda4e78e90f) |
+| `prompt-injection` | `0x90fc5c21…40eab199` | [tx](https://chainscan-galileo.0g.ai/tx/0x7ebe7fac0f4c8937fc2d53df95e71b7140cb05965672e4af4bb6917a7283ed38) |
+| `recipient-swap` | `0xbd2352f1…bb099e72` | [tx](https://chainscan-galileo.0g.ai/tx/0x966d7d3b0504c69ceb9ae616f2b157a39c0ec4711bf39fe15e2ab7f8f674908c) |
+| `replay` | `0x45020784…91cd3000` | [tx](https://chainscan-galileo.0g.ai/tx/0x71c8e7be7a277b58e1d2830a3edde4b2575eacb64463bd006237886dd0d4b445) |
+| `concurrency` | `0xcb3702a5…43172c43` | [tx](https://chainscan-galileo.0g.ai/tx/0x6561771ec83d955610e2412c390e513846361841978dc7cb63120c126db60ba2) |
+| `recursive-tool` | `0x4834d1a8…0054b156` | [tx](https://chainscan-galileo.0g.ai/tx/0xf508dea89ebe0b17e0b7474947219e34410a38bbf30fd3b8d852cc7d0aa39756) |
+| `clean` | `0xde12b6ef…800f3213` | [tx](https://chainscan-galileo.0g.ai/tx/0xa22f83157c9adc35e00ef119167b792810255b36c977e575aad54882096de68a) |
+| `policy-fix` | `0x78c1a371…8560676d` | [tx](https://chainscan-galileo.0g.ai/tx/0xb765fd28681459af410a19d1db2d8308a7cd5fa38b3826c9a51f6019be1acd98) |
 
 The `clean` row is worth reading rather than skipping. 0G Storage is content addressed, so re-uploading identical bytes creates no transaction. The interface reports that as "stored and re-verified" with no transaction link, instead of linking a transaction that does not exist. A test enforces that distinction.
 
@@ -66,11 +66,51 @@ Per-call caps do not compose. Five calls that each pass a $20 cap can still drai
 ## What Worstcase does
 
 1. **Compile.** An MCP manifest plus a spending policy become a finite state graph. Anything the compiler does not model is rejected loudly rather than silently ignored.
-2. **Check.** Deterministic exploration over reachable states finds the maximum transferable value and the shortest path that reaches it.
+2. **Check.** Breadth-first enumeration of the reachable economic states finds the greatest loss any of them realises, and the shortest path that reaches it. States are deduplicated by their economic position, so orderings of the same spends collapse instead of exploding.
 3. **Explain.** Output is a concrete counterexample: an ordered list of tool calls, plus the policy checks that blocked the alternatives.
 4. **Anchor.** The run is hashed into a canonical evidence bundle and recorded on 0G Chain, so the bound is bound to an exact model version and cannot be quietly restated later.
 
 Truncated search, an unsupported action, or a timeout produce `UNKNOWN`. Never "safe". This is the property most tools in this space get wrong: absence of a finding is reported as a pass.
+
+If the search is cut short it returns `UNKNOWN` rather than the best value found so far, because a partial maximum understates the bound, and understating it is the one error this tool must not make.
+
+### What the search assumes
+
+Worth stating, because a bound is only meaningful with its assumptions attached:
+
+- **A manifest action is one intent, not an unlimited tool.** `replay-one` and `replay-two` exist as separate entries precisely because each is a single submission. Repetition that is real is modelled explicitly by `recurse` and `spawn`.
+- **Policy counters can be raced; balances cannot.** A spawned child checks caps against the pre-spawn snapshot, which is the genuine time-of-check race. Settlement is still checked against the live balance, so the search cannot report losing more money than the wallet holds.
+- **The bound covers the declared model within the declared limits.** It is not a proof about an arbitrary agent, and every result carries the `graphHash` and `policyHash` it was computed against.
+
+---
+
+## Run it on your own agent
+
+The fixtures are examples, not the product. Point it at your own manifest and spending policy:
+
+```bash
+npx vite-node scripts/check-agent.ts \
+  --manifest examples/agent-manifest.json \
+  --policy   examples/spend-policy.json \
+  --adversarial unknown-vendor
+```
+
+```
+Maximum loss:  45000000 base units (45.00 USDC)
+Explored:      8 reachable states
+Shortest path: pay-unknown-vendor
+```
+
+Remove `unknown-vendor` from `allowedRecipients` and run it again with `examples/spend-policy-fixed.json`:
+
+```
+Maximum loss:  0 base units (0.00 USDC)
+Shortest path: (none — no adversarial recipient is reachable)
+Blocked by policy:
+  pay-unknown-vendor       recipient-not-allowed
+```
+
+Exit codes are meant for CI: `0` no reachable loss, `1` a loss is reachable, `2` `UNKNOWN`, `3` the model would not compile. `UNKNOWN` deliberately does not exit `0`, so a truncated analysis cannot pass a pipeline. Add `--json` for machine-readable output, and `--max-states` / `--max-depth` / `--timeout-ms` to widen the budget.
 
 ---
 
@@ -101,7 +141,7 @@ Requires Node.js 22+ and [Foundry](https://getfoundry.sh).
 
 ```bash
 npm install
-npm test                 # 94 TypeScript tests across 13 files
+npm test                 # 99 TypeScript tests across 14 files
 forge test --offline     # 5 Solidity tests, no external libs
 npm run typecheck        # strict, no errors
 ```
@@ -180,6 +220,7 @@ Stated plainly, because a security tool that overstates itself is the thing it c
 - **Testnet, not mainnet.** Everything above is 0G Galileo, chain 16602. Mainnet deployment is the next step.
 - **The bound is conservative within a declared model.** It is not formal verification of an arbitrary agent, and it does not prove an agent is safe. It answers a narrower question honestly.
 - **Fixtures are synthetic.** All adversarial balances and effects are planted. No real funds move anywhere in this repository.
+- **The checker used to replay declared paths rather than search.** Until 2026-08-31 it iterated a hand-written `candidateTrajectories` list and reported the best of those, while calling the answer a maximum. On the headline fixture that understated the reachable loss by 2.6x, and deleting a trajectory silently lowered the reported bound. It now enumerates the reachable state space; `tests/phase1/unknown.test.ts` asserts the bound does not move when declared paths are removed, and every anchor above was re-published against the corrected engine. Recorded here because a tool that exists to catch overstated safety claims does not get to quietly fix its own.
 
 ## License
 

@@ -15,8 +15,29 @@ import { fixtureCatalog } from "../../fixtures/v1/catalog.js";
 describe("v1 domain contracts", () => {
   it("accepts every checked-in fixture and its nested contracts", () => {
     for (const fixture of fixtureCatalog) expect(FixtureSchema.parse(fixture).fixtureId).toBe(fixture.fixtureId);
-    expect(ManifestProjectionSchema.parse(fixtureCatalog[0].manifest).actions).toHaveLength(11);
+    expect(ManifestProjectionSchema.parse(fixtureCatalog[0].manifest).actions).toHaveLength(2);
     expect(SpendPolicySchema.parse(fixtureCatalog[0].policy).assets[0]?.symbol).toBe("USDC");
+  });
+
+  it("gives each attack family its own agent so the family is the binding constraint", () => {
+    // Fixtures that share a manifest and policy must produce the same bound,
+    // because the bound is a property of the model. Sharing one manifest across
+    // every family would make the per-family numbers meaningless.
+    const byId = new Map(fixtureCatalog.map((f) => [f.fixtureId, f.manifest.manifestId]));
+    expect(byId.get("prompt-injection")).not.toBe(byId.get("recipient-swap"));
+    expect(byId.get("replay")).not.toBe(byId.get("concurrency"));
+    expect(byId.get("recursive-tool")).not.toBe(byId.get("clean"));
+
+    // policy-fix deliberately reuses the prompt-injection agent: it is the same
+    // agent after one policy edge is tightened, which is the whole comparison.
+    expect(byId.get("policy-fix")).toBe(byId.get("prompt-injection"));
+    expect(fixtureCatalog.find((f) => f.fixtureId === "policy-fix")?.policy.allowedRecipients.usdc)
+      .not.toEqual(fixtureCatalog.find((f) => f.fixtureId === "prompt-injection")?.policy.allowedRecipients.usdc);
+
+    for (const fixture of fixtureCatalog) {
+      const ids = fixture.manifest.actions.map((a) => a.id);
+      expect(new Set(ids).size).toBe(ids.length);
+    }
   });
 
   it("rejects money coercion, unknown keys, and dangling action references", () => {

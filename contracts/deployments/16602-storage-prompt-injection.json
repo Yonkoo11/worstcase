@@ -2,11 +2,11 @@
   "network": "galileo",
   "chainId": 16602,
   "fixtureId": "prompt-injection",
-  "storageRoot": "0x3b61330543c528ccf88bf4cad9a2f9433785f0abafd55d592e68132c852d64ef",
-  "storageTx": "0xe1e5bf060d67b40fdcc5f116c3ad02b6fb22ff5a4ee88e34060b11451c26d4cd",
+  "storageRoot": "0x90fc5c21376f6b859ef853c2f19b9243131b2496e017ffb75e38b30640eab199",
+  "storageTx": "0x7ebe7fac0f4c8937fc2d53df95e71b7140cb05965672e4af4bb6917a7283ed38",
   "alreadyStored": false,
   "indexerUrl": "https://indexer-storage-testnet-turbo.0g.ai",
-  "explorerTx": "https://chainscan-galileo.0g.ai/tx/0xe1e5bf060d67b40fdcc5f116c3ad02b6fb22ff5a4ee88e34060b11451c26d4cd",
+  "explorerTx": "https://chainscan-galileo.0g.ai/tx/0x7ebe7fac0f4c8937fc2d53df95e71b7140cb05965672e4af4bb6917a7283ed38",
   "verified": {
     "proofValid": true,
     "bytesMatch": true
