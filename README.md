@@ -159,7 +159,7 @@ Verify an anchor straight from 0G Chain, without trusting this repository:
 cast call 0xDeA0792cEc959CE6893C24dEeFc6FE9B047a3Ea3 \
   "getAnchor(address,bytes32)((bytes32,bytes32,uint256,bytes32,uint8,address,uint64))" \
   0xf9946775891a24462cD4ec885d0D4E2675C84355 \
-  0x5fe0f91bb5401fbf0a5708970eddb62415fe3748e194a23c333805342062d44a \
+  0xafe7d23b996b20e1c169ccf034b12c88e01d03baaa02f40ab072323da61a0d28 \
   --rpc-url https://evmrpc-testnet.0g.ai
 ```
 
