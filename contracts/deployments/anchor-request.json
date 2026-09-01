@@ -1,16 +1,15 @@
 {
-  "fixtureId": "replay",
+  "fixtureId": "prompt-injection",
   "engineVersion": "0.1.0-contract",
-  "runId": "run-4dcb05fc7e047db202aee5c8",
-  "bundleRoot": "0x4746ff78fb159f1987a63d19a2c44952b14ee73da7b5e9dbefe0605910e8c10f",
-  "policyHash": "0xcaf8408576ad0a75fd24819ef105c96734c4d0786aa0b23dc78ff25381faad0b",
-  "graphHash": "0x1148a83480fee241f1bf7e73e285ae3a02938b63f2b3a8aa62b7f472e44b25c5",
-  "maximumLossBaseUnits": "20000000",
+  "runId": "run-9a878fef28fee9d423a26792",
+  "bundleRoot": "0x304ff5d34bef92e9ddd4e5cbfe8bb83c8629f5aa1da20c4ea1b8ad3816cd27b0",
+  "policyHash": "0xcf0638ea2d1e93dc197d8485c178264f3c82e35a6faf448fd8cd8671e7683bc7",
+  "graphHash": "0x3cba62e5ea67d620e134fcf53d20d8603059d23cbf8ee4ff5c26c84bc9231fd6",
+  "maximumLossBaseUnits": "27500000",
   "engineVersionHash": "0x49caf1febef59eec1d8476f675cfb79dbfbb231ea816561a84bf16633b5c7a31",
   "status": 1,
   "statusLabel": "COMPLETE",
   "shortestPathTransitionIds": [
-    "replay-one",
-    "replay-two"
+    "pay-attacker"
   ]
 }
