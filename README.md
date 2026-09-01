@@ -43,15 +43,15 @@ Each evidence bundle was uploaded, then downloaded back and re-derived to the sa
 
 | Fixture | Storage root | Upload |
 |---|---|---|
-| `prompt-injection` | `0x90fc5c21…40eab199` | [tx](https://chainscan-galileo.0g.ai/tx/0x7ebe7fac0f4c8937fc2d53df95e71b7140cb05965672e4af4bb6917a7283ed38) |
-| `recipient-swap` | `0xbd2352f1…bb099e72` | [tx](https://chainscan-galileo.0g.ai/tx/0x966d7d3b0504c69ceb9ae616f2b157a39c0ec4711bf39fe15e2ab7f8f674908c) |
-| `replay` | `0x45020784…91cd3000` | [tx](https://chainscan-galileo.0g.ai/tx/0x71c8e7be7a277b58e1d2830a3edde4b2575eacb64463bd006237886dd0d4b445) |
-| `concurrency` | `0xcb3702a5…43172c43` | [tx](https://chainscan-galileo.0g.ai/tx/0x6561771ec83d955610e2412c390e513846361841978dc7cb63120c126db60ba2) |
-| `recursive-tool` | `0x4834d1a8…0054b156` | [tx](https://chainscan-galileo.0g.ai/tx/0xf508dea89ebe0b17e0b7474947219e34410a38bbf30fd3b8d852cc7d0aa39756) |
-| `clean` | `0xde12b6ef…800f3213` | [tx](https://chainscan-galileo.0g.ai/tx/0xa22f83157c9adc35e00ef119167b792810255b36c977e575aad54882096de68a) |
-| `policy-fix` | `0x78c1a371…8560676d` | [tx](https://chainscan-galileo.0g.ai/tx/0xb765fd28681459af410a19d1db2d8308a7cd5fa38b3826c9a51f6019be1acd98) |
+| `prompt-injection` | `0xf279c280…e728d63f` | [tx](https://chainscan-galileo.0g.ai/tx/0x68efe97a73dd75af6a13cd0d6deadbd96c24c07260771708361b5b9e4dbc3dc1) |
+| `recipient-swap` | `0xbd2352f1…bb099e72` | [tx](https://chainscan-galileo.0g.ai/tx/0xca6891009f2924ec1c3615e9c204ac1e4dd706311ac5971933aa725f51e81500) |
+| `replay` | `0x45020784…91cd3000` | already stored, no new transaction |
+| `concurrency` | `0x8e8f90c9…99d3f8ef` | [tx](https://chainscan-galileo.0g.ai/tx/0xfcd1f01fcf3ae1d017b344107c9428e83e5cba28469b25eabf023cf10f9d2ead) |
+| `recursive-tool` | `0x4f75b38c…70f2689b` | [tx](https://chainscan-galileo.0g.ai/tx/0xe88c18f272da7d3299f76c13d8b85f21e0e249f391d41fcc85fcc55b75f7f890) |
+| `clean` | `0x9d5fc590…0083ca70` | [tx](https://chainscan-galileo.0g.ai/tx/0x999a707a5f13a499b28e3c2af796a4da9d584b7ceb73252c915441da47edd441) |
+| `policy-fix` | `0x19cc4ac3…a79e7714` | [tx](https://chainscan-galileo.0g.ai/tx/0xfb100ab2bf91de5b1350c3c22473a65f0583a41f9fd28fb2468065967ef29ad7) |
 
-The `clean` row is worth reading rather than skipping. 0G Storage is content addressed, so re-uploading identical bytes creates no transaction. The interface reports that as "stored and re-verified" with no transaction link, instead of linking a transaction that does not exist. A test enforces that distinction.
+The `replay` row is worth reading rather than skipping. 0G Storage is content addressed, so re-uploading identical bytes creates no transaction, and that bundle was unchanged by the last engine correction. The interface reports it as "stored and re-verified" with no transaction link, instead of linking a transaction that does not exist. A test enforces that distinction.
 
 ---
 
@@ -112,6 +112,30 @@ Blocked by policy:
 
 Exit codes are meant for CI: `0` no reachable loss, `1` a loss is reachable, `2` `UNKNOWN`, `3` the model would not compile. `UNKNOWN` deliberately does not exit `0`, so a truncated analysis cannot pass a pipeline. Add `--json` for machine-readable output, and `--max-states` / `--max-depth` / `--timeout-ms` to widen the budget.
 
+### Or call it as a service
+
+```bash
+npm run serve:api      # http://127.0.0.1:8787, outward writes refused
+```
+
+```bash
+curl -s localhost:8787/v1/fixtures
+
+CID=$(curl -s -X POST localhost:8787/v1/compilations -H 'content-type: application/json' \
+  -d "{\"schemaVersion\":\"1\",\"manifest\":$(cat examples/agent-manifest.json),\"policy\":$(cat examples/spend-policy.json)}" \
+  | python3 -c 'import sys,json;print(json.load(sys.stdin)["data"]["compilationId"])')
+
+curl -s -X POST localhost:8787/v1/runs -H 'content-type: application/json' \
+  -d "{\"compilationId\":\"$CID\",\"adversarialRecipients\":[\"unknown-vendor\"]}"
+```
+
+The eight endpoints in [`docs/openapi.yaml`](docs/openapi.yaml) are implemented in `packages/api`, on `node:http` with no additional dependencies, so exposing an API does not cost the workspace its zero-advisory dependency graph.
+
+Two behaviours are worth calling out, both covered by tests:
+
+- **Outward writes are refused by default.** Publishing evidence to 0G Storage or anchoring on 0G Chain returns `403 EXTERNAL_WRITE_NOT_APPROVED` unless the server is started with an approval. An HTTP route is not an exemption from the approval boundary the rest of the system enforces.
+- **A fixture cannot be run against an unrelated model.** Fixtures name both a model and the recipients that count as loss, so pairing one fixture's recipients with someone else's compilation returns zero, which reads as a pass while answering a different question. That mismatch is a `409`, not a quiet zero.
+
 ---
 
 ## How 0G is used
@@ -141,7 +165,7 @@ Requires Node.js 22+ and [Foundry](https://getfoundry.sh).
 
 ```bash
 npm install
-npm test                 # 100 TypeScript tests across 14 files
+npm test                 # 114 TypeScript tests across 15 files
 forge test --offline     # 5 Solidity tests, no external libs
 npm run typecheck        # strict, no errors
 ```
@@ -205,6 +229,7 @@ Before broadcasting, both scripts confirm the RPC actually reports the chain ID 
 | `packages/evidence` | Canonical bundle creation and byte-exact replay verification |
 | `packages/zerog` | 0G ports, approval boundary, isolated adapter runtime, mutation journal |
 | `contracts/` | `RunRegistry` Solidity, Foundry tests, deploy and anchor scripts |
+| `packages/api` | The v1 HTTP surface from `docs/openapi.yaml`, on `node:http` |
 | `apps/web` | Trace Ledger interface over checked artifacts |
 
 Deeper documents: [`docs/model-semantics.md`](docs/model-semantics.md), [`docs/threat-model.md`](docs/threat-model.md), [`docs/adapter-isolation.md`](docs/adapter-isolation.md), [`docs/openapi.yaml`](docs/openapi.yaml).

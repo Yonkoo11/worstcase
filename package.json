@@ -32,7 +32,9 @@
     "verify:adapter:container": "bash scripts/verify-adapter-container.sh",
     "verify:zerog:compute:live": "node scripts/require-live-evidence.mjs compute",
     "verify:zerog:storage:live": "node scripts/require-live-evidence.mjs storage",
-    "verify:zerog:chain:live": "node scripts/require-live-evidence.mjs chain"
+    "verify:zerog:chain:live": "node scripts/require-live-evidence.mjs chain",
+    "serve:api": "vite-node scripts/serve-api.ts",
+    "check:agent": "vite-node scripts/check-agent.ts"
   },
   "dependencies": {
     "@0gfoundation/0g-storage-ts-sdk": "1.2.11",

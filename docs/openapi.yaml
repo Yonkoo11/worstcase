@@ -164,12 +164,17 @@ components:
         manifest: { type: object }
         policy: { type: object }
     RunRequest:
+      description: >-
+        Either name fixtureIds, in which case compilationId must be the
+        compilation of that fixture's own manifest and policy, or supply
+        adversarialRecipients to search a caller-supplied model.
       type: object
       additionalProperties: false
-      required: [compilationId, fixtureIds, engineVersion, limits]
+      required: [compilationId]
       properties:
         compilationId: { type: string }
         fixtureIds: { type: array, minItems: 1, maxItems: 7, items: { type: string } }
+        adversarialRecipients: { type: array, minItems: 1, items: { type: string } }
         engineVersion: { type: string }
         limits: { type: object }
     AnchorRequest:
