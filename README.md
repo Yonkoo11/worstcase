@@ -165,7 +165,7 @@ Requires Node.js 22+ and [Foundry](https://getfoundry.sh).
 
 ```bash
 npm install
-npm test                 # 114 TypeScript tests across 15 files
+npm test                 # 115 TypeScript tests across 15 files
 forge test --offline     # 5 Solidity tests, no external libs
 npm run typecheck        # strict, no errors
 ```

@@ -13,7 +13,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { ENGINE_VERSION, FixtureSchema, SCHEMA_VERSION, type EvidenceBundle } from "../../contracts/src/index.js";
+import { ENGINE_VERSION, ExplorationLimitsSchema, FixtureSchema, SCHEMA_VERSION, type EvidenceBundle } from "../../contracts/src/index.js";
 import { compileModel, DEFAULT_LIMITS, type CompiledModel } from "../../compiler/src/index.js";
 import { checkFixture, searchMaximumLoss } from "../../checker/src/index.js";
 import { createLocalEvidenceBundle } from "../../evidence/src/index.js";
@@ -112,9 +112,21 @@ export function createApi(options: ApiOptions = {}) {
         if (input?.["schemaVersion"] !== SCHEMA_VERSION || input["manifest"] === undefined || input["policy"] === undefined) {
           return fail(res, 400, requestId, "INVALID_REQUEST", "schemaVersion, manifest and policy are required.");
         }
+        // Exploration limits decide how much of the state space is searched, so
+        // a bad one silently changes what the bound means. Reject it as its own
+        // error rather than folding it into a generic invalid-request.
+        let limits = DEFAULT_LIMITS;
+        if (input["limits"] !== undefined && Object.keys(input["limits"] as object).length > 0) {
+          const parsed = ExplorationLimitsSchema.safeParse({ ...DEFAULT_LIMITS, ...(input["limits"] as object) });
+          if (!parsed.success) {
+            return fail(res, 400, requestId, "LIMIT_OUT_OF_RANGE", `Exploration limits are out of range: ${parsed.error.issues.map((i) => `${i.path.join(".")} ${i.message}`).join("; ")}`);
+          }
+          limits = parsed.data;
+        }
+
         let compiled: CompiledModel | ReturnType<typeof compileModel>;
         try {
-          compiled = compileModel(input["manifest"], input["policy"], input["limits"] ?? DEFAULT_LIMITS);
+          compiled = compileModel(input["manifest"], input["policy"], limits);
         } catch (error) {
           return fail(res, 400, requestId, "INVALID_REQUEST", `Model rejected: ${(error as Error).message}`);
         }

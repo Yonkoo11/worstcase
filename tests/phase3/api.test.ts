@@ -74,6 +74,23 @@ describe("v1 HTTP surface", () => {
     expect((res.json["error"] as unknown as { code: string }).code).toBe("PAYLOAD_TOO_LARGE");
   });
 
+  it("rejects exploration limits outside their permitted range", async () => {
+    // A silently clamped or ignored limit changes what the bound means, so an
+    // out-of-range limit gets its own error rather than a generic rejection.
+    const res = await post(`${base}/v1/compilations`, {
+      schemaVersion: "1", manifest: read("agent-manifest.json"), policy: read("spend-policy.json"),
+      limits: { maxStates: 0 },
+    });
+    expect(res.status).toBe(400);
+    expect((res.json["error"] as unknown as { code: string }).code).toBe("LIMIT_OUT_OF_RANGE");
+
+    const ok = await post(`${base}/v1/compilations`, {
+      schemaVersion: "1", manifest: read("agent-manifest.json"), policy: read("spend-policy.json"),
+      limits: { maxStates: 500 },
+    });
+    expect(ok.status).toBe(201);
+  });
+
   it("runs a fixture against that fixture's own compilation", async () => {
     const fixture = fixtureCatalog.find((f) => f.fixtureId === "prompt-injection");
     const compiled = await post(`${base}/v1/compilations`, { schemaVersion: "1", manifest: fixture?.manifest, policy: fixture?.policy });
