@@ -66,3 +66,10 @@ AGENTS.md
 
 # Demo video working files (large, local only)
 .video/
+
+# Generated serverless bundle
+api/index.js
+.worstcase-data/
+.vercel/
+.vercel
+.env*.local

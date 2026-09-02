@@ -18,6 +18,8 @@ import { compileModel, DEFAULT_LIMITS, type CompiledModel } from "../../compiler
 import { checkFixture, searchMaximumLoss } from "../../checker/src/index.js";
 import { createLocalEvidenceBundle } from "../../evidence/src/index.js";
 import { fixtureCatalog } from "../../../fixtures/v1/catalog.js";
+import { MemoryStore, type Store } from "./store.js";
+import { ApiKeyAuth, RateLimiter, callerKey } from "./guards.js";
 
 export type ErrorCode =
   | "INVALID_REQUEST" | "LIMIT_OUT_OF_RANGE" | "UNAUTHORIZED" | "EXTERNAL_WRITE_NOT_APPROVED"
@@ -43,6 +45,13 @@ export type ApiOptions = {
   /** Supplying this is what permits outward writes. Absent means every write is refused. */
   approvalProvider?: undefined | (() => boolean);
   anchorReader?: AnchorReader;
+  /** Durable by default in the server entrypoint; tests pass a MemoryStore. */
+  store?: Store;
+  /** Bearer keys. An empty list leaves the deployment deliberately open. */
+  apiKeys?: readonly string[];
+  rateLimit?: { limit: number; windowMs: number } | undefined;
+  /** Only set behind a proxy you control; otherwise x-forwarded-for is spoofable. */
+  trustProxy?: boolean;
 };
 
 type StoredRun = {
@@ -54,11 +63,27 @@ type StoredRun = {
 };
 
 export function createApi(options: ApiOptions = {}) {
-  const compilations = new Map<string, { compiled: CompiledModel; manifest: unknown; policy: unknown }>();
-  const runs = new Map<string, StoredRun>();
-  const evidence = new Map<string, { bundle: EvidenceBundle; bytes: Uint8Array }>();
+  const store = options.store ?? new MemoryStore();
+  // Compiled models hold Maps and cannot be serialised, so they are rebuilt from
+  // the stored manifest and policy after a restart rather than cached across one.
+  const compiled = new Map<string, CompiledModel>();
   const anchorReader = options.anchorReader ?? defaultAnchorReader;
   const writesApproved = options.approvalProvider ?? (() => false);
+  const auth = new ApiKeyAuth(options.apiKeys ?? []);
+  const limiter = new RateLimiter(options.rateLimit?.limit ?? 60, options.rateLimit?.windowMs ?? 60_000);
+  const trustProxy = options.trustProxy === true;
+
+  /** Rebuild a compiled model, from cache when warm and from the store when cold. */
+  function loadCompilation(compilationId: string): { compiled: CompiledModel; manifest: unknown; policy: unknown } | null {
+    const record = store.get("compilations", compilationId) as { manifest: unknown; policy: unknown; limits: unknown } | null;
+    if (record === null) return null;
+    const warm = compiled.get(compilationId);
+    if (warm !== undefined) return { compiled: warm, manifest: record.manifest, policy: record.policy };
+    const rebuilt = compileModel(record.manifest, record.policy, record.limits);
+    if (rebuilt.status !== "SUPPORTED") return null;
+    compiled.set(compilationId, rebuilt);
+    return { compiled: rebuilt, manifest: record.manifest, policy: record.policy };
+  }
 
   const meta = (requestId: string) => ({ requestId, apiVersion: "1", schemaVersion: SCHEMA_VERSION, engineVersion: ENGINE_VERSION });
 
@@ -98,6 +123,19 @@ export function createApi(options: ApiOptions = {}) {
     const method = req.method ?? "GET";
 
     try {
+      // Rate limit before authentication, so an unauthenticated flood cannot
+      // spend the server's time on key comparison.
+      const caller = callerKey(req.socket.remoteAddress, req.headers["x-forwarded-for"] as string | undefined, trustProxy);
+      const decision = limiter.check(caller);
+      if (!decision.allowed) {
+        res.setHeader("retry-after", String(decision.retryAfterSeconds));
+        return fail(res, 429, requestId, "RATE_LIMITED", `Too many requests. Retry in ${decision.retryAfterSeconds}s.`, true);
+      }
+
+      if (!auth.accepts(req.headers.authorization)) {
+        return fail(res, 401, requestId, "UNAUTHORIZED", "A valid bearer token is required.");
+      }
+
       if (method === "GET" && path === "/v1/fixtures") {
         return ok(res, 200, requestId, fixtureCatalog.map((f) => ({
           fixtureId: f.fixtureId, family: f.family, description: f.description,
@@ -135,7 +173,7 @@ export function createApi(options: ApiOptions = {}) {
           // must never be returned as if a bound had been computed.
           return ok(res, 201, requestId, { status: compiled.status, issues: compiled.issues });
         }
-        compilations.set(compiled.compilationId, { compiled, manifest: input["manifest"], policy: input["policy"] });
+        store.put("compilations", compiled.compilationId, { manifest: input["manifest"], policy: input["policy"], limits });
         return ok(res, 201, requestId, {
           compilationId: compiled.compilationId, status: compiled.status,
           manifestHash: compiled.manifestHash, policyHash: compiled.policyHash, graphHash: compiled.graphHash,
@@ -156,14 +194,14 @@ export function createApi(options: ApiOptions = {}) {
         if (typeof compilationId !== "string" || (!hasFixtures && !hasRecipients)) {
           return fail(res, 422, requestId, "INVALID_REQUEST", "compilationId plus either 1 to 7 fixtureIds, or adversarialRecipients to check your own model.");
         }
-        const entry = compilations.get(compilationId);
-        if (entry === undefined) return fail(res, 422, requestId, "INVALID_REQUEST", "Unknown compilationId. Create a compilation first.");
+        const entry = loadCompilation(compilationId);
+        if (entry === null) return fail(res, 422, requestId, "INVALID_REQUEST", "Unknown compilationId. Create a compilation first.");
 
         // Checking the caller's own model: they say what counts as loss.
         if (!hasFixtures) {
           const result = searchMaximumLoss(entry.compiled, adversarialRecipients as string[]);
           const runId = `run-${randomUUID()}`;
-          runs.set(runId, { runId, compilationId, fixtureIds: [], results: [{ ...result }], createdAt: new Date().toISOString() });
+          store.put("runs", runId, { runId, compilationId, fixtureIds: [], results: [{ ...result }], createdAt: new Date().toISOString() });
           return ok(res, 202, requestId, { runId, compilationId, adversarialRecipients, results: [result] });
         }
 
@@ -185,23 +223,23 @@ export function createApi(options: ApiOptions = {}) {
           results.push({ fixtureId: id, ...checkFixture(fixtureCompiled, fixture) });
         }
         const runId = `run-${randomUUID()}`;
-        runs.set(runId, { runId, compilationId, fixtureIds: fixtureIds as string[], results, createdAt: new Date().toISOString() });
+        store.put("runs", runId, { runId, compilationId, fixtureIds: fixtureIds as string[], results, createdAt: new Date().toISOString() });
         return ok(res, 202, requestId, { runId, compilationId, results });
       }
 
       const runMatch = /^\/v1\/runs\/([A-Za-z0-9-]+)$/.exec(path);
       if (method === "GET" && runMatch !== null) {
-        const run = runs.get(runMatch[1] as string);
-        if (run === undefined) return fail(res, 404, requestId, "NOT_FOUND", "No such run.");
+        const run = store.get("runs", runMatch[1] as string) as StoredRun | null;
+        if (run === null) return fail(res, 404, requestId, "NOT_FOUND", "No such run.");
         return ok(res, 200, requestId, run);
       }
 
       const evidenceMatch = /^\/v1\/runs\/([A-Za-z0-9-]+)\/evidence$/.exec(path);
       if (method === "POST" && evidenceMatch !== null) {
-        const run = runs.get(evidenceMatch[1] as string);
-        if (run === undefined) return fail(res, 404, requestId, "NOT_FOUND", "No such run.");
-        const entry = compilations.get(run.compilationId);
-        if (entry === undefined) return fail(res, 409, requestId, "INVALID_STATE_TRANSITION", "The run's compilation is no longer held.");
+        const run = store.get("runs", evidenceMatch[1] as string) as StoredRun | null;
+        if (run === null) return fail(res, 404, requestId, "NOT_FOUND", "No such run.");
+        const entry = loadCompilation(run.compilationId);
+        if (entry === null) return fail(res, 409, requestId, "INVALID_STATE_TRANSITION", "The run's compilation is no longer held.");
 
         if (run.fixtureIds.length === 0) {
           // Own-model runs have no fixture to bind the bundle to. Say so rather
@@ -213,7 +251,7 @@ export function createApi(options: ApiOptions = {}) {
         if (fixture === undefined) return fail(res, 409, requestId, "INVALID_STATE_TRANSITION", "The run's fixture is unavailable.");
         const parsed = FixtureSchema.parse(fixture);
         const bundle = createLocalEvidenceBundle(entry.compiled, parsed, checkFixture(entry.compiled, parsed));
-        evidence.set(bundle.bundleRoot, { bundle: bundle.bundle, bytes: bundle.bytes });
+        store.put("evidence", bundle.bundleRoot, bundle.bundle);
 
         if (!writesApproved()) {
           // The canonical bundle exists locally; publishing it to 0G Storage is
@@ -226,9 +264,9 @@ export function createApi(options: ApiOptions = {}) {
 
       const bundleMatch = /^\/v1\/evidence\/(0x[0-9a-f]{64})$/.exec(path);
       if (method === "GET" && bundleMatch !== null) {
-        const held = evidence.get(bundleMatch[1] as string);
-        if (held === undefined) return fail(res, 404, requestId, "NOT_FOUND", "No such evidence bundle.");
-        return ok(res, 200, requestId, held.bundle);
+        const held = store.get("evidence", bundleMatch[1] as string);
+        if (held === null) return fail(res, 404, requestId, "NOT_FOUND", "No such evidence bundle.");
+        return ok(res, 200, requestId, held);
       }
 
       const anchorPostMatch = /^\/v1\/evidence\/(0x[0-9a-f]{64})\/anchors$/.exec(path);
@@ -261,7 +299,7 @@ export function createApi(options: ApiOptions = {}) {
     }
   };
 
-  return { handler, compilations, runs, evidence };
+  return { handler, store, auth };
 }
 
 export function startServer(port = 8787, options: ApiOptions = {}) {

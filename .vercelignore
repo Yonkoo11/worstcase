@@ -1,0 +1,15 @@
+# Local working data and large media that would otherwise upload on every deploy.
+#
+# Every pattern is anchored with a leading slash. An unanchored `evidence` also
+# matches `packages/evidence`, which silently removed a source package from the
+# build and broke it with a confusing module-resolution error.
+/.video
+/media
+/evidence
+/proposals
+/node_modules
+/contracts/out
+/contracts/cache
+/contracts/broadcast
+/dist
+/ai

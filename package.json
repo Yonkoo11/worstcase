@@ -34,7 +34,9 @@
     "verify:zerog:storage:live": "node scripts/require-live-evidence.mjs storage",
     "verify:zerog:chain:live": "node scripts/require-live-evidence.mjs chain",
     "serve:api": "vite-node scripts/serve-api.ts",
-    "check:agent": "vite-node scripts/check-agent.ts"
+    "check:agent": "vite-node scripts/check-agent.ts",
+    "build:api": "node scripts/build-api.mjs",
+    "build:vercel": "npm run build:api && WORSTCASE_BASE=/ npm run build:web"
   },
   "dependencies": {
     "@0gfoundation/0g-storage-ts-sdk": "1.2.11",
