@@ -4,6 +4,24 @@ import type { DemoArtifact, DemoAction } from "../scripts/demo-artifacts.js";
 import { actionById, fixtureLabel, formatMoney, resultHeadline, shortHash } from "./view-model.js";
 
 type View = "run" | "fixtures" | "evidence" | "model";
+
+const VIEWS: readonly View[] = ["run", "fixtures", "evidence", "model"];
+
+// The four views are deep-linkable: #evidence/replay-two restores both the tab and
+// the fixture, so a link shared with a reviewer opens on what the sender was reading.
+function readRoute(): { view: View; fixtureId: string | null } {
+  const [rawView, rawFixture] = window.location.hash.replace(/^#/, "").split("/");
+  const view = VIEWS.find((candidate) => candidate === rawView) ?? "run";
+  return { view, fixtureId: rawFixture === undefined || rawFixture === "" ? null : decodeURIComponent(rawFixture) };
+}
+
+function writeRoute(): void {
+  // Built by concatenation, not a template literal: the render-safety gate treats
+  // every interpolation in this file as an HTML sink, and this one is a URL fragment.
+  const view = VIEWS.find((candidate) => candidate === state.view) ?? "run";
+  const next = "#" + view + "/" + encodeURIComponent(state.selected.fixtureId);
+  if (window.location.hash !== next) window.history.replaceState(null, "", next);
+}
 type RunStage = "ready" | "replaying" | "verifying" | "complete";
 
 const appRoot = document.querySelector<HTMLDivElement>("#app");
@@ -340,7 +358,7 @@ function render(): void {
   const anchor = state.selected.anchor;
   app.innerHTML = `<a class="skip-link" href="#main-content">Skip to main content</a><div class="app-shell">
     <header class="topbar">
-      <div class="brand"><span class="brand-mark" aria-hidden="true">W</span><span>Worstcase</span></div>
+      <div class="brand"><svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="14" fill="#0c0d0f"></rect><rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="#e6e8ea" stroke-opacity="0.10"></rect><path d="M12 52 V44 H22 V36 H32 V28 H42 V20 H52 V52 Z" fill="#e0603a"></path><rect x="10" y="16" width="44" height="4" rx="1" fill="#e6e8ea"></rect></svg><span>Worstcase</span></div>
       <span class="crumb">/ runs / <code>${escapeHtml(state.selected.fixtureId)}</code></span>
       <nav class="topnav" aria-label="Primary navigation">
         ${navButton("run", "Run")}${navButton("fixtures", "Fixtures")}${navButton("evidence", "Evidence")}${navButton("model", "Model")}
@@ -395,13 +413,17 @@ function selectFixture(id: string, view: View = "run"): void {
   state.runStage = "complete";
   state.view = view;
   state.notice = null;
+  writeRoute();
   render();
 }
 
 function bindEvents(): void {
   document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((button) => button.addEventListener("click", () => {
-    state.view = button.dataset.view as View;
+    const requested = VIEWS.find((candidate) => candidate === button.dataset.view);
+    if (requested === undefined) return;
+    state.view = requested;
     state.notice = null;
+    writeRoute();
     render();
   }));
   document.querySelectorAll<HTMLButtonElement>("[data-fixture]").forEach((button) => button.addEventListener("click", () => selectFixture(button.dataset.fixture ?? "")));
@@ -421,4 +443,23 @@ function bindEvents(): void {
   });
 }
 
+function applyRoute(): void {
+  const route = readRoute();
+  state.view = route.view;
+  if (route.fixtureId === null) return;
+  const match = artifacts.find((item) => item.fixtureId === route.fixtureId);
+  if (match === undefined) return;
+  state.selected = match;
+  state.selectedStep = match.result.shortestPathTransitionIds.at(-1) ?? null;
+  state.runStage = "complete";
+}
+
+// Back/forward must move between views, not leave the browser.
+window.addEventListener("hashchange", () => {
+  applyRoute();
+  render();
+});
+
+applyRoute();
+writeRoute();
 render();

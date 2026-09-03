@@ -78,11 +78,7 @@ code, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   max-width: 1320px; width: 100%; margin: 0 auto;
 }
 .brand { display: flex; align-items: center; gap: var(--s2); font-weight: 600; letter-spacing: -0.01em; }
-.brand-mark {
-  width: 23px; height: 23px; border-radius: 5px;
-  background: var(--sig-soft); border: 1px solid var(--sig); color: var(--sig);
-  display: grid; place-items: center; font-family: var(--mono); font-size: 12px; font-weight: 700;
-}
+.brand-mark { width: 24px; height: 24px; border-radius: 6px; display: block; flex: 0 0 auto; }
 .crumb { font-family: var(--mono); font-size: 14px; color: var(--t3); }
 .crumb code { color: var(--t2); }
 .topnav { display: flex; gap: var(--s1); margin-left: auto; }

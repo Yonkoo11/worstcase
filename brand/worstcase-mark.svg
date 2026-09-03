@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64"
+     role="img" aria-label="Worstcase">
+  <title>Worstcase</title>
+  <defs>
+    <radialGradient id="wc-bloom" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e0603a" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#e0603a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#0c0d0f"/>
+  <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="#e6e8ea" stroke-opacity="0.10"/>
+  <circle cx="41" cy="33" r="21" fill="url(#wc-bloom)"/>
+  <!-- reachable value, climbing: four risers, flush against the bound -->
+  <path d="M12 52 V44 H22 V36 H32 V28 H42 V20 H52 V52 Z" fill="#e0603a"/>
+  <!-- the bound: nothing crosses it -->
+  <rect x="10" y="16" width="44" height="4" rx="1" fill="#e6e8ea"/>
+</svg>
