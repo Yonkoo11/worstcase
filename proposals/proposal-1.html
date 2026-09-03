@@ -1,35 +1,252 @@
 <!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Worstcase — Proposal 1 — Verdict Sheet</title>
 <!--
-  DESIGN PROPOSAL #1 — Trace Ledger
-  DNA: DNA-G-S-M-N-X (Grid / Side nav / Minimal / Neutral + amber / Mixed)
-  Inspiration: Tenderly trace causality + Linear Peek + Worstcase research ledger
-  UX Architecture
-  Entry: open the fixed demo run or import a supported manifest.
-  Exit: understand the bound and replay the exact evidence bundle.
-  Screens: Run list -> Result workbench -> Step peek -> Evidence replay.
-  Happy path: fixed run -> inspect maximum-loss path -> tighten rule -> replay zero-loss run.
-  States: empty CTA; skeleton loading; UNKNOWN replaces monetary value; dependency error offers bounded retry; complete shown below.
-  Kill-switch: one workbench, no dashboard detour, provenance never masquerades as analytical status.
+UX ARCHITECTURE — Proposal 1 "Verdict Sheet"
+DNA-A-T-S-D-X  (Asymmetric / Top-fixed / Split hero / Duotone / Mixed type)
+Inspirations: Socket.dev package report (verdict names the responsible edge) +
+              Bloomberg terminal ledger rules + editorial incident sheet.
+
+Entry:  A judge lands on a run. Exit: they can state the number, the cause, and where to verify it.
+
+Screens: Run (this) / Fixtures / Evidence / Model support — top-fixed nav, no sidebar.
+
+Happy path: read bound -> read the one responsible edge -> scan what was ruled out -> verify on chain.
+
+THE STRUCTURAL FIX: the counterexample is now usually ONE step. So the page is not a ledger of
+many rows; it is a VERDICT plus a RULED-OUT panel. The ruled-out list is what proves the bound,
+and it carries the page when the path is short and when there is no path at all.
+
+States:
+  COMPLETE + loss>0  -> bound is the hero, one responsible edge, ruled-out list beside it
+  COMPLETE + loss=0  -> hero becomes "No value reaches the declared sink", ruled-out becomes the body
+  UNKNOWN            -> the number is REPLACED by the reason; never renders as 0
+  Loading            -> bound area shows a scan line over a skeleton; nothing claims a value
+
+Kill-switch: no explanation needed — the sentence is the interface. No screen exists "just in case".
 -->
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Worstcase — Trace Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600&display=swap');
-:root{--base:#0d0e0e;--rail:#111313;--surface:#171918;--lift:#1d201e;--text:#ebe9e2;--body:#babbb4;--muted:#80847e;--rule:rgba(235,233,226,.1);--strong:rgba(235,233,226,.18);--amber:#d7a64a;--danger:#d66d58;--ok:#78a989;--r1:6px;--r2:10px;--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s6:24px;--s8:32px;--s12:48px;--ease:cubic-bezier(.23,1,.32,1);--side:232px}
-*{box-sizing:border-box}body{margin:0;background:var(--base);color:var(--text);font:15px/1.5 Manrope,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}button{font:inherit}button:focus-visible{box-shadow:0 0 0 3px rgba(215,166,74,.4);outline:0}.mono,.amount{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}.shell{min-height:100vh;display:grid;grid-template-columns:var(--side) 1fr}.side{position:relative;background:var(--rail);border-right:1px solid var(--rule);padding:var(--s6) var(--s4);display:flex;flex-direction:column}.brand{display:flex;gap:var(--s3);align-items:center;font-weight:600}.mark{width:28px;height:28px;border:1px solid var(--strong);border-radius:var(--r1);position:relative}.mark:before,.mark:after{content:"";position:absolute;background:var(--amber)}.mark:before{width:2px;height:17px;left:8px;top:5px}.mark:after{width:11px;height:2px;left:8px;bottom:6px;transform:skewX(-38deg)}.nav{margin-top:var(--s12);display:grid;gap:var(--s1)}.nav button{min-height:44px;text-align:left;padding:0 var(--s3);border:0;border-radius:var(--r1);background:transparent;color:var(--muted);cursor:pointer}.nav button[aria-current=true]{background:var(--surface);color:var(--text);box-shadow:inset 3px 0 var(--amber)}.side-foot{margin-top:auto;border-top:1px solid var(--rule);padding-top:var(--s4);font-size:13px;color:var(--muted)}.main{min-width:0}.top{height:65px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;padding:0 var(--s8)}.crumb{font-size:14px;color:var(--body)}.mobile-name{display:none}.origin{font:12px 'IBM Plex Mono';letter-spacing:.06em;text-transform:uppercase;padding:var(--s2) var(--s3);border:1px solid var(--strong);border-radius:var(--r1);color:var(--body)}.work{padding:var(--s8);max-width:1420px;margin:auto}.headline{display:grid;grid-template-columns:minmax(380px,1fr) 340px;gap:var(--s8);align-items:end;padding:var(--s4) 0 var(--s8);border-bottom:1px solid var(--strong)}.eyebrow{font:12px 'IBM Plex Mono';letter-spacing:.08em;text-transform:uppercase;color:var(--amber)}h1{font:600 clamp(30px,4vw,54px)/1.08 'Source Serif 4',serif;letter-spacing:-.035em;margin:var(--s3) 0}.loss{color:var(--danger)}.summary{color:var(--body);max-width:60ch;margin:0}.basis{display:grid;grid-template-columns:1fr auto;gap:var(--s2);font-size:13px}.basis dt{color:var(--muted)}.basis dd{margin:0;font-family:'IBM Plex Mono';font-variant-numeric:tabular-nums}.grid{display:grid;grid-template-columns:minmax(420px,1.3fr) minmax(310px,.7fr);gap:var(--s6);padding-top:var(--s6)}.panel{background:var(--surface);box-shadow:0 0 0 1px var(--rule),0 16px 38px rgba(0,0,0,.16);border-radius:var(--r2);overflow:hidden}.panel-head{min-height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 var(--s4);border-bottom:1px solid var(--rule)}.panel-head h2{font-size:16px;line-height:1.3;margin:0}.legend{font-size:13px;color:var(--muted)}.path{list-style:none;margin:0;padding:var(--s3) 0}.step{display:grid;grid-template-columns:48px 1fr auto;gap:var(--s3);align-items:center;min-height:72px;padding:var(--s2) var(--s4);position:relative}.step:before{content:"";position:absolute;left:39px;top:0;bottom:0;width:1px;background:var(--rule)}.step:first-child:before{top:50%}.step:last-child:before{bottom:50%}.node{z-index:1;width:16px;height:16px;margin:auto;background:var(--surface);border:2px solid var(--muted);border-radius:50%}.step.active{background:var(--lift)}.step.active .node{border-color:var(--danger);box-shadow:0 0 0 5px rgba(214,109,88,.12)}.step button{min-height:44px;text-align:left;border:0;background:none;color:var(--text);cursor:pointer;padding:0}.step button strong{font-weight:500}.meta{font:13px 'IBM Plex Mono';color:var(--muted);display:block}.delta{font:500 14px 'IBM Plex Mono';font-variant-numeric:tabular-nums;color:var(--danger)}.detail{padding:var(--s6)}.detail h3{font:600 24px/1.2 'Source Serif 4';margin:0 0 var(--s4)}.rulebox{padding:var(--s4);background:var(--base);border-left:3px solid var(--danger);border-radius:var(--r1);margin:var(--s4) 0}.rulebox code{font:13px/1.6 'IBM Plex Mono';color:var(--body)}.diff{display:grid;grid-template-columns:1fr auto;gap:var(--s3);padding:var(--s3) 0;border-bottom:1px solid var(--rule)}.diff span:first-child{color:var(--muted)}.actions{display:flex;gap:var(--s2);margin-top:var(--s6)}.action{min-height:44px;border-radius:var(--r1);padding:0 var(--s4);cursor:pointer;transition:transform 160ms var(--ease),box-shadow 160ms var(--ease)}.primary{border:0;background:var(--amber);color:#17130b;box-shadow:0 5px 18px rgba(215,166,74,.16)}.secondary{border:1px solid var(--strong);background:transparent;color:var(--text)}.action:active{transform:scale(.97);transition-duration:80ms}.evidence{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);background:transparent;box-shadow:none;border-top:1px solid var(--strong);border-radius:0}.proof{padding:var(--s4);border-right:1px solid var(--rule)}.proof:last-child{border-right:0}.proof b{display:block;font-size:14px}.proof small{color:var(--muted);font:12px 'IBM Plex Mono';letter-spacing:.03em}.dna{position:fixed;right:16px;top:74px;z-index:9;background:#22251f;color:var(--amber);border:1px solid var(--strong);border-radius:var(--r1);padding:8px 10px;font:12px 'IBM Plex Mono'}.mobilebar{display:none}.loading .step button strong,.loading .step .meta{color:transparent;background:#242724;border-radius:4px}.loading .step{opacity:.8}.unknown h1{color:var(--amber)}
-@media(hover:hover){.nav button:hover,.step button:hover{color:var(--text)}.action:hover{transform:translateY(-1px)}}
-@media(max-width:900px){.shell{display:block}.side{display:none}.top{padding:0 var(--s4)}.mobile-name{display:inline;font-weight:600;color:var(--text)}.work{padding:var(--s4) var(--s4) 84px}.headline,.grid{grid-template-columns:1fr}.headline{gap:var(--s4)}.evidence{grid-template-columns:1fr 1fr}.proof:nth-child(2){border-right:0}.mobilebar{position:fixed;display:flex;left:12px;right:12px;bottom:12px;height:60px;z-index:10;background:var(--lift);border:1px solid var(--strong);border-radius:var(--r2);justify-content:space-around;align-items:center;box-shadow:0 18px 42px rgba(0,0,0,.4)}.mobilebar button{min-width:64px;min-height:44px;border:0;background:none;color:var(--body)}.dna{top:76px}.detail{padding:var(--s4)}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition-duration:1ms!important}}
-html,body{max-width:100%;overflow-x:hidden}@media(max-width:900px){.top .origin,.dna,.panel-head .legend{display:none}.top{height:56px}.headline,.panel,.grid>*{min-width:0}h1{font-size:clamp(34px,11vw,44px)}.basis{max-width:100%}.mobilebar{overflow:hidden}.mobilebar button{flex:1}}
-</style></head><body>
-<div class="dna">DNA-G-S-M-N-X</div><div class="shell"><aside class="side"><div class="brand"><span class="mark" aria-hidden="true"></span>Worstcase</div><nav class="nav" aria-label="Primary"><button aria-current="true">Runs</button><button>Fixtures</button><button>Evidence</button><button>Model support</button></nav><div class="side-foot"><span class="mono">engine 0.1.0</span><br>Local evidence only<br><br>Tenderly trace + Linear peek</div></aside>
-<main class="main"><header class="top"><div class="crumb"><span class="mobile-name">Worstcase / </span>Runs / <span class="mono">prompt-injection</span></div><span class="origin">Local fixture · not anchored</span></header><section class="work" id="result"><div class="headline"><div><div class="eyebrow">Complete · conservative bound</div><h1><span class="loss">27.50 USDC</span> can reach attacker.</h1><p class="summary">The legitimate merchant payment succeeds, then hostile tool output proposes one allowed transfer to the declared adversarial sink.</p></div><dl class="basis"><dt>Winning rule</dt><dd>maximum loss</dd><dt>Tie-break</dt><dd>shortest path</dd><dt>Explored</dt><dd>2 states / 1 path</dd><dt>Model</dt><dd>fully supported</dd></dl></div>
-<div class="grid"><section class="panel"><div class="panel-head"><h2>Shortest maximum-loss path</h2><span class="legend">Protected balance → sink</span></div><ol class="path"><li class="step"><span class="node"></span><button data-step="0"><strong>Protected balance</strong><span class="meta">usdc · 100.00</span></button><span class="delta">100.00</span></li><li class="step"><span class="node"></span><button data-step="1"><strong>pay-merchant</strong><span class="meta">allowed recipient · legitimate spend</span></button><span class="delta" style="color:var(--body)">−10.00</span></li><li class="step active"><span class="node"></span><button data-step="2"><strong>pay-attacker</strong><span class="meta">allowed recipient · adversarial sink</span></button><span class="delta">−27.50</span></li><li class="step"><span class="node"></span><button data-step="3"><strong>Attacker receives</strong><span class="meta">terminal loss</span></button><span class="delta">27.50</span></li></ol></section>
-<aside class="panel detail" aria-live="polite"><div class="eyebrow">Step 02 · policy consequence</div><h3 id="detail-title">Recipient rule admits the sink</h3><p id="detail-copy">The amount is below both caps. Because <span class="mono">attacker</span> appears in the allowlist, the checker can reach this transfer.</p><div class="rulebox"><code>allowedRecipients.usdc<br>includes “attacker” → TRUE</code></div><div class="diff"><span>Protected balance</span><span class="mono">90.00 → 62.50</span></div><div class="diff"><span>External loss</span><span class="mono">0.00 → 27.50</span></div><div class="actions"><button class="action primary" id="tighten">Remove recipient</button><button class="action secondary" id="state">Show UNKNOWN</button></div></aside>
-<section class="panel evidence"><div class="proof"><small>ORIGIN</small><b>Local fixture</b></div><div class="proof"><small>BUNDLE ROOT</small><b class="mono">0x82bd…19a4</b></div><div class="proof"><small>0G STORAGE</small><b>Not uploaded</b></div><div class="proof"><small>0G CHAIN</small><b>Not anchored</b></div></section></div></section></main></div>
-<nav class="mobilebar" aria-label="Mobile"><button>Run</button><button>Path</button><button>Proof</button></nav>
-<script>
-const details=[['Starting protected value','The model begins with 100.00 synthetic USDC. No real balance or signer is available to the fixture.'],['Merchant payment is not loss','Ten USDC reaches the declared merchant. Spend and loss are intentionally different quantities.'],['Recipient rule admits the sink','The amount is below both caps. Because attacker appears in the allowlist, the checker can reach this transfer.'],['Terminal adversarial sink','Only value reaching a fixture-declared adversarial recipient contributes to maximum loss.']];
-document.querySelectorAll('[data-step]').forEach((b)=>b.addEventListener('click',()=>{document.querySelectorAll('.step').forEach(x=>x.classList.remove('active'));b.closest('.step').classList.add('active');const d=details[Number(b.dataset.step)];document.querySelector('#detail-title').textContent=d[0];document.querySelector('#detail-copy').textContent=d[1]}));
-document.querySelector('#tighten').addEventListener('click',()=>{document.querySelector('h1').innerHTML='<span style="color:var(--ok)">0.00 USDC</span> reaches attacker.';document.querySelector('.summary').textContent='Recipient binding blocks the first adversarial edge. The remainder of this path is unreachable within the declared model.';document.querySelector('.step.active strong').textContent='pay-attacker · BLOCKED';document.querySelector('.step.active .delta').textContent='0.00'});
-document.querySelector('#state').addEventListener('click',()=>{document.querySelector('h1').innerHTML='Loss bound <span style="color:var(--amber)">UNKNOWN</span>.';document.querySelector('.summary').textContent='Provider evidence did not verify. No monetary result is available and no external write was attempted.'});
-</script><footer hidden>Inspired by Tenderly (trace causality) + Linear (peek detail).</footer></body></html>
+:root{
+  --ink:#0b0a09; --paper:#12100e; --raised:#191613; --rule:rgba(226,214,198,.10); --rule-2:rgba(226,214,198,.18);
+  --bone:#e8e0d4; --bone-2:#b6ab9c; --bone-3:#7d7365;
+  --sig:#e2593f; --sig-soft:rgba(226,89,63,.16); --ok:#7f9a6d;
+  --r:6px; --r2:14px;
+  --e:cubic-bezier(.22,1,.36,1);
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s6:24px;--s8:32px;--s12:48px;--s16:64px;--s24:96px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ink); color:var(--bone);
+  font-family:"IBM Plex Sans",sans-serif; font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  -webkit-tap-highlight-color:transparent;
+  min-height:100vh;
+}
+/* LIVENESS: layered ground, not one flat fill */
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(900px 520px at 12% -8%, rgba(226,89,63,.11), transparent 62%),
+    radial-gradient(700px 460px at 92% 6%, rgba(140,120,95,.10), transparent 60%),
+    radial-gradient(1100px 700px at 50% 108%, rgba(226,89,63,.055), transparent 65%);
+}
+body::after{ /* paper tooth */
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='.5'/></svg>");
+}
+.wrap{position:relative; z-index:1}
+.mono{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- top nav ---------- */
+header{
+  position:sticky; top:0; z-index:20; background:rgba(11,10,9,.82); backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--rule);
+}
+.bar{max-width:1240px; margin:0 auto; padding:0 var(--s8); height:60px; display:flex; align-items:center; gap:var(--s8)}
+.brand{display:flex; align-items:center; gap:10px; font-weight:600; letter-spacing:-.01em; font-size:16px}
+.mark{width:24px;height:24px;border-radius:5px;border:1px solid var(--sig);display:grid;place-items:center;
+  font-family:"Instrument Serif",serif; font-size:15px; color:var(--sig); background:var(--sig-soft)}
+nav{display:flex; gap:2px; margin-left:auto}
+nav a{
+  font-size:14px; color:var(--bone-2); text-decoration:none; padding:7px 13px; border-radius:var(--r);
+  transition:color 160ms var(--e), background-color 160ms var(--e);
+}
+@media(hover:hover){nav a:hover{color:var(--bone); background:rgba(226,214,198,.05)}}
+nav a[aria-current="page"]{color:var(--bone); background:rgba(226,214,198,.07)}
+nav a:focus-visible{outline:none; box-shadow:0 0 0 3px rgba(226,89,63,.42)}
+
+/* ---------- asymmetric split hero ---------- */
+main{max-width:1240px; margin:0 auto; padding:var(--s12) var(--s8) var(--s24)}
+.split{display:grid; grid-template-columns:1.35fr .95fr; gap:var(--s16); align-items:start}
+.kicker{display:flex; align-items:center; gap:10px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--bone-3); margin-bottom:var(--s4)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--sig);box-shadow:0 0 0 4px var(--sig-soft);
+  animation:live 2.6s var(--e) infinite}
+@keyframes live{0%,100%{opacity:1}50%{opacity:.42}}
+h1{
+  font-family:"Instrument Serif",serif; font-weight:400; margin:0;
+  font-size:clamp(46px,6.1vw,82px); line-height:1.02; letter-spacing:-.02em; color:var(--bone);
+}
+h1 .amount{color:var(--sig)}
+.lede{margin:var(--s6) 0 0; max-width:52ch; font-size:17px; color:var(--bone-2)}
+
+/* the responsible edge — ONE card, sized like it matters */
+.edge{
+  margin-top:var(--s12); border:1px solid var(--rule-2); border-radius:var(--r2);
+  background:linear-gradient(180deg,rgba(25,22,19,.92),rgba(18,16,14,.92));
+  box-shadow:0 26px 60px -28px rgba(0,0,0,.9), 0 0 34px rgba(226,89,63,.09);
+  overflow:hidden;
+}
+.edge-top{display:flex; align-items:center; justify-content:space-between; gap:var(--s4);
+  padding:14px 20px; border-bottom:1px solid var(--rule); color:var(--bone-3); font-size:12px;
+  letter-spacing:.12em; text-transform:uppercase}
+.edge-body{padding:22px 20px; display:grid; grid-template-columns:auto 1fr auto; gap:18px; align-items:center}
+.stepno{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--sig);display:grid;place-items:center;
+  font-size:12px;color:var(--sig);background:var(--sig-soft)}
+.edge-name{font-size:19px; font-weight:600; letter-spacing:-.01em}
+.edge-sub{font-size:13.5px; color:var(--bone-3); margin-top:2px}
+.edge-amt{font-family:"IBM Plex Mono",monospace; font-size:26px; color:var(--sig); font-variant-numeric:tabular-nums}
+.why{border-top:1px solid var(--rule); padding:16px 20px; background:rgba(226,89,63,.045)}
+.why-l{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--bone-3)}
+.why code{font-family:"IBM Plex Mono",monospace; font-size:13.5px; color:var(--bone); display:block; margin-top:6px}
+.why code b{color:var(--sig); font-weight:500}
+
+/* right rail: basis + ruled out */
+.rail{position:sticky; top:84px; display:flex; flex-direction:column; gap:var(--s6)}
+.panel{border:1px solid var(--rule); border-radius:var(--r2); background:rgba(18,16,14,.7); overflow:hidden}
+.panel-h{padding:13px 18px; border-bottom:1px solid var(--rule); font-size:12px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--bone-3); display:flex; justify-content:space-between; align-items:center}
+.kv{display:flex; justify-content:space-between; gap:var(--s4); padding:10px 18px; font-size:14px; border-bottom:1px solid rgba(226,214,198,.05)}
+.kv:last-child{border-bottom:0}
+.kv dt{color:var(--bone-3); margin:0}
+.kv dd{margin:0; font-family:"IBM Plex Mono",monospace; font-size:13px; color:var(--bone)}
+
+/* RULED OUT — the proof the bound is a bound. Carries the page on 1-step and 0-step runs. */
+.ruled li{
+  display:grid; grid-template-columns:1fr auto; gap:var(--s3); align-items:center;
+  padding:11px 18px; border-bottom:1px solid rgba(226,214,198,.05); font-size:14px;
+}
+.ruled ul{list-style:none;margin:0;padding:0}
+.ruled li:last-child{border-bottom:0}
+.strike{color:var(--bone-2); text-decoration:line-through; text-decoration-color:rgba(226,89,63,.6); text-decoration-thickness:1.5px}
+.rule-tag{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--ok); border:1px solid rgba(127,154,109,.28);
+  background:rgba(127,154,109,.10); padding:3px 8px; border-radius:999px; white-space:nowrap}
+
+/* actions sit WITH the content they act on */
+.actions{display:flex; gap:var(--s3); margin-top:var(--s8); flex-wrap:wrap}
+button{font-family:inherit; font-size:14.5px; font-weight:500; border-radius:var(--r); cursor:pointer;
+  padding:11px 18px; min-height:44px; border:1px solid transparent;
+  transition:transform 80ms var(--e), background-color 160ms var(--e), border-color 160ms var(--e), box-shadow 160ms var(--e)}
+.b-primary{background:var(--sig); color:#160b08; box-shadow:0 0 24px rgba(226,89,63,.28)}
+.b-ghost{background:transparent; color:var(--bone); border-color:var(--rule-2)}
+@media(hover:hover){
+  .b-primary:hover{background:#ef6b51; box-shadow:0 0 30px rgba(226,89,63,.4)}
+  .b-ghost:hover{border-color:var(--bone-3); background:rgba(226,214,198,.045)}
+}
+button:active{transform:scale(.97)}
+button:focus-visible{outline:none; box-shadow:0 0 0 3px rgba(226,89,63,.45)}
+
+footer{max-width:1240px;margin:0 auto;padding:var(--s8);border-top:1px solid var(--rule);
+  display:flex;justify-content:space-between;gap:var(--s4);flex-wrap:wrap;color:var(--bone-3);font-size:12.5px}
+.dna{position:fixed;top:70px;right:14px;z-index:30;font-family:"IBM Plex Mono",monospace;font-size:11px;
+  letter-spacing:.08em;color:var(--bone-3);border:1px solid var(--rule-2);border-radius:999px;padding:5px 11px;background:rgba(11,10,9,.85)}
+
+@media (max-width:940px){
+  .split{grid-template-columns:1fr; gap:var(--s8)}
+  .rail{position:static}
+  main{padding:var(--s8) var(--s4) var(--s16)}
+  .bar{padding:0 var(--s4); gap:var(--s4)}
+  nav a{padding:7px 10px; font-size:13.5px}
+  .edge-body{grid-template-columns:auto 1fr; row-gap:10px}
+  .edge-amt{grid-column:2; justify-self:start; font-size:23px}
+  .dna{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:1ms!important}}
+</style>
+</head>
+<body>
+<div class="dna">DNA-A-T-S-D-X</div>
+<div class="wrap">
+
+<header>
+  <div class="bar">
+    <div class="brand"><span class="mark">W</span> Worstcase</div>
+    <nav>
+      <a href="#" aria-current="page">Run</a><a href="#">Fixtures</a><a href="#">Evidence</a><a href="#">Model</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="split">
+    <section>
+      <div class="kicker"><span class="dot"></span> Complete · conservative bound · prompt-injection</div>
+      <h1><span class="amount num">27.50 USDC</span> can reach attacker.</h1>
+      <p class="lede">A legitimate paid call returns hostile content that proposes an additional attacker transfer. This is the greatest value any reachable state realises, and the shortest way to realise it.</p>
+
+      <div class="edge">
+        <div class="edge-top"><span>The responsible edge</span><span class="mono">1 of 1 step</span></div>
+        <div class="edge-body">
+          <span class="stepno mono">1</span>
+          <div>
+            <div class="edge-name">Pay Attacker</div>
+            <div class="edge-sub mono">transfer · attacker · from protected balance 100.00</div>
+          </div>
+          <div class="edge-amt">−27.50</div>
+        </div>
+        <div class="why">
+          <div class="why-l">Why it is permitted</div>
+          <code>allowedRecipients.usdc includes “attacker” → <b>TRUE</b></code>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="b-primary">Replay this run</button>
+        <button class="b-ghost">Compare the policy fix</button>
+      </div>
+    </section>
+
+    <aside class="rail">
+      <div class="panel">
+        <div class="panel-h"><span>Basis</span></div>
+        <dl style="margin:0">
+          <div class="kv"><dt>Winning rule</dt><dd>maximum loss</dd></div>
+          <div class="kv"><dt>Tie-break</dt><dd>shortest path</dd></div>
+          <div class="kv"><dt>Explored</dt><dd>4 states / 4 paths</dd></div>
+          <div class="kv"><dt>Model</dt><dd>supported</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel ruled">
+        <div class="panel-h"><span>Ruled out</span><span class="mono">4 edges</span></div>
+        <ul>
+          <li><span class="strike">Pay Merchant</span><span class="rule-tag">not adversarial</span></li>
+          <li><span class="strike">Recursive Loop</span><span class="rule-tag">recursion-limit</span></li>
+          <li><span class="strike">Spawn Parallel</span><span class="rule-tag">concurrency-limit</span></li>
+          <li><span class="strike">Replay One</span><span class="rule-tag">nonce-replayed</span></li>
+        </ul>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><span>Evidence</span></div>
+        <div class="kv"><dt>0G Storage</dt><dd>re-verified</dd></div>
+        <div class="kv"><dt>0G Chain</dt><dd>anchored · 16602</dd></div>
+        <div class="kv"><dt>Bundle</dt><dd>0x304ff5…cd27b0</dd></div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer>
+  <span>engine 0.1.0-contract · bound covers the declared model within declared limits</span>
+  <span>Inspiration: Socket.dev verdict line · Bloomberg ledger rules · editorial incident sheet</span>
+</footer>
+</div>
+</body>
+</html>

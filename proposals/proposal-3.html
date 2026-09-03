@@ -1,29 +1,224 @@
 <!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Worstcase — Proposal 3 — The Bench</title>
 <!--
-  DESIGN PROPOSAL #3 — Route Table
-  DNA: DNA-F-O-I-M-R (Full-bleed / Overlay / Immersive / Monochrome / Retro)
-  Inspiration: Socket object-first reports + Vercel restraint + Swiss information design
-  UX Architecture
-  Entry: paste/import supported manifest into the command overlay or choose fixed suite.
-  Exit: verify a route row, then retrieve its canonical bundle.
-  Screens: Route table -> Full-screen command overlay -> Route inspector -> Replay panel.
-  Happy path: choose run -> scan route -> focus failing edge -> compare fixed route -> copy root.
-  States: guided empty row; striped loading rows; UNKNOWN suppresses amount; error row contains retry boundary.
-  Kill-switch: table is the product; no charts, vanity KPIs, or disconnected detail pages.
+UX ARCHITECTURE — Proposal 3 "The Bench"
+DNA-B-O-M-N-R  (Bento / Overlay nav / Minimal hero / Neutral / Retro-mono)
+Inspirations: Tenderly transaction overview (state delta in context) + Semgrep findings pane
+              (analysis separate from workflow) + lab-instrument readout / oscilloscope panel.
+
+Entry: an instrument already showing a reading. Exit: the reader has the number, the cause, the
+exhaustion proof and the anchor — all visible at once, no scrolling required on desktop.
+
+Screens: Run (this) / Fixtures / Evidence / Model support via overlay menu.
+
+THE STRUCTURAL FIX: unequal bento cells. The bound cell is large and always full. The path cell is
+SMALL by design, so a one-step path fills it completely instead of leaving a hollow ledger. The
+exhaustion cell and evidence cell carry equal weight, so the page is complete at 1 step, at 5 steps,
+and at zero steps.
+
+States:
+  COMPLETE loss>0 -> bound cell shows figure; path cell shows the step(s)
+  COMPLETE loss=0 -> bound cell reads "0.00 — nothing reaches the sink"; path cell becomes "no reachable
+                     adversarial edge"; exhaustion cell expands to fill its span. Page stays full.
+  UNKNOWN         -> bound cell shows the reason in place of the figure, tinted amber, never 0
+  Loading         -> cells show a scanning rule; no figure is drawn until the run resolves
+
+Kill-switch: every cell answers a question a judge will actually ask. No cell is decorative.
 -->
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Worstcase — Route Table</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
-:root{--black:#0a0b0a;--panel:#101210;--row:#151815;--text:#e4e8df;--dim:#8c9589;--line:rgba(228,232,223,.13);--lime:#bed56e;--chalk:#d8dccb;--error:#d58670;--r1:2px;--r2:6px;--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s6:24px;--s8:32px;--ease:cubic-bezier(.23,1,.32,1)}
-*{box-sizing:border-box}body{margin:0;background:var(--black);color:var(--text);font:14px/1.45 'IBM Plex Mono',monospace;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-variant-numeric:tabular-nums}.app{min-height:100vh;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:48px 48px;background-position:-1px -1px}.bar{height:72px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 var(--s6);border-bottom:1px solid var(--line);background:rgba(10,11,10,.94)}.logo{display:flex;align-items:center;gap:var(--s3);font-family:'Space Grotesk',sans-serif;font-size:18px}.route-mark{width:36px;height:24px;position:relative}.route-mark:before{content:"";position:absolute;inset:3px 0;background:linear-gradient(90deg,var(--text) 0 26%,transparent 26% 37%,var(--text) 37% 63%,transparent 63% 74%,var(--lime) 74%);clip-path:polygon(0 0,89% 0,100% 50%,89% 100%,0 100%,9% 50%)}.status{color:var(--dim);font-size:12px;letter-spacing:.06em}.command{justify-self:end;min-height:44px;padding:0 var(--s4);border:1px solid var(--line);border-radius:var(--r1);background:var(--panel);color:var(--text);font:13px 'IBM Plex Mono';cursor:pointer;transition:transform 160ms var(--ease),border-color 160ms var(--ease)}button:focus-visible{outline:0;box-shadow:0 0 0 3px rgba(190,213,110,.4)}button:active{transform:scale(.97);transition-duration:80ms}.hero{min-height:320px;display:grid;grid-template-columns:minmax(0,1fr) 360px;border-bottom:1px solid var(--line);background:rgba(10,11,10,.76)}.statement{padding:var(--s8) var(--s6);align-self:end}.label{font-size:12px;letter-spacing:.09em;color:var(--lime)}h1{font:600 clamp(44px,7vw,92px)/.93 'Space Grotesk',sans-serif;letter-spacing:-.06em;margin:var(--s3) 0;max-width:13ch}.statement p{font-family:'Space Grotesk';font-size:17px;color:var(--dim);max-width:60ch}.receipt{border-left:1px solid var(--line);padding:var(--s6);display:flex;flex-direction:column;justify-content:flex-end;background:var(--panel)}.receipt dl{margin:0}.receipt div{display:grid;grid-template-columns:1fr auto;gap:var(--s3);padding:var(--s2) 0;border-bottom:1px solid var(--line)}.receipt dt{color:var(--dim)}.receipt dd{margin:0}.table-wrap{background:var(--black)}.table-head,.route{display:grid;grid-template-columns:68px minmax(180px,1fr) 150px 170px 150px;align-items:center}.table-head{min-height:48px;color:var(--dim);font-size:12px;letter-spacing:.07em;border-bottom:1px solid var(--line);padding:0 var(--s6)}.route{min-height:76px;border-bottom:1px solid var(--line);padding:0 var(--s6);position:relative;cursor:pointer}.route[aria-selected=true]{background:var(--row)}.route[aria-selected=true]:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--lime)}.route .id{color:var(--dim)}.route strong{font-weight:500;color:var(--chalk)}.route small{display:block;color:var(--dim);font-size:13px}.route .loss{color:var(--error)}.route .pass{color:var(--lime)}.route .edge{display:flex;align-items:center;gap:var(--s2)}.dot{width:8px;height:8px;border:1px solid currentColor;border-radius:50%}.inspector{display:grid;grid-template-columns:minmax(0,1fr) 360px;background:var(--panel);border-bottom:1px solid var(--line)}.trace{padding:var(--s6)}.trace-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--s6)}.trace h2{font:600 22px 'Space Grotesk';margin:0}.sequence{display:flex;align-items:center;overflow:auto;padding-bottom:var(--s3)}.block{min-width:154px;padding:var(--s3);border:1px solid var(--line);background:var(--black)}.block b{display:block;font-size:13px}.block span{color:var(--dim);font-size:12px}.arrow{width:42px;height:1px;background:var(--line);position:relative;flex:none}.arrow:after{content:"";position:absolute;right:0;top:-3px;border-left:6px solid var(--line);border-top:3px solid transparent;border-bottom:3px solid transparent}.block.fail{border-color:var(--error);box-shadow:inset 0 -3px var(--error)}.explain{border-left:1px solid var(--line);padding:var(--s6)}.explain h3{font:600 20px 'Space Grotesk';margin:0 0 var(--s3)}.explain p{color:var(--dim)}.code{padding:var(--s3);background:var(--black);border-radius:var(--r1);color:var(--chalk)}.footer{min-height:76px;display:flex;align-items:center;justify-content:space-between;padding:0 var(--s6);color:var(--dim);background:var(--black)}.overlay{position:fixed;inset:0;z-index:20;background:rgba(10,11,10,.96);display:none;place-items:center;padding:var(--s4)}.overlay.open{display:grid}.dialog{width:min(680px,100%);background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);box-shadow:0 20px 60px rgba(0,0,0,.52)}.dialog header{padding:var(--s4);border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.dialog input{width:100%;min-height:56px;border:0;border-bottom:1px solid var(--line);background:var(--black);color:var(--text);padding:0 var(--s4);font:16px 'IBM Plex Mono'}.dialog input:focus{outline:0;box-shadow:inset 0 -2px var(--lime)}.choices{padding:var(--s2)}.choice{width:100%;min-height:52px;text-align:left;border:0;background:none;color:var(--text);font:14px 'IBM Plex Mono';padding:0 var(--s3);cursor:pointer}.choice:hover{background:var(--row)}.dna{position:fixed;right:16px;top:82px;z-index:9;background:var(--lime);color:#171b10;padding:8px 10px;border-radius:var(--r1);font:600 12px 'IBM Plex Mono'}.loading .route>*{color:transparent;background:var(--row);height:16px;margin-right:var(--s4)}
-@media(hover:hover){.command:hover{border-color:var(--lime);transform:translateY(-1px)}.route:hover{background:rgba(21,24,21,.65)}}
-@media(max-width:860px){.bar{grid-template-columns:1fr auto}.status{display:none}.hero,.inspector{grid-template-columns:1fr}.receipt,.explain{border-left:0;border-top:1px solid var(--line)}.table-head{display:none}.route{grid-template-columns:46px 1fr auto;gap:var(--s2);padding:var(--s3) var(--s4)}.route>*:nth-child(3),.route>*:nth-child(4){display:none}.hero{min-height:0}.statement{padding:64px var(--s4) var(--s8)}.receipt{padding:var(--s4)}.trace,.explain{padding:var(--s4)}.footer{padding:var(--s4);display:block}.footer span{display:block;margin-bottom:var(--s2)}.dna{top:80px}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition-duration:1ms!important}}
-html,body{max-width:100%;overflow-x:hidden}@media(max-width:860px){.dna,.command{display:none}.bar{grid-template-columns:1fr}.statement,.receipt,.route,.trace,.explain{min-width:0}.receipt div{grid-template-columns:minmax(0,1fr) auto}.route{grid-template-columns:38px minmax(0,1fr)}.route>*:nth-child(n+3){display:none}.sequence{max-width:100%}h1{font-size:clamp(42px,13vw,58px)}}
-</style></head><body><div class="dna">DNA-F-O-I-M-R</div><div class="app"><header class="bar"><div class="logo"><span class="route-mark" aria-hidden="true"></span>Worstcase</div><div class="status">MODEL CHECKER / ENGINE 0.1.0</div><button class="command" id="open">Open run <kbd>⌘ K</kbd></button></header>
-<section class="hero"><div class="statement"><span class="label">ROUTE 0001 / COMPLETE / LOCAL FIXTURE</span><h1>27.50 reaches the sink.</h1><p>The winning route is maximum by loss, minimum by length, and contained by the declared action graph.</p></div><aside class="receipt"><dl><div><dt>protected</dt><dd>100.00 USDC</dd></div><div><dt>legitimate spend</dt><dd>10.00 USDC</dd></div><div><dt>reachable loss</dt><dd class="loss">27.50 USDC</dd></div><div><dt>external writes</dt><dd>none</dd></div></dl></aside></section>
-<section class="table-wrap" aria-label="Routes"><div class="table-head"><span>ID</span><span>Fixture / route</span><span>Status</span><span>First consequence</span><span>Loss</span></div><div class="route" aria-selected="true" tabindex="0"><span class="id">01</span><span><strong>prompt-injection</strong><small>pay-merchant → pay-attacker</small></span><span class="edge pass"><i class="dot"></i> COMPLETE</span><span>recipient admitted</span><span class="loss">27.50 USDC</span></div><div class="route" tabindex="0"><span class="id">02</span><span><strong>recipient-swap</strong><small>swap-attacker</small></span><span class="edge pass"><i class="dot"></i> COMPLETE</span><span>recipient admitted</span><span class="loss">25.00 USDC</span></div><div class="route" tabindex="0"><span class="id">03</span><span><strong>concurrency</strong><small>parallel-a ∥ parallel-b</small></span><span class="edge pass"><i class="dot"></i> COMPLETE</span><span>snapshot race</span><span class="loss">60.00 USDC</span></div><div class="route" tabindex="0"><span class="id">04</span><span><strong>corrected-policy</strong><small>first adversarial edge blocked</small></span><span class="edge"><i class="dot"></i> COMPLETE</span><span>recipient rejected</span><span>0.00 USDC</span></div></section>
-<section class="inspector"><div class="trace"><div class="trace-title"><h2>Route 01</h2><span>2 transitions / 2 explored states</span></div><div class="sequence"><div class="block"><b>100.00 USDC</b><span>protected</span></div><i class="arrow"></i><div class="block"><b>pay-merchant</b><span>−10.00 / not loss</span></div><i class="arrow"></i><div class="block fail"><b>pay-attacker</b><span>−27.50 / sink</span></div><i class="arrow"></i><div class="block"><b>27.50 USDC</b><span>external loss</span></div></div></div><aside class="explain"><h3>Why this route wins</h3><p>The recipient passes every declared rule. Among all complete candidates, no route loses more; no equal-loss route is shorter.</p><div class="code">rule recipient-not-allowed<br>result FALSE<br>sink attacker</div></aside></section>
-<footer class="footer"><span>Origin: local fixture · Storage: not uploaded · Chain: not anchored</span><span>Inspired by Socket reports, Vercel restraint, Swiss information design.</span></footer></div>
-<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog"><header><b id="dialog-title">Open a run</b><span>ESC</span></header><label><span hidden>Search runs</span><input type="search" placeholder="Type fixture or run ID" aria-label="Search runs"></label><div class="choices"><button class="choice">prompt-injection · 27.50 USDC</button><button class="choice">corrected-policy · 0.00 USDC</button><button class="choice">provider-timeout · UNKNOWN</button></div></div></div>
-<script>const o=document.querySelector('#overlay');document.querySelector('#open').addEventListener('click',()=>{o.classList.add('open');o.querySelector('input').focus()});document.addEventListener('keydown',e=>{if(e.key==='Escape')o.classList.remove('open');if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();o.classList.add('open')}});document.querySelectorAll('.route').forEach(r=>r.addEventListener('click',()=>{document.querySelectorAll('.route').forEach(x=>x.removeAttribute('aria-selected'));r.setAttribute('aria-selected','true')}));document.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>o.classList.remove('open')))</script></body></html>
+:root{
+  --b0:#0c0d0f; --b1:#131417; --b2:#191b1f; --b3:#212429;
+  --t1:#e6e8ea; --t2:#9ba1a8; --t3:#666d75;
+  --sig:#e0603a; --sig-s:rgba(224,96,58,.13);
+  --amber:#d9a441; --ok:#7fa06b;
+  --rule:rgba(230,232,234,.09); --rule2:rgba(230,232,234,.17);
+  --e:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--b0);color:var(--t1);
+  font-family:"Space Grotesk",sans-serif;font-size:15.5px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(820px 480px at 88% -10%, rgba(224,96,58,.10), transparent 60%),
+    radial-gradient(700px 500px at 4% 84%, rgba(110,125,140,.11), transparent 62%);}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.04;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='.6'/></svg>")}
+.z{position:relative;z-index:1}
+.m{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+
+.top{display:flex;align-items:center;gap:16px;max-width:1320px;margin:0 auto;padding:20px 26px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:600;letter-spacing:-.01em}
+.chip{width:23px;height:23px;border-radius:5px;background:var(--sig-s);border:1px solid var(--sig);color:var(--sig);
+  display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700}
+.crumb{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--t3)}
+.menu{margin-left:auto;border:1px solid var(--rule2);background:transparent;color:var(--t1);border-radius:7px;
+  padding:9px 15px;min-height:44px;font-family:"JetBrains Mono",monospace;font-size:12.5px;letter-spacing:.06em;
+  cursor:pointer;transition:transform 80ms var(--e),border-color 160ms var(--e),background-color 160ms var(--e)}
+@media(hover:hover){.menu:hover{border-color:var(--t3);background:rgba(230,232,234,.04)}}
+.menu:active{transform:scale(.97)}
+.menu:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(224,96,58,.45)}
+.ov{position:fixed;inset:0;z-index:50;background:rgba(12,13,15,.97);display:none;place-items:center}
+.ov:target{display:grid}
+.ov a{display:block;text-align:center;font-size:30px;color:var(--t1);text-decoration:none;padding:11px}
+@media(hover:hover){.ov a:hover{color:var(--sig)}}
+
+/* BENTO — deliberately unequal cells */
+.bento{max-width:1320px;margin:0 auto;padding:6px 26px 60px;
+  display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.cell{background:linear-gradient(180deg,var(--b2),var(--b1));border:1px solid var(--rule);border-radius:14px;
+  padding:22px;position:relative;overflow:hidden}
+.cell.lift{box-shadow:0 30px 66px -34px #000, 0 0 34px rgba(224,96,58,.09);border-color:var(--rule2)}
+.lbl{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--t3);display:flex;align-items:center;gap:9px}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--sig);box-shadow:0 0 0 4px var(--sig-s);
+  animation:p 2.8s var(--e) infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.42}}
+
+/* bound cell — large, always full */
+.c-bound{grid-column:span 7}
+.figure{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:clamp(48px,6.6vw,86px);
+  line-height:1;letter-spacing:-.035em;color:var(--sig);margin:20px 0 6px}
+.figure .u{font-size:.38em;color:var(--t2);letter-spacing:0;margin-left:10px;font-weight:500}
+.claim{font-size:19px;color:var(--t1);max-width:44ch}
+.desc{color:var(--t2);font-size:15px;margin-top:12px;max-width:56ch}
+
+/* basis cell */
+.c-basis{grid-column:span 5;display:flex;flex-direction:column}
+.rows{margin-top:16px;display:flex;flex-direction:column}
+.row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--rule);font-size:14px}
+.row:last-child{border-bottom:0}
+.row dt{color:var(--t3);margin:0}.row dd{margin:0;font-family:"JetBrains Mono",monospace;font-size:13px}
+
+/* path cell — SMALL on purpose so one step fills it */
+.c-path{grid-column:span 5}
+.step{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;margin-top:18px;
+  background:var(--b3);border:1px solid var(--rule2);border-radius:10px;padding:16px}
+.sn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--sig);color:var(--sig);background:var(--sig-s);
+  display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-size:11px}
+.sname{font-weight:600;font-size:16px}
+.smeta{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--t3);margin-top:2px}
+.samt{font-family:"JetBrains Mono",monospace;font-size:20px;color:var(--sig)}
+.rulebox{margin-top:14px;border-left:2px solid var(--sig);background:rgba(224,96,58,.05);padding:11px 14px;border-radius:0 8px 8px 0}
+.rulebox code{font-family:"JetBrains Mono",monospace;font-size:13px;display:block;color:var(--t1)}
+.rulebox b{color:var(--sig);font-weight:500}
+
+/* exhaustion cell — equal citizen, carries zero-path runs */
+.c-out{grid-column:span 7}
+.outs{list-style:none;margin:16px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
+.outs li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--rule);font-size:14.5px}
+.strike{color:var(--t2);text-decoration:line-through;text-decoration-color:rgba(224,96,58,.55);text-decoration-thickness:1.5px}
+.tg{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ok);border:1px solid rgba(127,160,107,.3);
+  background:rgba(127,160,107,.1);padding:3px 8px;border-radius:999px;white-space:nowrap}
+.exhaust{margin-top:16px;color:var(--t3);font-size:14px}
+
+/* evidence strip */
+.c-ev{grid-column:span 12;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0;padding:0}
+.ev{padding:18px 22px;border-right:1px solid var(--rule)}
+.ev:last-child{border-right:0}
+.ev dt{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--t3);margin:0}
+.ev dd{margin:7px 0 0;font-family:"JetBrains Mono",monospace;font-size:13.5px;color:var(--t1)}
+.ev .good{color:var(--ok)}
+
+.acts{grid-column:span 12;display:flex;gap:12px;flex-wrap:wrap}
+button.b{font-family:"JetBrains Mono",monospace;font-size:13px;letter-spacing:.05em;border-radius:8px;cursor:pointer;
+  padding:13px 20px;min-height:44px;border:1px solid transparent;
+  transition:transform 80ms var(--e),background-color 160ms var(--e),border-color 160ms var(--e),box-shadow 160ms var(--e)}
+.b-p{background:var(--sig);color:#180a06;box-shadow:0 0 26px rgba(224,96,58,.3)}
+.b-g{background:transparent;color:var(--t1);border-color:var(--rule2)}
+@media(hover:hover){.b-p:hover{background:#ec6f48}.b-g:hover{border-color:var(--t3);background:rgba(230,232,234,.04)}}
+button.b:active{transform:scale(.97)}
+button.b:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(224,96,58,.45)}
+.dna{position:fixed;top:16px;right:126px;z-index:60;font-family:"JetBrains Mono",monospace;font-size:11px;
+  color:var(--t3);border:1px solid var(--rule2);border-radius:999px;padding:5px 10px;background:rgba(12,13,15,.85)}
+footer{max-width:1320px;margin:0 auto;padding:22px 26px 40px;color:var(--t3);font-size:12.5px;
+  display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;border-top:1px solid var(--rule)}
+@media(max-width:1000px){
+  .c-bound,.c-basis,.c-path,.c-out{grid-column:span 12}
+  .outs{grid-template-columns:1fr}
+  .dna{display:none}
+  .bento{padding:6px 18px 56px}
+  .top{padding:16px 18px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:1ms!important}}
+</style>
+</head>
+<body>
+<div class="dna">DNA-B-O-M-N-R</div>
+<div class="z">
+  <div class="top">
+    <div class="logo"><span class="chip">W</span> Worstcase</div>
+    <span class="crumb">/ runs / prompt-injection</span>
+    <a class="menu" href="#nav">MENU</a>
+  </div>
+  <div class="ov" id="nav"><div>
+    <a href="#">Run</a><a href="#">Fixtures</a><a href="#">Evidence</a><a href="#">Model support</a>
+    <a href="#" style="font-size:15px;color:#666d75;margin-top:18px">Close</a>
+  </div></div>
+
+  <div class="bento">
+    <section class="cell lift c-bound">
+      <div class="lbl"><span class="pulse"></span> Maximum reachable loss · complete</div>
+      <div class="figure">27.50<span class="u">USDC</span></div>
+      <div class="claim">can reach the declared adversarial recipient.</div>
+      <p class="desc">A legitimate paid call returns hostile content that proposes an additional attacker transfer.</p>
+    </section>
+
+    <section class="cell c-basis">
+      <div class="lbl">Basis of the figure</div>
+      <dl class="rows">
+        <div class="row"><dt>Winning rule</dt><dd>maximum loss</dd></div>
+        <div class="row"><dt>Tie-break</dt><dd>shortest path</dd></div>
+        <div class="row"><dt>Explored</dt><dd>4 states / 4 paths</dd></div>
+        <div class="row"><dt>Model support</dt><dd>supported</dd></div>
+        <div class="row"><dt>Engine</dt><dd>0.1.0-contract</dd></div>
+      </dl>
+    </section>
+
+    <section class="cell c-path">
+      <div class="lbl">The call that realises it</div>
+      <div class="step">
+        <span class="sn">1</span>
+        <div><div class="sname">Pay Attacker</div><div class="smeta">transfer · attacker · balance 100.00</div></div>
+        <div class="samt">−27.50</div>
+      </div>
+      <div class="rulebox"><code>allowedRecipients.usdc includes “attacker” → <b>TRUE</b></code></div>
+    </section>
+
+    <section class="cell c-out">
+      <div class="lbl">Ruled out — why nothing loses more</div>
+      <ul class="outs">
+        <li><span class="strike">Pay Merchant</span><span class="tg">not adversarial</span></li>
+        <li><span class="strike">Recursive Loop</span><span class="tg">recursion-limit</span></li>
+        <li><span class="strike">Spawn Parallel</span><span class="tg">concurrency-limit</span></li>
+        <li><span class="strike">Replay One</span><span class="tg">nonce-replayed</span></li>
+      </ul>
+      <p class="exhaust">The reachable space was explored and exhausted. If it had been truncated, this panel would read UNKNOWN and no figure would be shown.</p>
+    </section>
+
+    <section class="cell c-ev" style="padding:0">
+      <div class="ev"><dt>0G Storage</dt><dd class="good">re-verified</dd></div>
+      <div class="ev"><dt>0G Chain</dt><dd class="good">anchored · 16602</dd></div>
+      <div class="ev"><dt>Bundle root</dt><dd>0x304ff5…cd27b0</dd></div>
+      <div class="ev"><dt>Registry</dt><dd>0xDeA079…7a3Ea3</dd></div>
+    </section>
+
+    <div class="acts">
+      <button class="b b-p">Replay this run</button>
+      <button class="b b-g">Compare the policy fix</button>
+    </div>
+  </div>
+
+  <footer>
+    <span>Bound covers the declared model within declared limits.</span>
+    <span>Inspiration: Tenderly state delta · Semgrep findings pane · instrument readout</span>
+  </footer>
+</div>
+</body>
+</html>

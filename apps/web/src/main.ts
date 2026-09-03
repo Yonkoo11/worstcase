@@ -63,85 +63,132 @@ function runButton(): string {
   </button>`;
 }
 
-function renderPath(): string {
+/** The one (or few) calls that realise the bound. Small by design: a single-step
+ * counterexample fills this cell instead of leaving a hollow ledger. */
+function renderCallCell(): string {
   const result = state.selected.result;
   const ids = result.shortestPathTransitionIds;
+
   if (ids.length === 0) {
-    return `<div class="empty-path">
-      <span class="blocked-mark" aria-hidden="true">×</span>
-      <div><strong>No adversarial edge is reachable.</strong><p>The tightened policy blocks ${result.blocked.length === 1 ? `the planted path` : `all ${result.blocked.length} planted paths`}. Select ${result.blocked.length === 1 ? `it` : `one`} to inspect the policy decision.</p></div>
-    </div>
-    <ol class="blocked-list" aria-label="Blocked transitions">
-      ${result.blocked.map((item) => `<li><button data-step="${escapeHtml(item.transitionId)}" ${state.selectedStep === item.transitionId ? 'aria-current="step"' : ""}><span>${escapeHtml(fixtureLabel(item.transitionId))}</span><code>${escapeHtml(item.policyCheckId)}</code></button></li>`).join("")}
-    </ol>`;
+    return `<section class="cell cell-call" aria-labelledby="call-title">
+      <div class="cell-label"><h2 id="call-title">No reachable adversarial edge</h2></div>
+      <p class="cell-note">Nothing in this agent can move value to a declared adversarial recipient under its policy. The panel beside this one lists every path that was tried and the rule that stopped it.</p>
+    </section>`;
   }
 
-  const opening = `<li class="path-step path-origin"><span class="node" aria-hidden="true"></span><div><strong>Protected balance</strong><small>${state.selected.asset.symbol.toLowerCase()} · ${formatMoney(state.selected.protectedBalanceBaseUnits, state.selected.asset.decimals, 2)}</small></div><b>${formatMoney(state.selected.protectedBalanceBaseUnits, state.selected.asset.decimals, 2)}</b></li>`;
-  const steps = ids.map((id) => {
+  const steps = ids.map((id, index) => {
     const action = actionById(state.selected, id);
     if (action === undefined) return "";
     const selected = state.selectedStep === id;
-    return `<li class="path-step ${selected ? "is-selected" : ""}">
-      <span class="node" aria-hidden="true"></span>
-      <button data-step="${escapeHtml(id)}" ${selected ? 'aria-current="step"' : ""}>
-        <strong>${escapeHtml(fixtureLabel(id))}</strong>
-        <small>${escapeHtml(action.type)}${action.recipient === undefined ? "" : ` · ${escapeHtml(action.recipient)}`}</small>
-      </button>
+    return `<button class="step ${selected ? "is-selected" : ""}" data-step="${escapeHtml(id)}" ${selected ? 'aria-current="step"' : ""}>
+      <span class="step-n">${index + 1}</span>
+      <span class="step-body"><strong>${escapeHtml(fixtureLabel(id))}</strong><small>${escapeHtml(action.type)}${action.recipient === undefined ? "" : ` · ${escapeHtml(action.recipient)}`} · balance ${escapeHtml(formatMoney(state.selected.protectedBalanceBaseUnits, state.selected.asset.decimals, 2))}</small></span>
       <b class="${action.adversarial ? "is-loss" : ""}">${action.amountBaseUnits === undefined ? "—" : `−${escapeHtml(formatMoney(action.amountBaseUnits, state.selected.asset.decimals, 2))}`}</b>
-    </li>`;
+    </button>`;
   }).join("");
-  return `<ol class="path-list">${opening}${steps}</ol>`;
+
+  const focused = state.selectedStep === null ? undefined : actionById(state.selected, state.selectedStep);
+  const permitted = focused === undefined
+    ? ""
+    : `<div class="why">
+        <span class="why-label">Why it is permitted</span>
+        <code>allowedRecipients.${escapeHtml(state.selected.asset.id)} includes “${escapeHtml(focused.recipient ?? "n/a")}” → <b>${state.selected.allowedRecipients.includes(focused.recipient ?? "") ? "TRUE" : "FALSE"}</b></code>
+      </div>`;
+
+  return `<section class="cell cell-call" aria-labelledby="call-title">
+    <div class="cell-label"><h2 id="call-title">${ids.length === 1 ? "The call that realises it" : "The calls that realise it"}</h2><span>${ids.length} step${ids.length === 1 ? "" : "s"}</span></div>
+    <div class="steps">${steps}</div>
+    ${permitted}
+  </section>`;
 }
 
-function renderDetail(): string {
-  const id = state.selectedStep;
-  const action = id === null ? undefined : actionById(state.selected, id);
-  if (action === undefined) {
-    return `<div class="detail-empty"><strong>Policy holds on every planted path.</strong><p>Select a blocked transition to inspect its policy decision.</p></div>`;
-  }
-  const reason = action.adversarial
-    ? `${fixtureLabel(action.id)} transfers ${moneyFor(action)} to the fixture-declared adversarial recipient.`
-    : `${fixtureLabel(action.id)} is legitimate spend and does not contribute to external loss.`;
-  return `<div class="detail-kicker">Selected consequence</div>
-    <h2>${escapeHtml(action.adversarial ? "Allowed recipient reaches the sink" : "Legitimate spend remains distinct")}</h2>
-    <p>${escapeHtml(reason)}</p>
-    <div class="policy-code"><code>allowedRecipients.${escapeHtml(state.selected.asset.id)}</code><br />includes “${escapeHtml(action.recipient ?? "n/a") }” → ${state.selected.allowedRecipients.includes(action.recipient ?? "") ? "TRUE" : "FALSE"}</div>
-    <dl class="detail-facts">
-      <div><dt>Action type</dt><dd>${escapeHtml(action.type)}</dd></div>
-      <div><dt>Amount</dt><dd>${escapeHtml(moneyFor(action))}</dd></div>
-      <div><dt>Counts as loss</dt><dd>${action.adversarial ? "Yes — declared sink" : "No — legitimate recipient"}</dd></div>
-    </dl>`;
+/** Why nothing loses more. A co-equal panel, because exhaustion is what makes the
+ * figure a bound rather than a sighting — and it carries runs with no path at all.
+ *
+ * Two kinds of entry, both real: edges a policy rule stopped, and edges the search
+ * reached but which cannot increase the loss. Listing only the first left this panel
+ * empty for permissive policies, which understated how much was actually examined. */
+function renderRuledOutCell(): string {
+  const result = state.selected.result;
+  const onPath = new Set(result.shortestPathTransitionIds);
+  const blockedIds = new Set(result.blocked.map((item) => item.transitionId));
+
+  const blockedRows = result.blocked.map((item) =>
+    `<li><button class="ruled-row" data-step="${escapeHtml(item.transitionId)}"><span class="struck">${escapeHtml(fixtureLabel(item.transitionId))}</span><code>${escapeHtml(item.policyCheckId)}</code></button></li>`);
+
+  // Reached, permitted, but cannot raise the bound — the other half of the proof.
+  const inertRows = state.selected.actions
+    .filter((action) => !onPath.has(action.id) && !blockedIds.has(action.id))
+    .map((action) => `<li><button class="ruled-row" data-step="${escapeHtml(action.id)}"><span class="struck">${escapeHtml(fixtureLabel(action.id))}</span><code>${action.adversarial ? "no further loss" : "not adversarial"}</code></button></li>`);
+
+  const rows = [...blockedRows, ...inertRows];
+  const body = rows.length === 0
+    ? `<li class="ruled-empty">Every declared action lies on the maximum-loss path.</li>`
+    : rows.join("");
+
+  const note = result.status === "UNKNOWN"
+    ? "The search was truncated, so no figure is claimed. This is not a pass."
+    : `The reachable space was explored and exhausted across ${result.exploredStates} state${result.exploredStates === 1 ? "" : "s"}. Had it been truncated, this panel would read UNKNOWN and no figure would be shown.`;
+
+  return `<section class="cell cell-ruled" aria-labelledby="ruled-title">
+    <div class="cell-label"><h2 id="ruled-title">Ruled out — why nothing loses more</h2><span>${rows.length} edge${rows.length === 1 ? "" : "s"}</span></div>
+    <ul class="ruled">${body}</ul>
+    <p class="cell-note">${escapeHtml(note)}</p>
+  </section>`;
+}
+
+function renderEvidenceStrip(): string {
+  const anchor = state.selected.anchor;
+  const store = state.selected.storage;
+  const cell = (label: string, value: string, good = false) =>
+    `<div class="ev"><dt>${label}</dt><dd class="${good ? "is-good" : ""}">${value}</dd></div>`;
+  return `<dl class="cell cell-evidence">
+    ${cell("0G Storage", store === undefined ? "not uploaded" : "re-verified", store !== undefined)}
+    ${cell("0G Chain", anchor === undefined ? "not anchored" : `anchored · ${anchor.chainId}`, anchor !== undefined)}
+    ${cell("Bundle root", `<code>${escapeHtml(shortHash(state.selected.bundleRoot))}</code>`)}
+    ${cell("Engine", `<code>${escapeHtml(state.selected.engineVersion)}</code>`)}
+  </dl>`;
 }
 
 function renderRun(): string {
   const result = state.selected.result;
-  const loss = result.status === "COMPLETE" ? BigInt(result.maximumLossBaseUnits ?? "0") : null;
-  const statusClass = loss === 0n ? "is-clear" : result.status === "UNKNOWN" ? "is-unknown" : "is-danger";
-  return `<section class="run-view" aria-labelledby="result-title">
-    <div class="run-progress ${state.runStage !== "complete" ? "is-running" : ""}" role="status" aria-live="polite"><span></span><p>${escapeHtml(stageCopy())}</p></div>
-    <header class="verdict">
-      <div>
-        <div class="eyebrow">${result.status === "COMPLETE" ? "Complete · conservative bound" : "Unknown · no monetary result"}</div>
-        <h1 id="result-title" class="${statusClass}">${escapeHtml(resultHeadline(state.selected))}</h1>
-        <p>${escapeHtml(state.selected.description)}</p>
-      </div>
-      <dl class="basis">
+  const complete = result.status === "COMPLETE";
+  const loss = complete ? BigInt(result.maximumLossBaseUnits ?? "0") : null;
+  const tone = loss === 0n ? "is-clear" : complete ? "is-danger" : "is-unknown";
+
+  // UNKNOWN replaces the figure entirely. It must never render as a zero.
+  const figure = complete
+    ? `<div class="figure ${tone}">${escapeHtml(formatMoney(result.maximumLossBaseUnits ?? "0", state.selected.asset.decimals, 2))}<span class="unit">${escapeHtml(state.selected.asset.symbol)}</span></div>
+       <p class="claim">${loss === 0n ? "reaches the declared adversarial recipient. Nothing does." : "can reach the declared adversarial recipient."}</p>`
+    : `<div class="figure is-unknown no-figure">UNKNOWN</div>
+       <p class="claim">The search did not finish, so no bound is claimed. Reason: <code>${escapeHtml(result.unknownReason ?? "SEARCH_INCOMPLETE")}</code>.</p>`;
+
+  return `<section class="bento" aria-labelledby="result-title">
+    <section class="cell cell-bound ${tone}">
+      <div class="cell-label"><span class="pulse ${state.runStage !== "complete" ? "is-running" : ""}" aria-hidden="true"></span>
+        <h1 id="result-title">${complete ? "Maximum reachable loss · complete" : "No monetary result · unknown"}</h1></div>
+      ${figure}
+      <p class="cell-desc">${escapeHtml(state.selected.description)}</p>
+      <p class="run-stage" role="status" aria-live="polite">${escapeHtml(stageCopy())}</p>
+    </section>
+
+    <section class="cell cell-basis" aria-label="Basis of the figure">
+      <div class="cell-label"><h2>Basis of the figure</h2></div>
+      <dl class="rows">
         <div><dt>Winning rule</dt><dd>maximum loss</dd></div>
         <div><dt>Tie-break</dt><dd>shortest path</dd></div>
         <div><dt>Explored</dt><dd>${result.exploredStates} states / ${result.exploredTrajectories} path${result.exploredTrajectories === 1 ? "" : "s"}</dd></div>
-        <div><dt>Model</dt><dd>${state.selected.supportStatus.toLowerCase()}</dd></div>
+        <div><dt>Model support</dt><dd>${escapeHtml(state.selected.supportStatus.toLowerCase())}</dd></div>
       </dl>
-    </header>
-    <div class="ledger-grid">
-      <section class="ledger panel" aria-labelledby="path-title">
-        <header><h2 id="path-title">Shortest maximum-loss path</h2><span>Protected balance → sink</span></header>
-        ${renderPath()}
-      </section>
-      <aside class="detail panel" aria-live="polite">${renderDetail()}</aside>
-    </div>
-    <div class="result-actions">
+    </section>
+
+    ${renderCallCell()}
+    ${renderRuledOutCell()}
+    ${renderEvidenceStrip()}
+
+    <div class="cell-actions">
       ${runButton()}
-      <button class="button button-secondary" id="compare-policy">${state.selected.fixtureId === "policy-fix" ? "Return to vulnerable policy" : "Compare policy fix"}</button>
+      <button class="button button-secondary" id="compare-policy">${state.selected.fixtureId === "policy-fix" ? "Return to vulnerable policy" : "Compare the policy fix"}</button>
     </div>
   </section>`;
 }
@@ -223,27 +270,24 @@ function renderMain(): string {
 }
 
 function renderMobileNav(): string {
-  if (state.view === "run") {
-    const busy = state.runStage === "replaying" || state.runStage === "verifying";
-    return `<button class="mobile-replay" data-replay aria-busy="${busy}">${busy ? "Cancel" : "Replay"}</button>${navButton("fixtures", "Fixtures")}${navButton("evidence", "Proof")}${navButton("model", "Model")}`;
-  }
+  // Navigation only. Replay used to live in here, which mixed a primary action
+  // into the nav bar and made the bar the loudest thing on a small screen.
   return `${navButton("run", "Run")}${navButton("fixtures", "Fixtures")}${navButton("evidence", "Proof")}${navButton("model", "Model")}`;
 }
 
 function render(): void {
+  const anchor = state.selected.anchor;
   app.innerHTML = `<a class="skip-link" href="#main-content">Skip to main content</a><div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>Worstcase</span></div>
-      <nav aria-label="Primary navigation">
-        ${navButton("run", "Run")}${navButton("fixtures", "Fixtures")}${navButton("evidence", "Evidence")}${navButton("model", "Model support")}
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">W</span><span>Worstcase</span></div>
+      <span class="crumb">/ runs / <code>${escapeHtml(state.selected.fixtureId)}</code></span>
+      <nav class="topnav" aria-label="Primary navigation">
+        ${navButton("run", "Run")}${navButton("fixtures", "Fixtures")}${navButton("evidence", "Evidence")}${navButton("model", "Model")}
       </nav>
-      <div class="sidebar-meta"><code>engine ${escapeHtml(state.selected.engineVersion)}</code><span>${state.selected.anchor === undefined ? "Local evidence only" : `Anchored · chain ${state.selected.anchor.chainId}`}</span></div>
-    </aside>
-    <main id="main-content" tabindex="-1">
-      <header class="topbar"><div class="breadcrumb"><b>Worstcase</b><span class="desktop-context">/ ${state.view === "run" ? "Runs" : fixtureLabel(state.view)} / <code>${escapeHtml(state.selected.fixtureId)}</code></span><span class="mobile-context">/ ${escapeHtml(state.selected.fixtureId)}</span></div><div class="provenance"><span aria-hidden="true"></span>${state.selected.anchor === undefined ? "Local fixture · not anchored" : `Local fixture · anchored on ${escapeHtml(state.selected.anchor.network)}`}</div></header>
-      <div class="content">${renderMain()}</div>
-    </main>
-    <nav class="mobile-nav" aria-label="Mobile actions and navigation">${renderMobileNav()}</nav>
+      <span class="provenance ${anchor === undefined ? "" : "is-anchored"}"><span aria-hidden="true"></span>${anchor === undefined ? "local · not anchored" : `local fixture · anchored on ${escapeHtml(anchor.network)}`}</span>
+    </header>
+    <main id="main-content" tabindex="-1"><div class="content">${renderMain()}</div></main>
+    <nav class="mobile-nav" aria-label="Mobile navigation">${renderMobileNav()}</nav>
     ${state.notice === null ? "" : `<div class="notice" role="status">${escapeHtml(state.notice)}</div>`}
   </div>`;
   bindEvents();
