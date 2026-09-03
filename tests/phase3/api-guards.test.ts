@@ -88,6 +88,62 @@ describe("rate limiting", () => {
   });
 });
 
+describe("per-request search budget", () => {
+  it("refuses a budget above the server ceiling instead of clamping it quietly", async () => {
+    // One unbounded request was measured at ~36s CPU and ~680MB RSS, which a
+    // rate limit alone does not contain. Silently reducing the budget would
+    // change what the returned bound covers without telling the caller.
+    const { server, base } = serve({ store: new MemoryStore(), ceilings: { maxStates: 5_000, timeoutMs: 2_000, maxDepth: 16 } });
+    try {
+      const over = await post(`${base}/v1/compilations`, {
+        schemaVersion: "1", manifest: read("agent-manifest.json"), policy: read("spend-policy.json"),
+        limits: { maxStates: 1_000_000 },
+      });
+      expect(over.status).toBe(400);
+      const error = over.json["error"] as unknown as { code: string; message: string };
+      expect(error.code).toBe("LIMIT_OUT_OF_RANGE");
+      expect(error.message).toContain("ceiling");
+
+      const within = await post(`${base}/v1/compilations`, {
+        schemaVersion: "1", manifest: read("agent-manifest.json"), policy: read("spend-policy.json"),
+        limits: { maxStates: 4_000 },
+      });
+      expect(within.status).toBe(201);
+      expect((within.json["data"] as unknown as { limits: { maxStates: number } }).limits.maxStates).toBe(4_000);
+    } finally { server.close(); }
+  });
+
+  it("keeps a hostile search inside the ceiling rather than burning the host", async () => {
+    const { server, base } = serve({ store: new MemoryStore(), ceilings: { maxStates: 2_000, timeoutMs: 2_000, maxDepth: 16 } });
+    try {
+      const actions = Array.from({ length: 20 }, (_, i) => ({
+        id: `pay-${String(i).padStart(2, "0")}`, type: "transfer", assetId: "usdc",
+        amountBaseUnits: String(1000 * (i + 1)), recipient: "sink",
+      }));
+      const manifest = { schemaVersion: "1", manifestId: "hostile", tools: [{ id: "pay", actionIds: actions.map((a) => a.id) }], actions, unsupported: [] };
+      const policy = {
+        schemaVersion: "1", policyId: "hostile", assets: [{ id: "usdc", symbol: "USDC", decimals: 6 }],
+        protectedBalances: { usdc: "100000000000" }, allowedRecipients: { usdc: ["sink"] },
+        perActionCaps: { usdc: "100000000000" }, cumulativeCaps: { usdc: "100000000000" },
+        requireUniqueNonce: false, maxConcurrency: 1, maxRecursionDepth: 0,
+      };
+      const compiled = await post(`${base}/v1/compilations`, { schemaVersion: "1", manifest, policy });
+      const compilationId = (compiled.json["data"] as unknown as { compilationId: string }).compilationId;
+
+      const started = Date.now();
+      const run = await post(`${base}/v1/runs`, { compilationId, adversarialRecipients: ["sink"] });
+      const elapsed = Date.now() - started;
+
+      expect(run.status).toBe(202);
+      const result = (run.json["data"] as unknown as { results: { status: string; unknownReason?: string }[] }).results[0];
+      // Truncated, and truncation is reported rather than passed off as a bound.
+      expect(result?.status).toBe("UNKNOWN");
+      expect(result?.unknownReason).toBe("MAX_STATES");
+      expect(elapsed).toBeLessThan(5_000);
+    } finally { server.close(); }
+  });
+});
+
 describe("durability", () => {
   it("serves a run created before a restart", async () => {
     const dir = mkdtempSync(join(tmpdir(), "worstcase-store-"));

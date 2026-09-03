@@ -13,7 +13,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { ENGINE_VERSION, ExplorationLimitsSchema, FixtureSchema, SCHEMA_VERSION, type EvidenceBundle } from "../../contracts/src/index.js";
+import { ENGINE_VERSION, ExplorationLimitsSchema, FixtureSchema, SCHEMA_VERSION } from "../../contracts/src/index.js";
 import { compileModel, DEFAULT_LIMITS, type CompiledModel } from "../../compiler/src/index.js";
 import { checkFixture, searchMaximumLoss } from "../../checker/src/index.js";
 import { createLocalEvidenceBundle } from "../../evidence/src/index.js";
@@ -50,6 +50,16 @@ export type ApiOptions = {
   /** Bearer keys. An empty list leaves the deployment deliberately open. */
   apiKeys?: readonly string[];
   rateLimit?: { limit: number; windowMs: number } | undefined;
+  /**
+   * Per-request search budget for this deployment.
+   *
+   * A single unbounded request was measured at ~36s of CPU and ~680MB of RSS,
+   * which a rate limit alone does not contain. Defaults are far below the
+   * schema's maxima, which exist for a local operator on their own machine.
+   */
+  ceilings?: { maxStates: number; timeoutMs: number; maxDepth: number };
+  /** Bound on cached compiled models, so distinct manifests cannot grow memory without limit. */
+  maxCachedCompilations?: number;
   /** Only set behind a proxy you control; otherwise x-forwarded-for is spoofable. */
   trustProxy?: boolean;
 };
@@ -72,6 +82,17 @@ export function createApi(options: ApiOptions = {}) {
   const auth = new ApiKeyAuth(options.apiKeys ?? []);
   const limiter = new RateLimiter(options.rateLimit?.limit ?? 60, options.rateLimit?.windowMs ?? 60_000);
   const trustProxy = options.trustProxy === true;
+  const ceilings = options.ceilings ?? { maxStates: 50_000, timeoutMs: 5_000, maxDepth: 32 };
+  const maxCached = options.maxCachedCompilations ?? 256;
+
+  /** Insertion-ordered eviction keeps the warm set bounded. */
+  function rememberCompiled(id: string, model: CompiledModel): void {
+    if (compiled.size >= maxCached) {
+      const oldest = compiled.keys().next();
+      if (!oldest.done) compiled.delete(oldest.value);
+    }
+    compiled.set(id, model);
+  }
 
   /** Rebuild a compiled model, from cache when warm and from the store when cold. */
   function loadCompilation(compilationId: string): { compiled: CompiledModel; manifest: unknown; policy: unknown } | null {
@@ -81,7 +102,7 @@ export function createApi(options: ApiOptions = {}) {
     if (warm !== undefined) return { compiled: warm, manifest: record.manifest, policy: record.policy };
     const rebuilt = compileModel(record.manifest, record.policy, record.limits);
     if (rebuilt.status !== "SUPPORTED") return null;
-    compiled.set(compilationId, rebuilt);
+    rememberCompiled(compilationId, rebuilt);
     return { compiled: rebuilt, manifest: record.manifest, policy: record.policy };
   }
 
@@ -153,11 +174,32 @@ export function createApi(options: ApiOptions = {}) {
         // Exploration limits decide how much of the state space is searched, so
         // a bad one silently changes what the bound means. Reject it as its own
         // error rather than folding it into a generic invalid-request.
-        let limits = DEFAULT_LIMITS;
-        if (input["limits"] !== undefined && Object.keys(input["limits"] as object).length > 0) {
-          const parsed = ExplorationLimitsSchema.safeParse({ ...DEFAULT_LIMITS, ...(input["limits"] as object) });
+        // This server's own defaults: the library's, held down to the ceiling.
+        // The library's defaults suit a local operator on their own machine and
+        // can legitimately exceed what a shared host will spend on one request.
+        const serverDefaults = {
+          ...DEFAULT_LIMITS,
+          maxStates: Math.min(DEFAULT_LIMITS.maxStates, ceilings.maxStates),
+          timeoutMs: Math.min(DEFAULT_LIMITS.timeoutMs, ceilings.timeoutMs),
+          maxDepth: Math.min(DEFAULT_LIMITS.maxDepth, ceilings.maxDepth),
+        };
+
+        let limits = serverDefaults;
+        const requested = (input["limits"] ?? {}) as Record<string, unknown>;
+        if (Object.keys(requested).length > 0) {
+          const parsed = ExplorationLimitsSchema.safeParse({ ...serverDefaults, ...requested });
           if (!parsed.success) {
             return fail(res, 400, requestId, "LIMIT_OUT_OF_RANGE", `Exploration limits are out of range: ${parsed.error.issues.map((i) => `${i.path.join(".")} ${i.message}`).join("; ")}`);
+          }
+          // Only what the caller actually asked for is judged against the ceiling.
+          // Rejecting them for a default they never set would be a confusing lie.
+          // Exceeding it is refused rather than clamped: a silently reduced budget
+          // changes what the returned bound covers without telling the caller.
+          const over = (Object.keys(ceilings) as (keyof typeof ceilings)[])
+            .filter((k) => requested[k] !== undefined && parsed.data[k] > ceilings[k])
+            .map((k) => `${k}=${parsed.data[k]} exceeds this server's ceiling of ${ceilings[k]}`);
+          if (over.length > 0) {
+            return fail(res, 400, requestId, "LIMIT_OUT_OF_RANGE", `${over.join("; ")}. Run the checker locally for a wider budget.`);
           }
           limits = parsed.data;
         }
@@ -174,6 +216,7 @@ export function createApi(options: ApiOptions = {}) {
           return ok(res, 201, requestId, { status: compiled.status, issues: compiled.issues });
         }
         store.put("compilations", compiled.compilationId, { manifest: input["manifest"], policy: input["policy"], limits });
+        rememberCompiled(compiled.compilationId, compiled);
         return ok(res, 201, requestId, {
           compilationId: compiled.compilationId, status: compiled.status,
           manifestHash: compiled.manifestHash, policyHash: compiled.policyHash, graphHash: compiled.graphHash,

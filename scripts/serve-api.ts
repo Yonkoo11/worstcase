@@ -27,6 +27,11 @@ startServer(port, {
   store: new FileStore(dataDir),
   apiKeys: keys,
   rateLimit: { limit, windowMs: 60_000 },
+  ceilings: {
+    maxStates: Number(process.env["WORSTCASE_MAX_STATES"] ?? 50_000),
+    timeoutMs: Number(process.env["WORSTCASE_TIMEOUT_MS"] ?? 5_000),
+    maxDepth: Number(process.env["WORSTCASE_MAX_DEPTH"] ?? 32),
+  },
   trustProxy: process.env["WORSTCASE_TRUST_PROXY"] === "1",
   ...(approved ? { approvalProvider: () => true } : {}),
 });
