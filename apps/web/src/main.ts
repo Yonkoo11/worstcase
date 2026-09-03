@@ -42,7 +42,7 @@ function escapeHtml(value: string): string {
 
 function moneyFor(action: DemoAction): string {
   if (action.amountBaseUnits === undefined) return "control";
-  return `${formatMoney(action.amountBaseUnits, state.selected.asset.decimals, 2)} ${state.selected.asset.symbol}`;
+  return `${formatMoney(action.amountBaseUnits, state.selected.asset.decimals, 2)} ${escapeHtml(state.selected.asset.symbol)}`;
 }
 
 function navButton(view: View, label: string): string {

@@ -236,7 +236,9 @@ main { flex: 1; }
 .button-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
 /* ---------- other views ---------- */
-.section-view { display: flex; flex-direction: column; gap: var(--s6); }
+.section-view { display: flex; flex-direction: column; gap: var(--s6); align-items: stretch; }
+/* A button is sized by its label, never stretched to the column width. */
+.section-view > .button { align-self: flex-start; }
 .section-heading .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--t3); }
 .section-heading h1 { font-size: clamp(28px, 3.4vw, 40px); line-height: 1.12; letter-spacing: -0.02em; margin: var(--s3) 0 0; font-weight: 600; }
 .section-heading p { color: var(--t2); margin: var(--s3) 0 0; max-width: 68ch; }
