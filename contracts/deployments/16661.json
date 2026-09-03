@@ -1,0 +1,9 @@
+{
+  "network": "mainnet",
+  "chainId": 16661,
+  "runRegistry": "0xf35bE6FFEBF91AcC27A78696cf912595C6b08AAA",
+  "deployer": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
+  "deployTx": "0xa58bf05e48748760fbd579d0c109da818fca98d476c08877f1ba41232ffc5216",
+  "rpcUrl": "https://evmrpc.0g.ai",
+  "explorer": "https://chainscan.0g.ai"
+}

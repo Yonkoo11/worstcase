@@ -190,6 +190,67 @@ function renderRun(): string {
       ${runButton()}
       <button class="button button-secondary" id="compare-policy">${state.selected.fixtureId === "policy-fix" ? "Return to vulnerable policy" : "Compare the policy fix"}</button>
     </div>
+  </section>
+  ${renderDepth()}`;
+}
+
+/**
+ * Everything below the fold.
+ *
+ * The bento answers the question in one screen, which is right for a first read,
+ * but it left the page exactly viewport-height with nothing to scroll to, so it
+ * read as thin. These sections are the rest of the real evidence: the whole
+ * corpus, how to check the result without trusting this site, and where the
+ * model stops. Nothing here is filler.
+ */
+function renderDepth(): string {
+  const anchor = state.selected.anchor;
+  const store = state.selected.storage;
+  const rows = artifacts.map((artifact) => {
+    const active = artifact.fixtureId === state.selected.fixtureId;
+    const complete = artifact.result.status === "COMPLETE";
+    const amount = complete
+      ? `${formatMoney(artifact.result.maximumLossBaseUnits ?? "0", artifact.asset.decimals, 2)} ${escapeHtml(artifact.asset.symbol)}`
+      : "UNKNOWN";
+    return `<button class="fixture-row" data-fixture="${escapeHtml(artifact.fixtureId)}" ${active ? 'aria-current="true"' : ""}>
+      <span class="fixture-index">${String(artifacts.indexOf(artifact) + 1).padStart(2, "0")}</span>
+      <span><strong>${escapeHtml(fixtureLabel(artifact.fixtureId))}</strong><small>${escapeHtml(artifact.description)}</small></span>
+      <b class="${BigInt(artifact.result.maximumLossBaseUnits ?? "0") > 0n ? "is-loss" : ""}">${escapeHtml(amount)}</b>
+    </button>`;
+  }).join("");
+
+  const verifyCmd = anchor === undefined ? "" : `cast call ${anchor.runRegistry} \\
+  "getAnchor(address,bytes32)((bytes32,bytes32,uint256,bytes32,uint8,address,uint64))" \\
+  ${anchor.submitter} \\
+  ${state.selected.bundleRoot} \\
+  --rpc-url ${anchor.chainId === 16661 ? "https://evmrpc.0g.ai" : "https://evmrpc-testnet.0g.ai"}`;
+
+  return `<section class="depth" aria-label="More about this run">
+    <section class="depth-block">
+      <h2>The whole corpus</h2>
+      <p>Five planted attacks, a clean agent, and the same agent after one policy edge is tightened. Each is its own model, so the family it plants is what binds its number. Select any to load it.</p>
+      <div class="fixture-list">${rows}</div>
+    </section>
+
+    <section class="depth-block">
+      <h2>Check it without trusting this page</h2>
+      <p>The figure above is anchored on 0G Chain against the exact policy, graph and engine that produced it. Read it straight off the chain:</p>
+      ${anchor === undefined ? `<p class="cell-note">This run is not anchored, so there is nothing to read back.</p>` : `<pre class="verify"><code>${escapeHtml(verifyCmd)}</code></pre>
+      <div class="depth-links">
+        <a href="${escapeHtml(anchor.explorerTx)}" target="_blank" rel="noopener noreferrer">Anchor transaction</a>
+        <a href="${escapeHtml(anchor.explorerContract)}" target="_blank" rel="noopener noreferrer">RunRegistry contract</a>
+        ${store === undefined || store.explorerTx === null ? "" : `<a href="${escapeHtml(store.explorerTx)}" target="_blank" rel="noopener noreferrer">Storage upload</a>`}
+      </div>`}
+    </section>
+
+    <section class="depth-block">
+      <h2>Where the model stops</h2>
+      <p>An action the compiler cannot model is refused rather than skipped, because skipping one would quietly lower the bound.</p>
+      <div class="model-table" role="table" aria-label="Model support">
+        <div role="row"><span role="columnheader">Action family</span><span role="columnheader">Status</span><span role="columnheader">Bound effect</span></div>
+        ${[["transfer", "Supported", "Balance, caps, recipient, nonce"], ["callPaidTool", "Supported", "Quoted maximum transfer"], ["spawn", "Supported", "Snapshot concurrency"], ["recurse", "Supported", "Bounded depth"], ["arbitrary side effect", "Unsupported", "Returns UNKNOWN"]].map(([action, status, effect]) => `<div role="row"><code role="cell">${action}</code><span role="cell" class="${status === "Unsupported" ? "is-loss" : ""}">${status}</span><span role="cell">${effect}</span></div>`).join("")}
+      </div>
+    </section>
   </section>`;
 }
 

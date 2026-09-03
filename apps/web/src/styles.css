@@ -235,6 +235,28 @@ main { flex: 1; }
 .button[aria-busy="true"] { opacity: 0.85; }
 .button-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
+/* ---------- below the fold ----------
+ * The bento answers the question in one screen. These blocks give the page the
+ * depth it lacked when it ended exactly at the viewport with nothing to scroll to.
+ */
+.depth { display: flex; flex-direction: column; gap: var(--s12); margin-top: var(--s12); padding-top: var(--s10); border-top: 1px solid var(--rule); }
+.depth-block { display: flex; flex-direction: column; gap: var(--s4); }
+.depth-block h2 { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; margin: 0; color: var(--t1); }
+.depth-block > p { margin: 0; color: var(--t2); font-size: 16px; max-width: 74ch; }
+.verify {
+  margin: 0; padding: var(--s5); border-radius: var(--r-lg); overflow-x: auto;
+  background: var(--b1); border: 1px solid var(--rule);
+}
+.verify code { font-family: var(--mono); font-size: 14px; color: var(--t2); white-space: pre; }
+.depth-links { display: flex; gap: var(--s5); flex-wrap: wrap; }
+.depth-links a {
+  font-family: var(--mono); font-size: 14px; color: var(--ok); text-decoration: none;
+  border-bottom: 1px solid var(--ok-line); padding-bottom: 2px;
+  transition: color var(--norm) var(--e), border-color var(--norm) var(--e);
+}
+@media (hover: hover) { .depth-links a:hover { color: var(--t1); border-bottom-color: var(--t1); } }
+.depth-links a:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(224, 96, 58, 0.45); border-radius: var(--r); }
+
 /* ---------- other views ---------- */
 .section-view { display: flex; flex-direction: column; gap: var(--s6); align-items: stretch; }
 /* A button is sized by its label, never stretched to the column width. */

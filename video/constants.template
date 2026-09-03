@@ -1,0 +1,75 @@
+// AUTO-GENERATED from build/timings.json by gen-constants.py — GAP MODE.
+// Audio is truth: every frame count below comes from ffprobe on the real narration.
+export const FPS = 30;
+export const W = 1920;
+export const H = 1080;
+
+// GAP mode: TTS narration at 1.0x with a silent tail before each crossfade.
+// atempo=1.12 was applied at generation time, so NO playbackRate here — stacking
+// the two would play the voice at 1.34x and sound clipped.
+export const PACING_MODE = "gap" as const;
+export const PLAYBACK_RATE = 1.0;
+export const SCENE_GAP = Math.round(1.5 * FPS);
+export const CROSSFADE = 15;
+
+// The product's own design system, not an archetype default.
+export const COLORS = {
+  bg: "#0c0d0f", bgCard: "#131417", bgElevated: "#191b1f", bgOverlay: "#212429",
+  accent: "#e0603a", accentDim: "#8f3a22", accentBright: "#ec6f48",
+  accentGlow: "rgba(224, 96, 58, 0.15)",
+  ok: "#7fa06b", amber: "#d9a441",
+  white: "#e6e8ea", offWhite: "#9ba1a8", muted: "#666d75",
+  border: "rgba(230, 232, 234, 0.09)", borderStrong: "rgba(230, 232, 234, 0.17)",
+} as const;
+
+export const TERMINAL = {
+  bg: "#12100e", text: "#c9d9cd", green: "#7fa06b", yellow: "#d9a441",
+  red: "#e0603a", blue: "#58a6ff", prompt: "#e0603a", dim: "#666d75",
+} as const;
+
+export const AUDIO_DURATIONS = {
+@AUDIO@
+} as const;
+
+export const SCENE_DURATIONS = {
+@SCENES@
+} as const;
+
+export const TOTAL_FRAMES = Object.values(SCENE_DURATIONS).reduce((a, b) => a + b, 0)
+  - CROSSFADE * (Object.keys(SCENE_DURATIONS).length - 1);
+
+export const AUDIO_FILES: Record<keyof typeof AUDIO_DURATIONS, string> = {
+@FILES@
+};
+
+export const VIDEO_FILES = {
+  interface: "video/interface.mp4",
+  evidence: "video/evidence.mp4",
+} as const;
+
+// Must mirror the TransitionSeries order exactly; Subtitles walks this to build
+// global offsets. Diverge and every subtitle after the divergence fires wrong.
+export const SCENE_ORDER = [@ORDER@] as const;
+
+// Scene-local frames. Derived from the exact per-line clip durations, which are
+// ground truth here because one clip was generated per subtitle line. Whisper's
+// base model was run to check this and quantises to whole seconds, so it cannot
+// improve on the derivation; drift stayed under its own resolution.
+export const SUBTITLES = {
+@SUBS@
+} as const;
+
+// Real values from the shipped engine and the live chain. Nothing invented.
+export const TERMINAL_LINES = [
+  { text: "~/worstcase $ npx vite-node scripts/anchor-run.ts prompt-injection", color: "prompt" },
+  { text: "Fixture:        prompt-injection", color: "dim" },
+  { text: "Result:         COMPLETE", color: "green" },
+  { text: "Maximum loss:   27500000 base units", color: "red" },
+  { text: "Bundle root:    0x304ff5d34bef92e9ddd4e5cbfe8bb83c8629f5aa1da20c4ea1b8ad3816cd27b0", color: "text" },
+  { text: "Anchor request: contracts/deployments/anchor-request.json", color: "dim" },
+] as const;
+
+export const SOCIAL_FPS = 30;
+export const SOCIAL_W = 1080;
+export const SOCIAL_H = 1920;
+export const SOCIAL_DURATION = 11 * SOCIAL_FPS;

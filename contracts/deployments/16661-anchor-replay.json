@@ -1,0 +1,12 @@
+{
+  "network": "mainnet",
+  "chainId": 16661,
+  "runRegistry": "0xf35bE6FFEBF91AcC27A78696cf912595C6b08AAA",
+  "submitter": "0xf9946775891a24462cD4ec885d0D4E2675C84355",
+  "fixtureId": "replay",
+  "bundleRoot": "0x4746ff78fb159f1987a63d19a2c44952b14ee73da7b5e9dbefe0605910e8c10f",
+  "maximumLossBaseUnits": "20000000",
+  "anchorTx": "0x2d80c279049789e3366433a960ec59467c532c5c69400e0eeca0654f41ec93ef",
+  "explorerTx": "https://chainscan.0g.ai/tx/0x2d80c279049789e3366433a960ec59467c532c5c69400e0eeca0654f41ec93ef",
+  "explorerContract": "https://chainscan.0g.ai/address/0xf35bE6FFEBF91AcC27A78696cf912595C6b08AAA"
+}

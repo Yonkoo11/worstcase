@@ -73,3 +73,8 @@ api/index.js
 .vercel/
 .vercel
 .env*.local
+
+# Remotion video project (large, local only)
+video/node_modules/
+video/out/
+video/public/video/

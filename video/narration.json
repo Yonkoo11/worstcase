@@ -1,0 +1,41 @@
+{
+  "voice": "en-US-AndrewMultilingualNeural",
+  "note": "caption is what the viewer reads; tts respells only tokens a voice mispronounces (0G -> zero G, AI -> A.I.).",
+  "scenes": [
+    { "id": "hook", "lines": [
+      { "caption": "Give an AI agent a wallet, and you have built a spending program", "tts": "Give an A.I. agent a wallet, and you have built a spending program" },
+      { "caption": "that a language model steers at runtime.", "tts": "that a language model steers at runtime." },
+      { "caption": "Before you fund it: how much can actually leave?", "tts": "Before you fund it: how much can actually leave?" }
+    ]},
+    { "id": "problem", "lines": [
+      { "caption": "The usual answer is a per-call limit.", "tts": "The usual answer is a per-call limit." },
+      { "caption": "Per-call limits don't compose.", "tts": "Per-call limits don't compose." },
+      { "caption": "Two payments that each pass a fifty dollar cap can still move sixty,", "tts": "Two payments that each pass a fifty dollar cap can still move sixty," },
+      { "caption": "if they race the same budget. A single-step guard can't see a multi-step path.", "tts": "if they race the same budget. A single-step guard can't see a multi-step path." }
+    ]},
+    { "id": "terminal", "lines": [
+      { "caption": "Worstcase compiles the agent's tools and spending policy into a state graph,", "tts": "Worstcase compiles the agent's tools and spending policy into a state graph," },
+      { "caption": "then searches every reachable state for the most money that can leave.", "tts": "then searches every reachable state for the most money that can leave." },
+      { "caption": "Twenty-seven fifty, on this manifest.", "tts": "Twenty-seven fifty, on this manifest." },
+      { "caption": "A deterministic checker computed that. Not a model.", "tts": "A deterministic checker computed that. Not a model." }
+    ]},
+    { "id": "interface", "lines": [
+      { "caption": "The figure alone isn't useful, so it names the call that realises it,", "tts": "The figure alone isn't useful, so it names the call that realises it," },
+      { "caption": "and the policy rule that let it through.", "tts": "and the policy rule that let it through." },
+      { "caption": "Beside it sits the proof: everything the search ruled out.", "tts": "Beside it sits the proof: everything the search ruled out." },
+      { "caption": "Tighten one policy edge and the same agent drops to zero,", "tts": "Tighten one policy edge and the same agent drops to zero," },
+      { "caption": "with the rule that blocked it named.", "tts": "with the rule that blocked it named." }
+    ]},
+    { "id": "evidence", "lines": [
+      { "caption": "Every run is stored on 0G Storage and anchored on 0G Chain.", "tts": "Every run is stored on zero G Storage and anchored on zero G Chain." },
+      { "caption": "Storage isn't trusted on its word: the bundle is downloaded back", "tts": "Storage isn't trusted on its word: the bundle is downloaded back" },
+      { "caption": "and its Merkle root re-derived before anything is recorded.", "tts": "and its Merkle root re-derived before anything is recorded." },
+      { "caption": "The chain anchor binds the figure to the exact policy and engine that produced it.", "tts": "The chain anchor binds the figure to the exact policy and engine that produced it." }
+    ]},
+    { "id": "close", "lines": [
+      { "caption": "0G Compute stays out: five advisories with no fix at any version.", "tts": "zero G Compute stays out: five advisories with no fix at any version." },
+      { "caption": "Two surfaces are live, and the third says so rather than pretending.", "tts": "Two surfaces are live, and the third says so rather than pretending." },
+      { "caption": "Worstcase. Know the worst-case spend before you fund the agent.", "tts": "Worstcase. Know the worst-case spend before you fund the agent." }
+    ]}
+  ]
+}

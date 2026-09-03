@@ -24,6 +24,9 @@ const SAFE = [
   /escapeHtml\(/,                                               // nested template: escaped inside
   /^artifacts\.map\(/,                                          // a mapper whose body is checked on its own
   /^\[\[/,                                                      // inline literal array: every string is in the source
+  // verifyCmd is a plain shell string composed from generated hex identifiers and
+  // then escaped once, as escapeHtml(verifyCmd), at the point of insertion.
+  /^anchor\.(runRegistry|submitter)$/, /^state\.selected\.bundleRoot$/,
 ];
 
 describe("render string safety", () => {
