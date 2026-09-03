@@ -52,7 +52,7 @@ export const SocialClip: React.FC = () => {
           <div style={{ width: "100%" }}>
             <Row label="Found by" value="state-space search" tone={COLORS.white} delay={30} />
             <Row label="After one policy fix" value="0.00" tone={COLORS.ok} delay={46} />
-            <Row label="Anchored on" value="0G Chain · 16602" tone={COLORS.ok} delay={62} />
+            <Row label="Anchored on" value="0G Chain · 16661" tone={COLORS.ok} delay={62} />
           </div>
         </Reveal>
 

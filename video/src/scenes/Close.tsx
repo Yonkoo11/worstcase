@@ -32,7 +32,7 @@ export const Close: React.FC = () => {
             display: "flex", borderRadius: 14, overflow: "hidden",
             border: `1px solid ${COLORS.border}`, background: COLORS.bgCard, width: "fit-content",
           }}>
-            <Fact k="0G Chain" v="anchored · 16602" tone={COLORS.ok} />
+            <Fact k="0G Chain" v="anchored · 16661" tone={COLORS.ok} />
             <Fact k="0G Storage" v="re-verified" tone={COLORS.ok} />
             <Fact k="0G Compute" v="not live — stated" tone={COLORS.amber} />
           </div>
