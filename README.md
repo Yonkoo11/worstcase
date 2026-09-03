@@ -131,10 +131,16 @@ curl -s -X POST localhost:8787/v1/runs -H 'content-type: application/json' \
 
 The eight endpoints in [`docs/openapi.yaml`](docs/openapi.yaml) are implemented in `packages/api`, on `node:http` with no additional dependencies, so exposing an API does not cost the workspace its zero-advisory dependency graph.
 
-Two behaviours are worth calling out, both covered by tests:
+Behaviours worth calling out, all covered by tests:
 
 - **Outward writes are refused by default.** Publishing evidence to 0G Storage or anchoring on 0G Chain returns `403 EXTERNAL_WRITE_NOT_APPROVED` unless the server is started with an approval. An HTTP route is not an exemption from the approval boundary the rest of the system enforces.
 - **A fixture cannot be run against an unrelated model.** Fixtures name both a model and the recipients that count as loss, so pairing one fixture's recipients with someone else's compilation returns zero, which reads as a pass while answering a different question. That mismatch is a `409`, not a quiet zero.
+- **The per-request search budget is capped, and exceeding it is refused rather than clamped.** Stress testing measured a single unbounded request at roughly 36 seconds of CPU and 680 MB of RSS, which a rate limit does not contain because the cost sits inside one request. The server holds its own ceiling below the schema maxima and returns `LIMIT_OUT_OF_RANGE`, because a silently reduced budget would change what the returned bound covers without telling the caller.
+- **Bearer authentication**, compared by digest under `timingSafeEqual`. An empty key list means the deployment is deliberately open; blank entries cannot silently open one that meant to be closed.
+- **Rate limiting**, checked before authentication so an unauthenticated flood cannot spend the server's time on key comparison. `x-forwarded-for` is trusted only when the deployment declares it sits behind a proxy, because trusting it otherwise lets a caller mint a new identity per request and turn the limiter off.
+- **Durable records** written with write-then-rename, so a crash mid-write leaves the previous record intact rather than a truncated one, and record ids that could escape the store directory are rejected.
+
+[`docs/CODE-REVIEW.md`](docs/CODE-REVIEW.md) records the adversarial pass these came out of, including what was measured and what remains open.
 
 ---
 
@@ -165,7 +171,7 @@ Requires Node.js 22+ and [Foundry](https://getfoundry.sh).
 
 ```bash
 npm install
-npm test                 # 115 TypeScript tests across 15 files
+npm test                 # 127 TypeScript tests across 16 files
 forge test --offline     # 5 Solidity tests, no external libs
 npm run typecheck        # strict, no errors
 ```
@@ -241,7 +247,7 @@ Deeper documents: [`docs/model-semantics.md`](docs/model-semantics.md), [`docs/t
 Stated plainly, because a security tool that overstates itself is the thing it claims to prevent.
 
 - **0G Compute is not live.** The Compute SDK's own source shows that generating request headers can trigger an on-chain balance check and provider funding path, so it cannot be treated as read-only or run ahead of a funding approval boundary. It stays a typed port until that runs behind the isolated adapter (container policy, egress allowlist, mutation journal, process supervisor) that is already built and tested. Findings are in [`reports/0g-sdk-dependency-risk.md`](reports/0g-sdk-dependency-risk.md).
-- **The Storage SDK was admitted under pinned overrides, not as-is.** Installed alone it pulls 5 advisories, 4 of them high, from `axios`, `ws` and `ethers`. The workspace pins all three past their advisories through `overrides`, which brings `npm audit` to zero across 131 packages, and a live upload-download round trip proves the SDK still works with the patched versions rather than assuming it. If that audit stops reading zero, this integration is a regression and should be treated as one.
+- **The Storage SDK was admitted under pinned overrides, not as-is.** Installed alone it pulls 5 advisories, 4 of them high, from `axios`, `ws` and `ethers`. The workspace pins all three past their advisories through `overrides`, which brings `npm audit` to zero across the workspace's 180 packages, and a live upload-download round trip proves the SDK still works with the patched versions rather than assuming it. If that audit stops reading zero, this integration is a regression and should be treated as one.
 - **Testnet, not mainnet.** Everything above is 0G Galileo, chain 16602. Mainnet deployment is the next step.
 - **The bound is conservative within a declared model.** It is not formal verification of an arbitrary agent, and it does not prove an agent is safe. It answers a narrower question honestly.
 - **Fixtures are synthetic.** All adversarial balances and effects are planted. No real funds move anywhere in this repository.
