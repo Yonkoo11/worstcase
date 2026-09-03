@@ -78,3 +78,8 @@ api/index.js
 video/node_modules/
 video/out/
 video/public/video/
+
+# Video working data: raw frames and generated audio are rebuildable
+video/frames/
+video/build/
+video/public/audio/
