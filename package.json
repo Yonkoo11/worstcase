@@ -1,6 +1,6 @@
 {
-  "name": "losspath",
-  "version": "0.0.0",
+  "name": "worstcase",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -56,5 +56,11 @@
     "ws": "^8.21.0",
     "ethers": "^6.17.0",
     "axios": "^1.12.0"
+  },
+  "description": "Pre-funding model checker for AI agents with payment-capable tools: the maximum reachable loss and the shortest call sequence that reaches it.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Yonkoo11/worstcase.git"
   }
 }

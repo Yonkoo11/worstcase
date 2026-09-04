@@ -1,5 +1,5 @@
 import { createInterface } from "node:readline";
-import { AdapterRequestSchema, AdapterResponseSchema, hashAdapterBytes } from "@losspath/zerog";
+import { AdapterRequestSchema, AdapterResponseSchema, hashAdapterBytes } from "@worstcase/zerog";
 
 const lines = createInterface({ input: process.stdin, crlfDelay: Infinity })[Symbol.asyncIterator]();
 const requestLine = await lines.next();

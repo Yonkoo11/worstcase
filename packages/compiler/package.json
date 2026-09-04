@@ -1,5 +1,5 @@
 {
-  "name": "@losspath/compiler",
+  "name": "@worstcase/compiler",
   "version": "0.0.0",
   "private": true,
   "type": "module",

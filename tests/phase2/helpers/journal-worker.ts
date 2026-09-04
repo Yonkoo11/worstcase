@@ -1,4 +1,4 @@
-import { FileMutationJournal } from "@losspath/zerog";
+import { FileMutationJournal } from "@worstcase/zerog";
 
 const [mode, directory, idempotencyKey, canonicalRequestHash] = process.argv.slice(2);
 if (

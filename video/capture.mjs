@@ -41,6 +41,12 @@ await page.goto(SITE, { waitUntil: "networkidle2" });
 await page.evaluate(CURSOR);
 await sleep(900);
 
+// Interactions that find nothing are recorded, not shrugged off. A renamed button
+// once turned a whole segment into 41 seconds of the wrong screen while the
+// narration said the loss drops to zero, and nothing surfaced it until the render.
+const missedClicks = [];
+const missedPoints = [];
+
 const click = async (label) => {
   const box = await page.evaluate((needle) => {
     const el = [...document.querySelectorAll("button")].find((b) => (b.textContent || "").trim().toLowerCase().includes(needle.toLowerCase()));
@@ -48,7 +54,11 @@ const click = async (label) => {
     const r = el.getBoundingClientRect();
     return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
   }, label);
-  if (box === null) return false;
+  if (box === null) {
+    console.error(`MISS: no button matching "${label}" — this segment will show the wrong screen`);
+    missedClicks.push(label);
+    return false;
+  }
   await page.evaluate((x, y) => window.__mv(x, y), box.x, box.y);
   await sleep(700);
   await page.evaluate((needle) => {
@@ -66,7 +76,14 @@ const point = async (needle) => {
     const r = el.getBoundingClientRect();
     return { x: r.left + Math.min(r.width / 2, 320), y: r.top + r.height / 2 };
   }, needle);
-  if (box !== null) await page.evaluate((x, y) => window.__mv(x, y), box.x, box.y);
+  if (box === null) {
+    // A missed pointer is milder than a missed click: the footage is still the right
+    // screen, the cursor just never arrives. Recorded so it is visible, not fatal.
+    console.warn(`miss: nothing matching "${needle}" to point at`);
+    missedPoints.push(needle);
+    return;
+  }
+  await page.evaluate((x, y) => window.__mv(x, y), box.x, box.y);
 };
 
 let frame = 0;
@@ -107,3 +124,12 @@ recording = false;
 await recorder;
 await browser.close();
 console.log(`${segment}: ${frame} frames`);
+if (missedPoints.length > 0) {
+  console.warn(`${segment}: cursor never reached ${missedPoints.join(", ")}`);
+}
+if (missedClicks.length > 0) {
+  console.error(`${segment}: no button matched ${missedClicks.join(", ")}`);
+  console.error("The screen never changed, so this footage shows something other than");
+  console.error("what the script and the narration describe. Do not ship it.");
+  process.exitCode = 1;
+}

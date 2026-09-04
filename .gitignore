@@ -66,6 +66,8 @@ AGENTS.md
 
 # Demo video working files (large, local only)
 .video/
+media/
+.publish-review
 
 # Generated serverless bundle
 api/index.js

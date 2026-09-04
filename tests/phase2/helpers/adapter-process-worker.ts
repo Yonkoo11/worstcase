@@ -1,4 +1,4 @@
-import { AdapterRequestSchema, AdapterResponseSchema, hashAdapterBytes } from "@losspath/zerog";
+import { AdapterRequestSchema, AdapterResponseSchema, hashAdapterBytes } from "@worstcase/zerog";
 
 const mode = process.argv[2];
 const chunks: Buffer[] = [];
