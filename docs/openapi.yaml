@@ -4,8 +4,8 @@ info:
   version: 1.0.0-contract
   description: Bounded economic model checking for supported payment-capable agent tools.
 servers:
-  - url: http://localhost:3001
-    description: Local development
+  - url: http://127.0.0.1:8787
+    description: Local development, the default port of `npm run serve:api`
 paths:
   /v1/compilations:
     post:
