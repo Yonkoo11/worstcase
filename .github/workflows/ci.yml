@@ -1,0 +1,50 @@
+name: Verify
+
+# The deploy workflow runs typecheck and the TypeScript suite before publishing,
+# which protects the site. It does not run the Solidity tests, so a contract change
+# could break `forge test` and every green check would still say the repo is fine.
+# This runs the same gate a release runs locally, on every push and pull request.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+# A newer push makes an in-flight run of the same branch pointless.
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Latest 22.x. The suite spawns TypeScript workers with
+          # --experimental-strip-types, which needs 22.6.0 or newer; the preinstall
+          # guard in package.json fails loudly with the reason if that ever regresses.
+          node-version: "22"
+          cache: npm
+
+      - uses: foundry-rs/foundry-toolchain@v1
+
+      - run: npm ci
+
+      # verify-release.sh runs `forge test --offline`, which proves the contracts
+      # need no external Solidity dependencies. --offline also means solc is never
+      # downloaded, and a fresh runner has no solc cached, so the gate would fail on
+      # a missing compiler rather than on anything real. This one online build
+      # installs the pinned solc; the offline test then runs against that cache.
+      - run: forge build
+        env:
+          FOUNDRY_PROFILE: default
+
+      # One gate, defined once. CI running its own list of steps is how CI and the
+      # local check drift until one of them is quietly wrong.
+      - run: ./scripts/verify-release.sh

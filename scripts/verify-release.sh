@@ -8,7 +8,8 @@
 
 set -uo pipefail
 cd "$(dirname "$0")/.."
-export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
+# This machine keeps node 22 outside the default PATH; CI and other machines do not.
+[ -d /opt/homebrew/opt/node@22/bin ] && export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
 FAILED=0
 step() { printf '\n== %s\n' "$1"; }
 ok()   { printf '   ok   %s\n' "$1"; }
