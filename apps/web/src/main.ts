@@ -1,7 +1,7 @@
 import "./styles.css";
 import artifactData from "./generated/demo-artifacts.json" with { type: "json" };
 import type { DemoArtifact, DemoAction } from "../scripts/demo-artifacts.js";
-import { actionById, fixtureLabel, formatMoney, resultHeadline, shortHash } from "./view-model.js";
+import { actionById, escapeHtml, fixtureLabel, formatMoney, resultHeadline, shortHash } from "./view-model.js";
 
 type View = "run" | "fixtures" | "evidence" | "model";
 
@@ -53,10 +53,6 @@ const state: {
 };
 
 let replayToken = 0;
-
-function escapeHtml(value: string): string {
-  return value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character] ?? character);
-}
 
 function moneyFor(action: DemoAction): string {
   if (action.amountBaseUnits === undefined) return "control";

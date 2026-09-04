@@ -51,6 +51,44 @@ grep -rE "0x[0-9a-fA-F]{64}" --include="*.sol" --include="*.py" --include="*.ts"
 5. File an incident note in `ai/incidents/YYYY-MM-DD-leak.md` with: what leaked, how, blast radius, mitigation timeline.
 6. Add the failure mode to the project's threat model in `ai/sponsor-integration.md`.
 
+## Untrusted text reaching the DOM
+
+The interface renders by concatenating HTML strings and assigning them to `innerHTML`.
+That is a deliberate choice, and it is the one place in this project where attacker
+influenced text meets an execution sink, so it is written down rather than assumed safe.
+
+**What is attacker influenced.** Anything read back from a chain or an API: asset symbols,
+recipient labels, addresses, bundle roots, error messages returned by a node. A token can be
+deployed under any name its author likes, including `<img src=x onerror=...>`. Fixture data is
+authored in this repository and is not hostile, but it travels the same code path, so no
+distinction is made at render time.
+
+**The control.** Every interpolation is passed through `escapeHtml`, which replaces
+`& < > ' "` with entities. Nothing reaches `innerHTML` unescaped unless it is a literal in
+the source.
+
+**How the control is enforced.** `tests/phase3/render-safety.test.ts` does two things.
+It reads `apps/web/src/main.ts` and walks every interpolation in the file, failing unless each
+one is escaped or provably a literal. Then it imports `escapeHtml` and asserts what it does to
+hostile input: the five characters individually, plus the payloads this product invites, such as
+an asset symbol of `<img src=x onerror="alert(1)">` and an attribute-breaking `" onmouseover=`.
+
+`escapeHtml` lives in `apps/web/src/view-model.ts` rather than `main.ts` for that reason.
+`main.ts` renders at import time, so a test cannot import it, and an earlier version of this
+suite settled for checking that the five characters appeared somewhere in the function's source
+text. That check was weak enough to pass a broken implementation: removing `<` from the escape
+pattern leaves `"<": "&lt;"` in the body, so the source still contained the character while the
+function no longer escaped it. The behavioural tests fail on exactly that edit.
+
+This is not theoretical. Two unescaped interpolations shipped and were caught by a pre-push hook,
+and a third, `state.selected.asset.symbol`, was found only when that test was written.
+
+**Known limitation, stated plainly.** This is a convention enforced by a test, not a structural
+guarantee. Building DOM nodes and assigning `textContent` would make the class of bug impossible
+rather than merely detected. The pre-push gate flags every `innerHTML` in changed files for
+exactly this reason and has to be overridden deliberately, per push, with `ALLOW_HTML_SINKS=1`.
+Treat that override as a decision to re-check the test above, not as a formality.
+
 ## Default deny
 
 If any tool, hook, or workflow is unclear about whether it might touch a key — assume YES and apply the rules. This file is the canonical source. Project-level deviations require explicit operator approval.

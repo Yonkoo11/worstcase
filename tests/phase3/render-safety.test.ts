@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { escapeHtml } from "../../apps/web/src/view-model.js";
 
 /**
  * The interface is rendered by concatenating HTML strings, so an unescaped
@@ -41,13 +42,34 @@ describe("render string safety", () => {
     expect(unsafe, `Unescaped interpolation(s) reaching innerHTML: ${unsafe.join(" | ")}`).toEqual([]);
   });
 
-  it("keeps an escapeHtml that neutralises the characters that matter", async () => {
-    // Re-implemented here rather than imported, so a weakened implementation in
-    // main.ts fails this test instead of silently agreeing with it.
-    const escaped = source.match(/function escapeHtml[\s\S]*?\n}/)?.[0] ?? "";
-    for (const character of ["&", "<", ">", '"', "'"]) {
-      expect(escaped, `escapeHtml must handle ${character}`).toContain(character);
-    }
+  it("neutralises every character that can break out of HTML", () => {
+    // Asserts behaviour, not source text. Reading the function body only proved the
+    // five characters appeared somewhere inside it, which a broken implementation
+    // could satisfy while escaping nothing.
+    expect(escapeHtml("&")).toBe("&amp;");
+    expect(escapeHtml("<")).toBe("&lt;");
+    expect(escapeHtml(">")).toBe("&gt;");
+    expect(escapeHtml('"')).toBe("&quot;");
+    expect(escapeHtml("'")).toBe("&#39;");
+  });
+
+  it("defuses the payloads this product invites", () => {
+    // A token can be deployed under any name, and this tool exists to be pointed at
+    // hostile things, so these are the realistic inputs rather than invented ones.
+    const symbol = `<img src=x onerror="alert(1)">`;
+    expect(escapeHtml(symbol)).toBe("&lt;img src=x onerror=&quot;alert(1)&quot;&gt;");
+    expect(escapeHtml(symbol)).not.toContain("<");
+
+    const attribute = `" onmouseover="alert(1)`;
+    expect(escapeHtml(attribute)).not.toContain('"');
+
+    const closing = "</script><script>alert(1)</script>";
+    expect(escapeHtml(closing)).not.toContain("<");
+  });
+
+  it("leaves ordinary text alone", () => {
+    expect(escapeHtml("27.50 USDC")).toBe("27.50 USDC");
+    expect(escapeHtml("prompt-injection")).toBe("prompt-injection");
   });
 });
 
