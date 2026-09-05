@@ -1,7 +1,8 @@
 import "./styles.css";
 import artifactData from "./generated/demo-artifacts.json" with { type: "json" };
-import type { DemoArtifact, DemoAction } from "../scripts/demo-artifacts.js";
-import { actionById, escapeHtml, fixtureLabel, formatMoney, resultHeadline, shortHash } from "./view-model.js";
+import type { DemoArtifact } from "../scripts/demo-artifacts.js";
+import { actionById, fixtureLabel, formatMoney, shortHash } from "./view-model.js";
+import { h, s, frag, replaceChildren, type Child } from "./dom.js";
 
 type View = "run" | "fixtures" | "evidence" | "model";
 
@@ -16,12 +17,11 @@ function readRoute(): { view: View; fixtureId: string | null } {
 }
 
 function writeRoute(): void {
-  // Built by concatenation, not a template literal: the render-safety gate treats
-  // every interpolation in this file as an HTML sink, and this one is a URL fragment.
   const view = VIEWS.find((candidate) => candidate === state.view) ?? "run";
   const next = "#" + view + "/" + encodeURIComponent(state.selected.fixtureId);
   if (window.location.hash !== next) window.history.replaceState(null, "", next);
 }
+
 type RunStage = "ready" | "replaying" | "verifying" | "complete";
 
 const appRoot = document.querySelector<HTMLDivElement>("#app");
@@ -29,7 +29,11 @@ if (appRoot === null) throw new Error("app root is missing");
 const app: HTMLDivElement = appRoot;
 
 function fatal(message: string): never {
-  app.innerHTML = `<main class="fatal-state"><div class="eyebrow">Artifact unavailable</div><h1>Worstcase could not load this checked run.</h1><p>${escapeHtml(message)}</p><button class="button button-primary" id="reload-app">Reload artifact</button></main>`;
+  replaceChildren(app, h("main", { class: "fatal-state" },
+    h("div", { class: "eyebrow" }, "Artifact unavailable"),
+    h("h1", {}, "Worstcase could not load this checked run."),
+    h("p", {}, message),
+    h("button", { class: "button button-primary", id: "reload-app" }, "Reload artifact")));
   document.querySelector<HTMLButtonElement>("#reload-app")?.addEventListener("click", () => window.location.reload());
   throw new Error(message);
 }
@@ -54,14 +58,9 @@ const state: {
 
 let replayToken = 0;
 
-function moneyFor(action: DemoAction): string {
-  if (action.amountBaseUnits === undefined) return "control";
-  return `${formatMoney(action.amountBaseUnits, state.selected.asset.decimals, 2)} ${escapeHtml(state.selected.asset.symbol)}`;
-}
-
-function navButton(view: View, label: string): string {
+function navButton(view: View, label: string): HTMLElement {
   const current = state.view === view;
-  return `<button class="nav-item" data-view="${view}" ${current ? 'aria-current="page"' : ""}>${label}</button>`;
+  return h("button", { class: "nav-item", "data-view": view, "aria-current": current && "page" }, label);
 }
 
 function stageCopy(): string {
@@ -70,50 +69,54 @@ function stageCopy(): string {
   return "Checked local artifact ready to replay";
 }
 
-function runButton(): string {
+function runButton(): HTMLElement {
   const busy = state.runStage === "replaying" || state.runStage === "verifying";
-  return `<button class="button button-primary" data-replay aria-busy="${busy}">
-    <span class="button-dot" aria-hidden="true"></span>${busy ? "Cancel replay" : "Replay fixture"}
-  </button>`;
+  return h("button", { class: "button button-primary", "data-replay": true, "aria-busy": String(busy) },
+    h("span", { class: "button-dot", "aria-hidden": "true" }),
+    busy ? "Cancel replay" : "Replay fixture");
 }
 
 /** The one (or few) calls that realise the bound. Small by design: a single-step
  * counterexample fills this cell instead of leaving a hollow ledger. */
-function renderCallCell(): string {
+function renderCallCell(): HTMLElement {
   const result = state.selected.result;
   const ids = result.shortestPathTransitionIds;
 
   if (ids.length === 0) {
-    return `<section class="cell cell-call" aria-labelledby="call-title">
-      <div class="cell-label"><h2 id="call-title">No reachable adversarial edge</h2></div>
-      <p class="cell-note">Nothing in this agent can move value to a declared adversarial recipient under its policy. The panel beside this one lists every path that was tried and the rule that stopped it.</p>
-    </section>`;
+    return h("section", { class: "cell cell-call", "aria-labelledby": "call-title" },
+      h("div", { class: "cell-label" }, h("h2", { id: "call-title" }, "No reachable adversarial edge")),
+      h("p", { class: "cell-note" }, "Nothing in this agent can move value to a declared adversarial recipient under its policy. The panel beside this one lists every path that was tried and the rule that stopped it."));
   }
 
-  const steps = ids.map((id, index) => {
+  const steps = ids.flatMap((id, index) => {
     const action = actionById(state.selected, id);
-    if (action === undefined) return "";
+    if (action === undefined) return [];
     const selected = state.selectedStep === id;
-    return `<button class="step ${selected ? "is-selected" : ""}" data-step="${escapeHtml(id)}" ${selected ? 'aria-current="step"' : ""}>
-      <span class="step-n">${index + 1}</span>
-      <span class="step-body"><strong>${escapeHtml(fixtureLabel(id))}</strong><small>${escapeHtml(action.type)}${action.recipient === undefined ? "" : ` · ${escapeHtml(action.recipient)}`} · balance ${escapeHtml(formatMoney(state.selected.protectedBalanceBaseUnits, state.selected.asset.decimals, 2))}</small></span>
-      <b class="${action.adversarial ? "is-loss" : ""}">${action.amountBaseUnits === undefined ? "—" : `−${escapeHtml(formatMoney(action.amountBaseUnits, state.selected.asset.decimals, 2))}`}</b>
-    </button>`;
-  }).join("");
+    const balance = formatMoney(state.selected.protectedBalanceBaseUnits, state.selected.asset.decimals, 2);
+    return [h("button", { class: `step ${selected ? "is-selected" : ""}`, "data-step": id, "aria-current": selected && "step" },
+      h("span", { class: "step-n" }, index + 1),
+      h("span", { class: "step-body" },
+        h("strong", {}, fixtureLabel(id)),
+        h("small", {}, action.type, action.recipient === undefined ? "" : ` · ${action.recipient}`, ` · balance ${balance}`)),
+      h("b", { class: action.adversarial ? "is-loss" : "" },
+        action.amountBaseUnits === undefined ? "—" : `−${formatMoney(action.amountBaseUnits, state.selected.asset.decimals, 2)}`))];
+  });
 
   const focused = state.selectedStep === null ? undefined : actionById(state.selected, state.selectedStep);
   const permitted = focused === undefined
-    ? ""
-    : `<div class="why">
-        <span class="why-label">Why it is permitted</span>
-        <code>allowedRecipients.${escapeHtml(state.selected.asset.id)} includes “${escapeHtml(focused.recipient ?? "n/a")}” → <b>${state.selected.allowedRecipients.includes(focused.recipient ?? "") ? "TRUE" : "FALSE"}</b></code>
-      </div>`;
+    ? null
+    : h("div", { class: "why" },
+      h("span", { class: "why-label" }, "Why it is permitted"),
+      h("code", {},
+        `allowedRecipients.${state.selected.asset.id} includes “${focused.recipient ?? "n/a"}” → `,
+        h("b", {}, state.selected.allowedRecipients.includes(focused.recipient ?? "") ? "TRUE" : "FALSE")));
 
-  return `<section class="cell cell-call" aria-labelledby="call-title">
-    <div class="cell-label"><h2 id="call-title">${ids.length === 1 ? "The call that realises it" : "The calls that realise it"}</h2><span>${ids.length} step${ids.length === 1 ? "" : "s"}</span></div>
-    <div class="steps">${steps}</div>
-    ${permitted}
-  </section>`;
+  return h("section", { class: "cell cell-call", "aria-labelledby": "call-title" },
+    h("div", { class: "cell-label" },
+      h("h2", { id: "call-title" }, ids.length === 1 ? "The call that realises it" : "The calls that realise it"),
+      h("span", {}, `${ids.length} step${ids.length === 1 ? "" : "s"}`)),
+    h("div", { class: "steps" }, ...steps),
+    permitted);
 }
 
 /** Why nothing loses more. A co-equal panel, because exhaustion is what makes the
@@ -122,49 +125,85 @@ function renderCallCell(): string {
  * Two kinds of entry, both real: edges a policy rule stopped, and edges the search
  * reached but which cannot increase the loss. Listing only the first left this panel
  * empty for permissive policies, which understated how much was actually examined. */
-function renderRuledOutCell(): string {
+function renderRuledOutCell(): HTMLElement {
   const result = state.selected.result;
   const onPath = new Set(result.shortestPathTransitionIds);
   const blockedIds = new Set(result.blocked.map((item) => item.transitionId));
 
-  const blockedRows = result.blocked.map((item) =>
-    `<li><button class="ruled-row" data-step="${escapeHtml(item.transitionId)}"><span class="struck">${escapeHtml(fixtureLabel(item.transitionId))}</span><code>${escapeHtml(item.policyCheckId)}</code></button></li>`);
+  const ruledRow = (id: string, reason: string): HTMLElement =>
+    h("li", {}, h("button", { class: "ruled-row", "data-step": id },
+      h("span", { class: "struck" }, fixtureLabel(id)),
+      h("code", {}, reason)));
+
+  const blockedRows = result.blocked.map((item) => ruledRow(item.transitionId, item.policyCheckId));
 
   // Reached, permitted, but cannot raise the bound — the other half of the proof.
   const inertRows = state.selected.actions
     .filter((action) => !onPath.has(action.id) && !blockedIds.has(action.id))
-    .map((action) => `<li><button class="ruled-row" data-step="${escapeHtml(action.id)}"><span class="struck">${escapeHtml(fixtureLabel(action.id))}</span><code>${action.adversarial ? "no further loss" : "not adversarial"}</code></button></li>`);
+    .map((action) => ruledRow(action.id, action.adversarial ? "no further loss" : "not adversarial"));
 
   const rows = [...blockedRows, ...inertRows];
-  const body = rows.length === 0
-    ? `<li class="ruled-empty">Every declared action lies on the maximum-loss path.</li>`
-    : rows.join("");
+  const body: Child[] = rows.length === 0
+    ? [h("li", { class: "ruled-empty" }, "Every declared action lies on the maximum-loss path.")]
+    : rows;
 
   const note = result.status === "UNKNOWN"
     ? "The search was truncated, so no figure is claimed. This is not a pass."
     : `The reachable space was explored and exhausted across ${result.exploredStates} state${result.exploredStates === 1 ? "" : "s"}. Had it been truncated, this panel would read UNKNOWN and no figure would be shown.`;
 
-  return `<section class="cell cell-ruled" aria-labelledby="ruled-title">
-    <div class="cell-label"><h2 id="ruled-title">Ruled out — why nothing loses more</h2><span>${rows.length} edge${rows.length === 1 ? "" : "s"}</span></div>
-    <ul class="ruled">${body}</ul>
-    <p class="cell-note">${escapeHtml(note)}</p>
-  </section>`;
+  return h("section", { class: "cell cell-ruled", "aria-labelledby": "ruled-title" },
+    h("div", { class: "cell-label" },
+      h("h2", { id: "ruled-title" }, "Ruled out — why nothing loses more"),
+      h("span", {}, `${rows.length} edge${rows.length === 1 ? "" : "s"}`)),
+    h("ul", { class: "ruled" }, ...body),
+    h("p", { class: "cell-note" }, note));
 }
 
-function renderEvidenceStrip(): string {
+function renderEvidenceStrip(): HTMLElement {
   const anchor = state.selected.anchor;
   const store = state.selected.storage;
-  const cell = (label: string, value: string, good = false) =>
-    `<div class="ev"><dt>${label}</dt><dd class="${good ? "is-good" : ""}">${value}</dd></div>`;
-  return `<dl class="cell cell-evidence">
-    ${cell("0G Storage", store === undefined ? "not uploaded" : "re-verified", store !== undefined)}
-    ${cell("0G Chain", anchor === undefined ? "not anchored" : `anchored · ${anchor.chainId}`, anchor !== undefined)}
-    ${cell("Bundle root", `<code>${escapeHtml(shortHash(state.selected.bundleRoot))}</code>`)}
-    ${cell("Engine", `<code>${escapeHtml(state.selected.engineVersion)}</code>`)}
-  </dl>`;
+  const cell = (label: string, value: Child, good = false) =>
+    h("div", { class: "ev" }, h("dt", {}, label), h("dd", { class: good ? "is-good" : "" }, value));
+  return h("dl", { class: "cell cell-evidence" },
+    cell("0G Storage", store === undefined ? "not uploaded" : "re-verified", store !== undefined),
+    cell("0G Chain", anchor === undefined ? "not anchored" : `anchored · ${anchor.chainId}`, anchor !== undefined),
+    cell("Bundle root", h("code", {}, shortHash(state.selected.bundleRoot))),
+    cell("Engine", h("code", {}, state.selected.engineVersion)));
 }
 
-function renderRun(): string {
+function fixtureRow(artifact: DemoArtifact): HTMLElement {
+  const active = artifact.fixtureId === state.selected.fixtureId;
+  const complete = artifact.result.status === "COMPLETE";
+  const amount = complete
+    ? `${formatMoney(artifact.result.maximumLossBaseUnits ?? "0", artifact.asset.decimals, 2)} ${artifact.asset.symbol}`
+    : "UNKNOWN";
+  return h("button", { class: "fixture-row", "data-fixture": artifact.fixtureId, "aria-current": active && "true" },
+    h("span", { class: "fixture-index" }, String(artifacts.indexOf(artifact) + 1).padStart(2, "0")),
+    h("span", {}, h("strong", {}, fixtureLabel(artifact.fixtureId)), h("small", {}, artifact.description)),
+    h("b", { class: BigInt(artifact.result.maximumLossBaseUnits ?? "0") > 0n ? "is-loss" : "" }, amount));
+}
+
+const MODEL_ROWS: readonly (readonly [string, string, string])[] = [
+  ["transfer", "Supported", "Balance, caps, recipient, nonce"],
+  ["callPaidTool", "Supported", "Quoted maximum transfer"],
+  ["spawn", "Supported", "Snapshot concurrency"],
+  ["recurse", "Supported", "Bounded depth"],
+  ["arbitrary side effect", "Unsupported", "Returns UNKNOWN"],
+];
+
+function modelTable(): HTMLElement {
+  return h("div", { class: "model-table", role: "table", "aria-label": "Model support" },
+    h("div", { role: "row" },
+      h("span", { role: "columnheader" }, "Action family"),
+      h("span", { role: "columnheader" }, "Status"),
+      h("span", { role: "columnheader" }, "Bound effect")),
+    ...MODEL_ROWS.map(([action, status, effect]) => h("div", { role: "row" },
+      h("code", { role: "cell" }, action),
+      h("span", { role: "cell", class: status === "Unsupported" ? "is-loss" : "" }, status),
+      h("span", { role: "cell" }, effect))));
+}
+
+function renderRun(): DocumentFragment {
   const result = state.selected.result;
   const complete = result.status === "COMPLETE";
   const loss = complete ? BigInt(result.maximumLossBaseUnits ?? "0") : null;
@@ -172,40 +211,43 @@ function renderRun(): string {
 
   // UNKNOWN replaces the figure entirely. It must never render as a zero.
   const figure = complete
-    ? `<div class="figure ${tone}">${escapeHtml(formatMoney(result.maximumLossBaseUnits ?? "0", state.selected.asset.decimals, 2))}<span class="unit">${escapeHtml(state.selected.asset.symbol)}</span></div>
-       <p class="claim">${loss === 0n ? "reaches the declared adversarial recipient. Nothing does." : "can reach the declared adversarial recipient."}</p>`
-    : `<div class="figure is-unknown no-figure">UNKNOWN</div>
-       <p class="claim">The search did not finish, so no bound is claimed. Reason: <code>${escapeHtml(result.unknownReason ?? "SEARCH_INCOMPLETE")}</code>.</p>`;
+    ? frag(
+      h("div", { class: `figure ${tone}` },
+        formatMoney(result.maximumLossBaseUnits ?? "0", state.selected.asset.decimals, 2),
+        h("span", { class: "unit" }, state.selected.asset.symbol)),
+      h("p", { class: "claim" }, loss === 0n ? "reaches the declared adversarial recipient. Nothing does." : "can reach the declared adversarial recipient."))
+    : frag(
+      h("div", { class: "figure is-unknown no-figure" }, "UNKNOWN"),
+      h("p", { class: "claim" }, "The search did not finish, so no bound is claimed. Reason: ",
+        h("code", {}, result.unknownReason ?? "SEARCH_INCOMPLETE"), "."));
 
-  return `<section class="bento" aria-labelledby="result-title">
-    <section class="cell cell-bound ${tone}">
-      <div class="cell-label"><span class="pulse ${state.runStage !== "complete" ? "is-running" : ""}" aria-hidden="true"></span>
-        <h1 id="result-title">${complete ? "Maximum reachable loss · complete" : "No monetary result · unknown"}</h1></div>
-      ${figure}
-      <p class="cell-desc">${escapeHtml(state.selected.description)}</p>
-      <p class="run-stage" role="status" aria-live="polite">${escapeHtml(stageCopy())}</p>
-    </section>
+  return frag(
+    h("section", { class: "bento", "aria-labelledby": "result-title" },
+      h("section", { class: `cell cell-bound ${tone}` },
+        h("div", { class: "cell-label" },
+          h("span", { class: `pulse ${state.runStage !== "complete" ? "is-running" : ""}`, "aria-hidden": "true" }),
+          h("h1", { id: "result-title" }, complete ? "Maximum reachable loss · complete" : "No monetary result · unknown")),
+        figure,
+        h("p", { class: "cell-desc" }, state.selected.description),
+        h("p", { class: "run-stage", role: "status", "aria-live": "polite" }, stageCopy())),
 
-    <section class="cell cell-basis" aria-label="Basis of the figure">
-      <div class="cell-label"><h2>Basis of the figure</h2></div>
-      <dl class="rows">
-        <div><dt>Winning rule</dt><dd>maximum loss</dd></div>
-        <div><dt>Tie-break</dt><dd>shortest path</dd></div>
-        <div><dt>Explored</dt><dd>${result.exploredStates} states / ${result.exploredTrajectories} path${result.exploredTrajectories === 1 ? "" : "s"}</dd></div>
-        <div><dt>Model support</dt><dd>${escapeHtml(state.selected.supportStatus.toLowerCase())}</dd></div>
-      </dl>
-    </section>
+      h("section", { class: "cell cell-basis", "aria-label": "Basis of the figure" },
+        h("div", { class: "cell-label" }, h("h2", {}, "Basis of the figure")),
+        h("dl", { class: "rows" },
+          h("div", {}, h("dt", {}, "Winning rule"), h("dd", {}, "maximum loss")),
+          h("div", {}, h("dt", {}, "Tie-break"), h("dd", {}, "shortest path")),
+          h("div", {}, h("dt", {}, "Explored"), h("dd", {}, `${result.exploredStates} states / ${result.exploredTrajectories} path${result.exploredTrajectories === 1 ? "" : "s"}`)),
+          h("div", {}, h("dt", {}, "Model support"), h("dd", {}, state.selected.supportStatus.toLowerCase())))),
 
-    ${renderCallCell()}
-    ${renderRuledOutCell()}
-    ${renderEvidenceStrip()}
+      renderCallCell(),
+      renderRuledOutCell(),
+      renderEvidenceStrip(),
 
-    <div class="cell-actions">
-      ${runButton()}
-      <button class="button button-secondary" id="compare-policy">${state.selected.fixtureId === "policy-fix" ? "Return to vulnerable policy" : "Compare the policy fix"}</button>
-    </div>
-  </section>
-  ${renderDepth()}`;
+      h("div", { class: "cell-actions" },
+        runButton(),
+        h("button", { class: "button button-secondary", id: "compare-policy" },
+          state.selected.fixtureId === "policy-fix" ? "Return to vulnerable policy" : "Compare the policy fix"))),
+    renderDepth());
 }
 
 /**
@@ -217,21 +259,9 @@ function renderRun(): string {
  * corpus, how to check the result without trusting this site, and where the
  * model stops. Nothing here is filler.
  */
-function renderDepth(): string {
+function renderDepth(): HTMLElement {
   const anchor = state.selected.anchor;
   const store = state.selected.storage;
-  const rows = artifacts.map((artifact) => {
-    const active = artifact.fixtureId === state.selected.fixtureId;
-    const complete = artifact.result.status === "COMPLETE";
-    const amount = complete
-      ? `${formatMoney(artifact.result.maximumLossBaseUnits ?? "0", artifact.asset.decimals, 2)} ${escapeHtml(artifact.asset.symbol)}`
-      : "UNKNOWN";
-    return `<button class="fixture-row" data-fixture="${escapeHtml(artifact.fixtureId)}" ${active ? 'aria-current="true"' : ""}>
-      <span class="fixture-index">${String(artifacts.indexOf(artifact) + 1).padStart(2, "0")}</span>
-      <span><strong>${escapeHtml(fixtureLabel(artifact.fixtureId))}</strong><small>${escapeHtml(artifact.description)}</small></span>
-      <b class="${BigInt(artifact.result.maximumLossBaseUnits ?? "0") > 0n ? "is-loss" : ""}">${escapeHtml(amount)}</b>
-    </button>`;
-  }).join("");
 
   const verifyCmd = anchor === undefined ? "" : `cast call ${anchor.runRegistry} \\
   "getAnchor(address,bytes32)((bytes32,bytes32,uint256,bytes32,uint8,address,uint64))" \\
@@ -239,69 +269,67 @@ function renderDepth(): string {
   ${state.selected.bundleRoot} \\
   --rpc-url ${anchor.chainId === 16661 ? "https://evmrpc.0g.ai" : "https://evmrpc-testnet.0g.ai"}`;
 
-  return `<section class="depth" aria-label="More about this run">
-    <section class="depth-block">
-      <h2>The whole corpus</h2>
-      <p>Five planted attacks, a clean agent, and the same agent after one policy edge is tightened. Each is its own model, so the family it plants is what binds its number. Select any to load it.</p>
-      <div class="fixture-list">${rows}</div>
-    </section>
+  const checkBody = anchor === undefined
+    ? h("p", { class: "cell-note" }, "This run is not anchored, so there is nothing to read back.")
+    : frag(
+      h("pre", { class: "verify" }, h("code", {}, verifyCmd)),
+      h("div", { class: "depth-links" },
+        h("a", { href: anchor.explorerTx, target: "_blank", rel: "noopener noreferrer" }, "Anchor transaction"),
+        h("a", { href: anchor.explorerContract, target: "_blank", rel: "noopener noreferrer" }, "RunRegistry contract"),
+        store === undefined || store.explorerTx === null
+          ? null
+          : h("a", { href: store.explorerTx, target: "_blank", rel: "noopener noreferrer" }, "Storage upload")));
 
-    <section class="depth-block">
-      <h2>Check it without trusting this page</h2>
-      <p>The figure above is anchored on 0G Chain against the exact policy, graph and engine that produced it. Read it straight off the chain:</p>
-      ${anchor === undefined ? `<p class="cell-note">This run is not anchored, so there is nothing to read back.</p>` : `<pre class="verify"><code>${escapeHtml(verifyCmd)}</code></pre>
-      <div class="depth-links">
-        <a href="${escapeHtml(anchor.explorerTx)}" target="_blank" rel="noopener noreferrer">Anchor transaction</a>
-        <a href="${escapeHtml(anchor.explorerContract)}" target="_blank" rel="noopener noreferrer">RunRegistry contract</a>
-        ${store === undefined || store.explorerTx === null ? "" : `<a href="${escapeHtml(store.explorerTx)}" target="_blank" rel="noopener noreferrer">Storage upload</a>`}
-      </div>`}
-    </section>
+  return h("section", { class: "depth", "aria-label": "More about this run" },
+    h("section", { class: "depth-block" },
+      h("h2", {}, "The whole corpus"),
+      h("p", {}, "Five planted attacks, a clean agent, and the same agent after one policy edge is tightened. Each is its own model, so the family it plants is what binds its number. Select any to load it."),
+      h("div", { class: "fixture-list" }, ...artifacts.map(fixtureRow))),
 
-    <section class="depth-block">
-      <h2>Where the model stops</h2>
-      <p>An action the compiler cannot model is refused rather than skipped, because skipping one would quietly lower the bound.</p>
-      <div class="model-table" role="table" aria-label="Model support">
-        <div role="row"><span role="columnheader">Action family</span><span role="columnheader">Status</span><span role="columnheader">Bound effect</span></div>
-        ${[["transfer", "Supported", "Balance, caps, recipient, nonce"], ["callPaidTool", "Supported", "Quoted maximum transfer"], ["spawn", "Supported", "Snapshot concurrency"], ["recurse", "Supported", "Bounded depth"], ["arbitrary side effect", "Unsupported", "Returns UNKNOWN"]].map(([action, status, effect]) => `<div role="row"><code role="cell">${action}</code><span role="cell" class="${status === "Unsupported" ? "is-loss" : ""}">${status}</span><span role="cell">${effect}</span></div>`).join("")}
-      </div>
-    </section>
-  </section>`;
+    h("section", { class: "depth-block" },
+      h("h2", {}, "Check it without trusting this page"),
+      h("p", {}, "The figure above is anchored on 0G Chain against the exact policy, graph and engine that produced it. Read it straight off the chain:"),
+      checkBody),
+
+    h("section", { class: "depth-block" },
+      h("h2", {}, "Where the model stops"),
+      h("p", {}, "An action the compiler cannot model is refused rather than skipped, because skipping one would quietly lower the bound."),
+      modelTable()));
 }
 
-function renderFixtures(): string {
-  return `<section class="section-view" aria-labelledby="fixtures-title">
-    <div class="section-heading"><div class="eyebrow">Fixture catalog · version 1</div><h1 id="fixtures-title">Choose one planted failure.</h1><p>Every amount below comes from the checked fixture artifact generated by engine ${escapeHtml(state.selected.engineVersion)}.</p></div>
-    <div class="fixture-list">${artifacts.map((artifact) => {
-      const active = artifact.fixtureId === state.selected.fixtureId;
-      const amount = artifact.result.status === "COMPLETE" ? `${formatMoney(artifact.result.maximumLossBaseUnits ?? "0", artifact.asset.decimals, 2)} ${escapeHtml(artifact.asset.symbol)}` : "UNKNOWN";
-      return `<button class="fixture-row" data-fixture="${escapeHtml(artifact.fixtureId)}" ${active ? 'aria-current="true"' : ""}>
-        <span class="fixture-index">${String(artifacts.indexOf(artifact) + 1).padStart(2, "0")}</span>
-        <span><strong>${escapeHtml(fixtureLabel(artifact.fixtureId))}</strong><small>${escapeHtml(artifact.description)}</small></span>
-        <b class="${BigInt(artifact.result.maximumLossBaseUnits ?? "0") > 0n ? "is-loss" : ""}">${escapeHtml(amount)}</b>
-      </button>`;
-    }).join("")}</div>
-  </section>`;
+function renderFixtures(): HTMLElement {
+  return h("section", { class: "section-view", "aria-labelledby": "fixtures-title" },
+    h("div", { class: "section-heading" },
+      h("div", { class: "eyebrow" }, "Fixture catalog · version 1"),
+      h("h1", { id: "fixtures-title" }, "Choose one planted failure."),
+      h("p", {}, `Every amount below comes from the checked fixture artifact generated by engine ${state.selected.engineVersion}.`)),
+    h("div", { class: "fixture-list" }, ...artifacts.map(fixtureRow)));
 }
 
-function renderEvidence(): string {
+function renderEvidence(): HTMLElement {
   const anchor = state.selected.anchor;
-  const chainRow = anchor === undefined
-    ? `<div><dt>0G Chain</dt><dd>Not anchored</dd><small>No registry event exists</small></div>`
-    : `<div><dt>0G Chain</dt><dd><a href="${escapeHtml(anchor.explorerTx)}" target="_blank" rel="noopener noreferrer">Anchored on ${escapeHtml(anchor.network)}</a></dd><small>Read back from chain state and matched</small></div>
-       <div><dt>Registry</dt><dd><a href="${escapeHtml(anchor.explorerContract)}" target="_blank" rel="noopener noreferrer"><code>${escapeHtml(shortHash(anchor.runRegistry))}</code></a></dd><small>Chain ${anchor.chainId}</small></div>`;
-
   const store = state.selected.storage;
+
+  const row = (term: string, value: Child, note: string) =>
+    h("div", {}, h("dt", {}, term), h("dd", {}, value), h("small", {}, note));
+
+  const chainRows: Child[] = anchor === undefined
+    ? [row("0G Chain", "Not anchored", "No registry event exists")]
+    : [
+      row("0G Chain", h("a", { href: anchor.explorerTx, target: "_blank", rel: "noopener noreferrer" }, `Anchored on ${anchor.network}`), "Read back from chain state and matched"),
+      row("Registry", h("a", { href: anchor.explorerContract, target: "_blank", rel: "noopener noreferrer" }, h("code", {}, shortHash(anchor.runRegistry))), `Chain ${anchor.chainId}`),
+    ];
+
   // Content-addressed storage creates no transaction when identical bytes are
   // already stored, so only offer a transaction link when one actually exists.
-  const storageValue = store === undefined
-    ? `<dd>Not uploaded</dd><small>No transaction exists</small>`
-    : store.explorerTx === null
-      ? `<dd>Stored and re-verified</dd><small>Identical bytes already stored, so no new transaction</small>`
-      : `<dd><a href="${escapeHtml(store.explorerTx)}" target="_blank" rel="noopener noreferrer">Uploaded and re-verified</a></dd><small>Downloaded back, root re-derived, bytes identical</small>`;
-  const storageRow = store === undefined
-    ? `<div><dt>0G Storage</dt>${storageValue}</div>`
-    : `<div><dt>0G Storage</dt>${storageValue}</div>
-       <div><dt>Storage root</dt><dd><code>${escapeHtml(shortHash(store.storageRoot))}</code></dd><small>Merkle root on ${escapeHtml(store.network)}</small></div>`;
+  const storageRows: Child[] = store === undefined
+    ? [row("0G Storage", "Not uploaded", "No transaction exists")]
+    : [
+      store.explorerTx === null
+        ? row("0G Storage", "Stored and re-verified", "Identical bytes already stored, so no new transaction")
+        : row("0G Storage", h("a", { href: store.explorerTx, target: "_blank", rel: "noopener noreferrer" }, "Uploaded and re-verified"), "Downloaded back, root re-derived, bytes identical"),
+      row("Storage root", h("code", {}, shortHash(store.storageRoot)), `Merkle root on ${store.network}`),
+    ];
 
   const heading = anchor === undefined
     ? "Local, reproducible, not yet published."
@@ -314,57 +342,70 @@ function renderEvidence(): string {
       ? "This bundle is generated from the exact fixture, policy, graph, engine, and deterministic result. Its root and maximum loss are bound on 0G Chain to the model version that produced them."
       : "This bundle is generated from the exact fixture, policy, graph, engine, and deterministic result. It is stored on 0G Storage and was downloaded back and re-derived to the same root, and its maximum loss is bound on 0G Chain to the model version that produced it.";
 
-  return `<section class="section-view" aria-labelledby="evidence-title">
-    <div class="section-heading"><div class="eyebrow">Canonical evidence</div><h1 id="evidence-title">${heading}</h1><p>${blurb}</p></div>
-    <dl class="evidence-sheet">
-      <div><dt>Origin</dt><dd>Local fixture</dd><small>Not 0G Compute</small></div>
-      <div><dt>Bundle root</dt><dd><code>${escapeHtml(state.selected.bundleRoot)}</code></dd><small>Canonical local bytes</small></div>
-      ${storageRow}
-      ${chainRow}
-    </dl>
-    <button class="button button-secondary" id="copy-root">Copy bundle root</button>
-  </section>`;
+  return h("section", { class: "section-view", "aria-labelledby": "evidence-title" },
+    h("div", { class: "section-heading" },
+      h("div", { class: "eyebrow" }, "Canonical evidence"),
+      h("h1", { id: "evidence-title" }, heading),
+      h("p", {}, blurb)),
+    h("dl", { class: "evidence-sheet" },
+      row("Origin", "Local fixture", "Not 0G Compute"),
+      row("Bundle root", h("code", {}, state.selected.bundleRoot), "Canonical local bytes"),
+      ...storageRows,
+      ...chainRows),
+    h("button", { class: "button button-secondary", id: "copy-root" }, "Copy bundle root"));
 }
 
-function renderModel(): string {
-  return `<section class="section-view" aria-labelledby="model-title">
-    <div class="section-heading"><div class="eyebrow">Declared model</div><h1 id="model-title">Supported actions are explicit.</h1><p>Unknown semantics must stop analysis. They are never silently interpreted as safe.</p></div>
-    <div class="model-table" role="table" aria-label="Model support">
-      <div role="row"><span role="columnheader">Action family</span><span role="columnheader">Status</span><span role="columnheader">Bound effect</span></div>
-      ${[["transfer", "Supported", "Balance, caps, recipient, nonce"], ["callPaidTool", "Supported", "Quoted maximum transfer"], ["spawn", "Supported", "Snapshot concurrency"], ["recurse", "Supported", "Bounded depth"], ["arbitrary side effect", "Unsupported", "Returns UNKNOWN"]].map(([action, status, effect]) => `<div role="row"><code role="cell">${action}</code><span role="cell" class="${status === "Unsupported" ? "is-loss" : ""}">${status}</span><span role="cell">${effect}</span></div>`).join("")}
-    </div>
-    <dl class="hashes"><div><dt>Manifest</dt><dd><code>${escapeHtml(shortHash(state.selected.manifestHash))}</code></dd></div><div><dt>Policy</dt><dd><code>${escapeHtml(shortHash(state.selected.policyHash))}</code></dd></div><div><dt>Graph</dt><dd><code>${escapeHtml(shortHash(state.selected.graphHash))}</code></dd></div></dl>
-  </section>`;
+function renderModel(): HTMLElement {
+  const hash = (term: string, value: string) => h("div", {}, h("dt", {}, term), h("dd", {}, h("code", {}, shortHash(value))));
+  return h("section", { class: "section-view", "aria-labelledby": "model-title" },
+    h("div", { class: "section-heading" },
+      h("div", { class: "eyebrow" }, "Declared model"),
+      h("h1", { id: "model-title" }, "Supported actions are explicit."),
+      h("p", {}, "Unknown semantics must stop analysis. They are never silently interpreted as safe.")),
+    modelTable(),
+    h("dl", { class: "hashes" },
+      hash("Manifest", state.selected.manifestHash),
+      hash("Policy", state.selected.policyHash),
+      hash("Graph", state.selected.graphHash)));
 }
 
-function renderMain(): string {
+function renderMain(): Node {
   if (state.view === "fixtures") return renderFixtures();
   if (state.view === "evidence") return renderEvidence();
   if (state.view === "model") return renderModel();
   return renderRun();
 }
 
-function renderMobileNav(): string {
-  // Navigation only. Replay used to live in here, which mixed a primary action
-  // into the nav bar and made the bar the loudest thing on a small screen.
-  return `${navButton("run", "Run")}${navButton("fixtures", "Fixtures")}${navButton("evidence", "Proof")}${navButton("model", "Model")}`;
+function brandMark(): SVGElement {
+  return s("svg", { class: "brand-mark", viewBox: "0 0 64 64", "aria-hidden": "true", focusable: "false" },
+    s("rect", { width: "64", height: "64", rx: "14", fill: "#0c0d0f" }),
+    s("rect", { x: "0.5", y: "0.5", width: "63", height: "63", rx: "13.5", fill: "none", stroke: "#e6e8ea", "stroke-opacity": "0.10" }),
+    s("path", { d: "M12 52 V44 H22 V36 H32 V28 H42 V20 H52 V52 Z", fill: "#e0603a" }),
+    s("rect", { x: "10", y: "16", width: "44", height: "4", rx: "1", fill: "#e6e8ea" }));
+}
+
+// Navigation only. Replay used to live in here, which mixed a primary action
+// into the nav bar and made the bar the loudest thing on a small screen.
+function renderMobileNav(): DocumentFragment {
+  return frag(navButton("run", "Run"), navButton("fixtures", "Fixtures"), navButton("evidence", "Proof"), navButton("model", "Model"));
 }
 
 function render(): void {
   const anchor = state.selected.anchor;
-  app.innerHTML = `<a class="skip-link" href="#main-content">Skip to main content</a><div class="app-shell">
-    <header class="topbar">
-      <div class="brand"><svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="14" fill="#0c0d0f"></rect><rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="#e6e8ea" stroke-opacity="0.10"></rect><path d="M12 52 V44 H22 V36 H32 V28 H42 V20 H52 V52 Z" fill="#e0603a"></path><rect x="10" y="16" width="44" height="4" rx="1" fill="#e6e8ea"></rect></svg><span>Worstcase</span></div>
-      <span class="crumb">/ runs / <code>${escapeHtml(state.selected.fixtureId)}</code></span>
-      <nav class="topnav" aria-label="Primary navigation">
-        ${navButton("run", "Run")}${navButton("fixtures", "Fixtures")}${navButton("evidence", "Evidence")}${navButton("model", "Model")}
-      </nav>
-      <span class="provenance ${anchor === undefined ? "" : "is-anchored"}"><span aria-hidden="true"></span>${anchor === undefined ? "local · not anchored" : `local fixture · anchored on ${escapeHtml(anchor.network)}`}</span>
-    </header>
-    <main id="main-content" tabindex="-1"><div class="content">${renderMain()}</div></main>
-    <nav class="mobile-nav" aria-label="Mobile navigation">${renderMobileNav()}</nav>
-    ${state.notice === null ? "" : `<div class="notice" role="status">${escapeHtml(state.notice)}</div>`}
-  </div>`;
+  replaceChildren(app,
+    h("a", { class: "skip-link", href: "#main-content" }, "Skip to main content"),
+    h("div", { class: "app-shell" },
+      h("header", { class: "topbar" },
+        h("div", { class: "brand" }, brandMark(), h("span", {}, "Worstcase")),
+        h("span", { class: "crumb" }, "/ runs / ", h("code", {}, state.selected.fixtureId)),
+        h("nav", { class: "topnav", "aria-label": "Primary navigation" },
+          navButton("run", "Run"), navButton("fixtures", "Fixtures"), navButton("evidence", "Evidence"), navButton("model", "Model")),
+        h("span", { class: `provenance ${anchor === undefined ? "" : "is-anchored"}` },
+          h("span", { "aria-hidden": "true" }),
+          anchor === undefined ? "local · not anchored" : `local fixture · anchored on ${anchor.network}`)),
+      h("main", { id: "main-content", tabindex: "-1" }, h("div", { class: "content" }, renderMain())),
+      h("nav", { class: "mobile-nav", "aria-label": "Mobile navigation" }, renderMobileNav()),
+      state.notice === null ? null : h("div", { class: "notice", role: "status" }, state.notice)));
   bindEvents();
 }
 
@@ -372,7 +413,7 @@ function showNotice(message: string): void {
   state.notice = message;
   const existing = document.querySelector<HTMLDivElement>(".notice");
   if (existing !== null) existing.textContent = message;
-  else document.querySelector(".app-shell")?.insertAdjacentHTML("beforeend", `<div class="notice" role="status">${escapeHtml(message)}</div>`);
+  else document.querySelector(".app-shell")?.append(h("div", { class: "notice", role: "status" }, message));
 }
 
 function replayFixture(): void {

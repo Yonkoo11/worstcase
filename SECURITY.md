@@ -53,41 +53,41 @@ grep -rE "0x[0-9a-fA-F]{64}" --include="*.sol" --include="*.py" --include="*.ts"
 
 ## Untrusted text reaching the DOM
 
-The interface renders by concatenating HTML strings and assigning them to `innerHTML`.
-That is a deliberate choice, and it is the one place in this project where attacker
-influenced text meets an execution sink, so it is written down rather than assumed safe.
+The interface renders chain-read text: asset symbols, recipient labels, addresses,
+bundle roots, node error messages. A token can be deployed under any name its author
+likes, including `<img src=x onerror=...>`, and this tool exists to be pointed at
+hostile things. So this is the one place in the project where attacker influenced text
+meets a rendering path, and it is written down rather than assumed safe.
 
-**What is attacker influenced.** Anything read back from a chain or an API: asset symbols,
-recipient labels, addresses, bundle roots, error messages returned by a node. A token can be
-deployed under any name its author likes, including `<img src=x onerror=...>`. Fixture data is
-authored in this repository and is not hostile, but it travels the same code path, so no
-distinction is made at render time.
+**The control.** The render layer builds DOM nodes. Children are appended as strings,
+which `ParentNode.append()` converts to text nodes without parsing, and attribute
+values go through `setAttribute`. There is no path from data to an element or an event
+handler, so the class of bug is impossible rather than merely detected.
 
-**The control.** Every interpolation is passed through `escapeHtml`, which replaces
-`& < > ' "` with entities. Nothing reaches `innerHTML` unescaped unless it is a literal in
-the source.
+This replaced string concatenation into `innerHTML` with escaping on every
+interpolation. That escaping was correct, and it was still a convention: one missed
+interpolation and the page executed whatever came back. Three unescaped ones did
+reach this codebase, two caught by a pre-push hook and one only when a test went
+looking. `escapeHtml` no longer exists, because nothing concatenates HTML any more
+and leaving it there would invite someone to reach for it.
 
-**How the control is enforced.** `tests/phase3/render-safety.test.ts` does two things.
-It reads `apps/web/src/main.ts` and walks every interpolation in the file, failing unless each
-one is escaped or provably a literal. Then it imports `escapeHtml` and asserts what it does to
-hostile input: the five characters individually, plus the payloads this product invites, such as
-an asset symbol of `<img src=x onerror="alert(1)">` and an attribute-breaking `" onmouseover=`.
+**How the control is enforced.** `tests/phase3/render-safety.test.ts` fails if
+`innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write`, `DOMParser`,
+`createContextualFragment`, `eval` or `new Function` reappears in `main.ts`, `dom.ts`
+or `view-model.ts`, reporting the file and line. It also drives the builder against a
+stub that records what it did, so an edit that routes children through markup instead
+of `append()` fails there too.
 
-`escapeHtml` lives in `apps/web/src/view-model.ts` rather than `main.ts` for that reason.
-`main.ts` renders at import time, so a test cannot import it, and an earlier version of this
-suite settled for checking that the five characters appeared somewhere in the function's source
-text. That check was weak enough to pass a broken implementation: removing `<` from the escape
-pattern leaves `"<": "&lt;"` in the body, so the source still contained the character while the
-function no longer escaped it. The behavioural tests fail on exactly that edit.
+**Checked empirically, not only by test.** An `<img src=x onerror>` payload was
+planted in a fixture's asset symbol and description, built, and loaded in a real
+browser. The payload rendered as literal text, created zero elements, and no handler
+ran. The first attempt at this proved nothing, because `build:web` regenerates the
+artifacts from the fixtures and quietly discarded the payload; the check only counts
+because the payload was confirmed present in the shipped bundle first.
 
-This is not theoretical. Two unescaped interpolations shipped and were caught by a pre-push hook,
-and a third, `state.selected.asset.symbol`, was found only when that test was written.
-
-**Known limitation, stated plainly.** This is a convention enforced by a test, not a structural
-guarantee. Building DOM nodes and assigning `textContent` would make the class of bug impossible
-rather than merely detected. The pre-push gate flags every `innerHTML` in changed files for
-exactly this reason and has to be overridden deliberately, per push, with `ALLOW_HTML_SINKS=1`.
-Treat that override as a decision to re-check the test above, not as a formality.
+**What this does not cover.** Nothing here constrains the CSS, and this says nothing
+about the API surface in `packages/api`, which has its own input handling and its own
+tests.
 
 ## Default deny
 

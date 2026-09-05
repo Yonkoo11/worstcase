@@ -1,75 +1,90 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { escapeHtml } from "../../apps/web/src/view-model.js";
 
 /**
- * The interface is rendered by concatenating HTML strings, so an unescaped
- * interpolation is an execution sink. Two real ones shipped before a pre-push
- * hook caught them; a test catches them earlier and without a bypass flag.
+ * The interface used to build HTML strings and assign them to innerHTML. Every
+ * interpolation was escaped, and an earlier version of this file walked the source
+ * to keep it that way. That worked, but it was a convention: one missed escape and
+ * the page executed whatever a chain returned. Three unescaped interpolations
+ * reached this codebase before that walk existed.
+ *
+ * The render layer now builds DOM nodes, so a dynamic value cannot become markup at
+ * all. These tests hold that line: no HTML sink may reappear, and the node builder
+ * must keep routing strings to text rather than to a parser.
  */
-const source = readFileSync(new URL("../../apps/web/src/main.ts", import.meta.url), "utf8");
+const SINKS = /innerHTML\s*\+?=|outerHTML\s*=|insertAdjacentHTML|document\.write\(|createContextualFragment|DOMParser|eval\(|new Function\(/;
 
-/** Interpolations that cannot carry attacker-controlled text. */
-const SAFE = [
-  /^escapeHtml\(/, /^formatMoney\(/, /^shortHash\(/,           // escaped or numeric
-  /^render[A-Z]/, /^navButton\(/, /^runButton\(/,               // nested renderers, escaped internally
-  /^String\(/, /^index \+ 1$/, /^artifacts\.indexOf\(/,         // numbers
-  /\?\s*["'][^"']*["']\s*:\s*["'][^"']*["']\s*$/,               // ternary between two literals
-  /^[a-zA-Z.[\]"'\w]*\.(length|size|chainId|exploredStates|exploredTrajectories)$/,
-  /^busy$/, /^body$/, /^rows\b/, /^steps$/, /^figure$/, /^permitted$/,
-  /^storageRow$/, /^chainRow$/, /^heading$/, /^blurb$/, /^storageValue$/,
-  /^tone$/, /^note$/, /^label$/, /^cell\(/, /^blockedRows/, /^inertRows/,
-  /^action$/, /^effect$/, /^status/,                            // literals from a hardcoded table
-  /^view$/, /^value$/,                                          // internal identifiers, never user text
-  /aria-current=/,                                              // attribute ternaries between literals
-  /escapeHtml\(/,                                               // nested template: escaped inside
-  /^artifacts\.map\(/,                                          // a mapper whose body is checked on its own
-  /^\[\[/,                                                      // inline literal array: every string is in the source
-  // verifyCmd is a plain shell string composed from generated hex identifiers and
-  // then escaped once, as escapeHtml(verifyCmd), at the point of insertion.
-  /^anchor\.(runRegistry|submitter)$/, /^state\.selected\.bundleRoot$/,
-];
+const readSource = (path: string) => readFileSync(new URL(`../../${path}`, import.meta.url), "utf8");
 
-describe("render string safety", () => {
-  it("escapes or proves safe every interpolation in the render templates", () => {
-    const interpolations = [...source.matchAll(/\$\{([^}]*)\}/g)].map((m) => m[1] as string);
-    expect(interpolations.length).toBeGreaterThan(20);
+/** A stub that records what the builder does. Not a DOM: the empirical proof that a
+ * payload stays inert is a real browser, and this only holds the code path. */
+function installStubDocument(): string[] {
+  const touched: string[] = [];
+  const makeElement = (tag: string) => {
+    const attributes: Record<string, string> = {};
+    const children: unknown[] = [];
+    return {
+      tag,
+      attributes,
+      children,
+      setAttribute(name: string, value: string) { attributes[name] = value; },
+      append(...items: unknown[]) { children.push(...items); },
+      replaceChildren(...items: unknown[]) { children.length = 0; children.push(...items); },
+      set innerHTML(value: string) { touched.push(`innerHTML=${value}`); },
+      get innerHTML() { return ""; },
+    };
+  };
+  // dom.ts asks `child instanceof Node`, which is a browser global. Without it the
+  // builder throws here rather than being tested.
+  (globalThis as Record<string, unknown>)["Node"] = class StubNode {};
+  (globalThis as Record<string, unknown>)["document"] = {
+    createElement: (tag: string) => makeElement(tag),
+    createElementNS: (_namespace: string, tag: string) => makeElement(tag),
+    createDocumentFragment: () => makeElement("#fragment"),
+  };
+  return touched;
+}
 
-    const unsafe = interpolations
-      .map((expression) => expression.trim())
-      .filter((expression) => !SAFE.some((pattern) => pattern.test(expression)));
-
-    expect(unsafe, `Unescaped interpolation(s) reaching innerHTML: ${unsafe.join(" | ")}`).toEqual([]);
+describe("render safety", () => {
+  it("keeps every HTML and script sink out of the render layer", () => {
+    for (const path of ["apps/web/src/main.ts", "apps/web/src/dom.ts", "apps/web/src/view-model.ts"]) {
+      const offending = readSource(path)
+        .split("\n")
+        .map((line, index) => ({ line: line.trim(), number: index + 1 }))
+        // These names appear in the explanatory comments of the very files that
+        // exist to avoid them, so prose is not evidence of a sink.
+        .filter(({ line }) => !line.startsWith("*") && !line.startsWith("//") && !line.startsWith("/*"))
+        .filter(({ line }) => SINKS.test(line))
+        .map(({ line, number }) => `${number}: ${line}`);
+      expect(offending, `${path} reintroduced an HTML sink:\n${offending.join("\n")}`).toEqual([]);
+    }
   });
 
-  it("neutralises every character that can break out of HTML", () => {
-    // Asserts behaviour, not source text. Reading the function body only proved the
-    // five characters appeared somewhere inside it, which a broken implementation
-    // could satisfy while escaping nothing.
-    expect(escapeHtml("&")).toBe("&amp;");
-    expect(escapeHtml("<")).toBe("&lt;");
-    expect(escapeHtml(">")).toBe("&gt;");
-    expect(escapeHtml('"')).toBe("&quot;");
-    expect(escapeHtml("'")).toBe("&#39;");
+  it("builds elements without handing a string to a parser", async () => {
+    const touched = installStubDocument();
+    const { h } = await import("../../apps/web/src/dom.js");
+    const payload = `<img src=x onerror="alert(1)">`;
+    const element = h("p" as never, { title: payload }, payload) as unknown as {
+      children: unknown[];
+      attributes: Record<string, string>;
+    };
+
+    // The payload survives as one plain string. ParentNode.append() turns a string
+    // into a Text node and never parses it, which is the whole guarantee.
+    expect(element.children).toEqual([payload]);
+    expect(element.attributes["title"]).toBe(payload);
+    expect(touched, "the builder assigned innerHTML").toEqual([]);
   });
 
-  it("defuses the payloads this product invites", () => {
-    // A token can be deployed under any name, and this tool exists to be pointed at
-    // hostile things, so these are the realistic inputs rather than invented ones.
-    const symbol = `<img src=x onerror="alert(1)">`;
-    expect(escapeHtml(symbol)).toBe("&lt;img src=x onerror=&quot;alert(1)&quot;&gt;");
-    expect(escapeHtml(symbol)).not.toContain("<");
-
-    const attribute = `" onmouseover="alert(1)`;
-    expect(escapeHtml(attribute)).not.toContain('"');
-
-    const closing = "</script><script>alert(1)</script>";
-    expect(escapeHtml(closing)).not.toContain("<");
-  });
-
-  it("leaves ordinary text alone", () => {
-    expect(escapeHtml("27.50 USDC")).toBe("27.50 USDC");
-    expect(escapeHtml("prompt-injection")).toBe("prompt-injection");
+  it("omits absent attributes instead of rendering them empty", async () => {
+    installStubDocument();
+    const { h } = await import("../../apps/web/src/dom.js");
+    const element = h("button" as never, { "aria-current": false, "data-replay": true, class: "step" }) as unknown as {
+      attributes: Record<string, string>;
+    };
+    // aria-current="" is not the same as absent, and data-replay takes no value.
+    expect(Object.keys(element.attributes).sort()).toEqual(["class", "data-replay"]);
+    expect(element.attributes["data-replay"]).toBe("");
   });
 });
 

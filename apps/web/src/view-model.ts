@@ -1,16 +1,5 @@
 import type { DemoArtifact, DemoAction } from "../scripts/demo-artifacts.js";
 
-/**
- * Neutralise text before it is concatenated into HTML.
- *
- * Lives here, not in main.ts, because main.ts renders the app at import time and so
- * cannot be imported by a test. Keeping this in a pure module lets the render-safety
- * suite assert what it actually does to hostile input instead of inspecting its source.
- */
-export function escapeHtml(value: string): string {
-  return value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character] ?? character);
-}
-
 export function formatMoney(baseUnits: string, decimals: number, minimumFractionDigits = 0): string {
   const negative = baseUnits.startsWith("-");
   const digits = negative ? baseUnits.slice(1) : baseUnits;
